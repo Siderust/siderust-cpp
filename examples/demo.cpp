@@ -13,6 +13,7 @@
 int main() {
     using namespace siderust;
     using namespace siderust::frames;
+    using namespace qtty::literals;
 
     std::printf("=== siderust-cpp demo ===\n\n");
 
@@ -30,9 +31,9 @@ int main() {
                 obs.lon.value(), obs.lat.value(), obs.height.value());
 
     // --- Sun altitude ---
-    double sun_alt = sun::altitude_at(obs, mjd);
+    qtty::Radian sun_alt = sun::altitude_at(obs, mjd);
     std::printf("Sun altitude: %.4f rad (%.2f deg)\n\n",
-                sun_alt, sun_alt * 180.0 / M_PI);
+                sun_alt.value(), sun_alt.to<qtty::Degree>().value());
 
     // --- Star catalog ---
     const auto& vega = VEGA;
@@ -41,9 +42,9 @@ int main() {
                 vega.luminosity_solar());
 
     // --- Star altitude ---
-    double star_alt = star_altitude::altitude_at(vega, obs, mjd);
+    qtty::Radian star_alt = star_altitude::altitude_at(vega, obs, mjd);
     std::printf("Vega altitude: %.4f rad (%.2f deg)\n\n",
-                star_alt, star_alt * 180.0 / M_PI);
+                star_alt.value(), star_alt.to<qtty::Degree>().value());
 
     // =================================================================
     // TYPED COORDINATE & EPHEMERIS API
@@ -110,7 +111,7 @@ int main() {
     // --- Night periods (sun below -18°) ---
     auto night_start = mjd;
     auto night_end   = mjd + 1.0;
-    auto nights = sun::below_threshold(obs, night_start, night_end, -18.0);
+    auto nights = sun::below_threshold(obs, night_start, night_end, -18.0_deg);
     std::printf("Astronomical night periods (sun < -18 deg):\n");
     for (auto& p : nights) {
         std::printf("  MJD %.6f – %.6f  (%.2f hours)\n",
