@@ -26,12 +26,12 @@ WGS84 geodetic position (fixed to center = `centers::Geocentric`, frame = `frame
 
 Spherical direction tagged by reference frame `F`.
 
-- Fields: `lon`, `lat` (both `qtty::Degree`)
-- Always available: `azimuthal()`, `polar()`, `to_c()`, `from_c(...)`
+- Internal components are not exposed as public fields.
+- Methods: `to_c()`, `from_c(...)`
 - Frame-dependent convenience accessors:
   - Equatorial frames (`frames::has_ra_dec_v<F>`): `ra()`, `dec()`
-  - Horizontal (`frames::has_az_alt_v<F>`): `az()`, `alt()`, `azimuth()`, `altitude()`
-  - Lon/lat frames (`frames::has_lon_lat_v<F>`): `longitude()`, `latitude()`
+  - Horizontal (`frames::has_az_alt_v<F>`): `az()`, `al()` / `alt()`
+  - Lon/lat frames (`frames::has_lon_lat_v<F>`): `lon()`, `lat()`
 - Transforms:
   - `to_frame<Target>(jd)` / `to<Target>(jd)` (only when `frames::has_frame_transform_v<F, Target>`)
   - `to_horizontal(jd, observer)` (only when `frames::has_horizontal_transform_v<F>`)
@@ -40,8 +40,12 @@ Spherical direction tagged by reference frame `F`.
 
 Spherical position (direction + distance) tagged by center `C`, frame `F`, and unit `U`.
 
-- Fields: `lon`, `lat`, `dist`
+- Internal components are not exposed as public fields.
 - Methods: `direction()`, `distance()`
+- Frame-dependent convenience accessors:
+  - Equatorial frames (`frames::has_ra_dec_v<F>`): `ra()`, `dec()`
+  - Horizontal (`frames::has_az_alt_v<F>`): `az()`, `al()` / `alt()`
+  - Lon/lat frames (`frames::has_lon_lat_v<F>`): `lon()`, `lat()`
 
 ### `siderust::cartesian::Direction<F>`
 
