@@ -69,14 +69,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-cargo-
 
-      - name: Validate required submodules exist
-        shell: bash
-        run: |
-          set -euo pipefail
-          test -f siderust-ffi/Cargo.toml
-          test -f siderust-ffi/siderust/dev-deps/tempoch/tempoch-ffi/Cargo.toml
-          test -f qtty-cpp/CMakeLists.txt
-
       - name: Configure (CMake)
         shell: bash
         run: |
