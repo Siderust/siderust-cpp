@@ -6,8 +6,6 @@
  *
  * Include this single header to get the full siderust C++ API.
  *
- * ## New Typed API
- *
  * @code
  * #include <siderust/siderust.hpp>
  *
@@ -23,15 +21,8 @@
  * auto hor = vega_icrs.to_horizontal(jd, roque_de_los_muchachos());
  *
  * // Typed ephemeris — unit-safe AU/km positions
- * auto earth = ephemeris::earth_heliocentric_typed(jd);   // cartesian::Position<Heliocentric, EclipticMeanJ2000, AU>
- * auto dist  = earth.comp_x.to<qtty::Kilometer>();         // unit conversion
- * @endcode
- *
- * ## Legacy API (still works)
- *
- * @code
- * SphericalDirection icrs(279.23, 38.78, Frame::ICRS);
- * auto ecl = icrs.transform(Frame::EclipticMeanJ2000, jd.value());
+ * auto earth = ephemeris::earth_heliocentric(jd);   // cartesian::Position<Heliocentric, EclipticMeanJ2000, AU>
+ * auto dist  = earth.comp_x.to<qtty::Kilometer>();   // unit conversion
  * @endcode
  */
 

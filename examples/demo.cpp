@@ -1,6 +1,6 @@
 /**
  * @file demo.cpp
- * @brief Demonstrates the siderust C++ API — both typed and legacy.
+ * @brief Demonstrates the siderust C++ API.
  *
  * Usage:
  *   cd build && cmake .. && cmake --build . && ./demo
@@ -27,7 +27,7 @@ int main() {
     // --- Observatory ---
     auto obs = roque_de_los_muchachos();
     std::printf("Roque de los Muchachos: lon=%.4f  lat=%.4f  h=%.0f m\n\n",
-                obs.lon_deg(), obs.lat_deg(), obs.height_m());
+                obs.lon.value(), obs.lat.value(), obs.height.value());
 
     // --- Sun altitude ---
     double sun_alt = sun::altitude_at(obs, mjd);
@@ -46,7 +46,7 @@ int main() {
                 star_alt, star_alt * 180.0 / M_PI);
 
     // =================================================================
-    // NEW TYPED API
+    // TYPED COORDINATE & EPHEMERIS API
     // =================================================================
     std::printf("--- Typed Coordinate API ---\n\n");
 
@@ -56,36 +56,36 @@ int main() {
     // Template-targeted transform: ICRS → EclipticMeanJ2000
     auto ecl = vega_icrs.to_frame<EclipticMeanJ2000>(jd);
     std::printf("Typed ICRS (%.4f, %.4f) -> EclMeanJ2000 (%.4f, %.4f)\n",
-                vega_icrs.lon_deg(), vega_icrs.lat_deg(),
-                ecl.lon_deg(), ecl.lat_deg());
+                vega_icrs.lon.value(), vega_icrs.lat.value(),
+                ecl.lon.value(), ecl.lat.value());
 
     // Shorthand .to<>() syntax
     auto eq_j2000 = vega_icrs.to<EquatorialMeanJ2000>(jd);
     std::printf("Typed ICRS -> EquatorialJ2000 (%.4f, %.4f)\n",
-                eq_j2000.lon_deg(), eq_j2000.lat_deg());
+                eq_j2000.lon.value(), eq_j2000.lat.value());
 
     // Horizontal transform
     auto hor = vega_icrs.to_horizontal(jd, obs);
     std::printf("Typed Horizontal: az=%.4f  alt=%.4f deg\n\n",
-                hor.azimuth_deg(), hor.altitude_deg());
+                hor.azimuth().value(), hor.altitude().value());
 
     // Roundtrip: ICRS → Ecliptic → ICRS
     auto back = ecl.to_frame<ICRS>(jd);
     std::printf("Roundtrip: (%.6f, %.6f) -> (%.6f, %.6f) -> (%.6f, %.6f)\n",
-                vega_icrs.lon_deg(), vega_icrs.lat_deg(),
-                ecl.lon_deg(), ecl.lat_deg(),
-                back.lon_deg(), back.lat_deg());
+                vega_icrs.lon.value(), vega_icrs.lat.value(),
+                ecl.lon.value(), ecl.lat.value(),
+                back.lon.value(), back.lat.value());
 
     // qtty unit-safe angle conversion
     qtty::Radian ra_rad = vega_icrs.lon.to<qtty::Radian>();
-    std::printf("Vega RA: %.6f deg = %.6f rad\n\n", vega_icrs.lon_deg(), ra_rad.value());
+    std::printf("Vega RA: %.6f deg = %.6f rad\n\n", vega_icrs.lon.value(), ra_rad.value());
 
     // --- Typed Ephemeris ---
     std::printf("--- Typed Ephemeris ---\n\n");
 
-    auto earth = ephemeris::earth_heliocentric_typed(jd);
+    auto earth = ephemeris::earth_heliocentric(jd);
     std::printf("Earth heliocentric (typed AU): (%.8f, %.8f, %.8f)\n",
-                earth.x(), earth.y(), earth.z());
+                earth.x().value(), earth.y().value(), earth.z().value());
 
     // Unit conversion: AU → km
     qtty::Kilometer x_km = earth.comp_x.to<qtty::Kilometer>();
@@ -93,26 +93,11 @@ int main() {
     std::printf("Earth heliocentric (km): (%.2f, %.2f, ...)\n\n",
                 x_km.value(), y_km.value());
 
-    auto moon = ephemeris::moon_geocentric_typed(jd);
+    auto moon = ephemeris::moon_geocentric(jd);
     std::printf("Moon geocentric (typed km): (%.2f, %.2f, %.2f)\n",
-                moon.x(), moon.y(), moon.z());
-    double moon_r = std::sqrt(moon.x()*moon.x() + moon.y()*moon.y() + moon.z()*moon.z());
+                moon.x().value(), moon.y().value(), moon.z().value());
+    auto moon_r = std::sqrt(moon.x().value()*moon.x().value() + moon.y().value()*moon.y().value() + moon.z().value()*moon.z().value());
     std::printf("Moon distance: %.2f km\n\n", moon_r);
-
-    // =================================================================
-    // LEGACY API (still works)
-    // =================================================================
-    std::printf("--- Legacy API ---\n\n");
-
-    SphericalDirection icrs_legacy(279.23473, 38.78369, Frame::ICRS);
-    auto ecl_legacy = icrs_legacy.transform(Frame::EclipticMeanJ2000, jd.value());
-    std::printf("Legacy ICRS (%.4f, %.4f) -> EclMeanJ2000 (%.4f, %.4f)\n",
-                icrs_legacy.lon_deg, icrs_legacy.lat_deg,
-                ecl_legacy.lon_deg, ecl_legacy.lat_deg);
-
-    auto hor_legacy = icrs_legacy.to_horizontal(obs, jd.value());
-    std::printf("Legacy Horizontal: az=%.4f  alt=%.4f deg\n\n",
-                hor_legacy.azimuth_deg(), hor_legacy.altitude_deg());
 
     // --- Planets ---
     auto mars_data = mars();

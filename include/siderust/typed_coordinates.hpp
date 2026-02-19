@@ -61,11 +61,6 @@ struct Geodetic {
     static Geodetic from_c(const siderust_geodetic_t& c) {
         return Geodetic(c.lon_deg, c.lat_deg, c.height_m);
     }
-
-    // Legacy accessors (raw double)
-    double lon_deg()  const { return lon.value(); }
-    double lat_deg()  const { return lat.value(); }
-    double height_m() const { return height.value(); }
 };
 
 // ============================================================================
@@ -105,28 +100,50 @@ struct Direction {
         return frames::FrameTraits<F>::name();
     }
 
-    // -- Named accessors (use SphericalNaming) --
+    // -- Generic accessors (always available, frame-agnostic) --
 
-    /// Right ascension / longitude / azimuth (frame-dependent name).
-    qtty::Degree azimuthal()  const { return lon; }
-    /// Declination / latitude / altitude (frame-dependent name).
-    qtty::Degree polar()      const { return lat; }
+    /// Azimuthal component (RA, longitude, azimuth … frame-dependent).
+    qtty::Degree azimuthal() const { return lon; }
+    /// Polar component (Dec, latitude, altitude … frame-dependent).
+    qtty::Degree polar()     const { return lat; }
 
-    // Convenience double accessors
-    double lon_deg() const { return lon.value(); }
-    double lat_deg() const { return lat.value(); }
+    // -- RA / Dec (equatorial frames: ICRS, ICRF, Equatorial* only) --
 
-    // ================================================================
-    // ICRS aliases
-    // ================================================================
-    double ra_deg()  const { return lon.value(); }
-    double dec_deg() const { return lat.value(); }
+    /** @brief Right ascension. Only available for equatorial frames. */
+    template<typename F_ = F, std::enable_if_t<frames::has_ra_dec_v<F_>, int> = 0>
+    qtty::Degree ra()  const { return lon; }
 
-    // ================================================================
-    // Horizontal aliases
-    // ================================================================
-    double azimuth_deg()  const { return lon.value(); }
-    double altitude_deg() const { return lat.value(); }
+    /** @brief Declination. Only available for equatorial frames. */
+    template<typename F_ = F, std::enable_if_t<frames::has_ra_dec_v<F_>, int> = 0>
+    qtty::Degree dec() const { return lat; }
+
+    // -- Azimuth / Altitude (Horizontal frame only) --
+
+    /** @brief Azimuth (short form). Only available for Horizontal frame. */
+    template<typename F_ = F, std::enable_if_t<frames::has_az_alt_v<F_>, int> = 0>
+    qtty::Degree az()       const { return lon; }
+
+    /** @brief Altitude (short form). Only available for Horizontal frame. */
+    template<typename F_ = F, std::enable_if_t<frames::has_az_alt_v<F_>, int> = 0>
+    qtty::Degree alt()      const { return lat; }
+
+    /** @brief Azimuth (long form). Only available for Horizontal frame. */
+    template<typename F_ = F, std::enable_if_t<frames::has_az_alt_v<F_>, int> = 0>
+    qtty::Degree azimuth()  const { return lon; }
+
+    /** @brief Altitude (long form). Only available for Horizontal frame. */
+    template<typename F_ = F, std::enable_if_t<frames::has_az_alt_v<F_>, int> = 0>
+    qtty::Degree altitude() const { return lat; }
+
+    // -- Longitude / Latitude (ecliptic, galactic, and generic frames) --
+
+    /** @brief Ecliptic / galactic longitude. Only for lon/lat frames. */
+    template<typename F_ = F, std::enable_if_t<frames::has_lon_lat_v<F_>, int> = 0>
+    qtty::Degree longitude() const { return lon; }
+
+    /** @brief Ecliptic / galactic latitude. Only for lon/lat frames. */
+    template<typename F_ = F, std::enable_if_t<frames::has_lon_lat_v<F_>, int> = 0>
+    qtty::Degree latitude()  const { return lat; }
 
     // ================================================================
     // FFI conversion
@@ -250,10 +267,7 @@ struct Position {
     static constexpr siderust_frame_t  frame_id()  { return frames::FrameTraits<F>::ffi_id; }
     static constexpr siderust_center_t center_id() { return centers::CenterTraits<C>::ffi_id; }
 
-    // Convenience double accessors
-    double lon_deg()    const { return lon.value(); }
-    double lat_deg()    const { return lat.value(); }
-    double distance()   const { return dist.value(); }
+    U distance() const { return dist; }
 };
 
 } // namespace spherical
@@ -314,10 +328,10 @@ struct Position {
     Position(double x_, double y_, double z_)
         : comp_x(U(x_)), comp_y(U(y_)), comp_z(U(z_)) {}
 
-    // Component accessors (raw double)
-    double x() const { return comp_x.value(); }
-    double y() const { return comp_y.value(); }
-    double z() const { return comp_z.value(); }
+    // Component accessors
+    U x() const { return comp_x; }
+    U y() const { return comp_y; }
+    U z() const { return comp_z; }
 
     static constexpr siderust_frame_t  frame_id()  { return frames::FrameTraits<F>::ffi_id; }
     static constexpr siderust_center_t center_id() { return centers::CenterTraits<C>::ffi_id; }
