@@ -12,9 +12,10 @@
 #include <stdexcept>
 #include <string>
 
+#include <tempoch/ffi_core.hpp>
+
 extern "C" {
 #include "siderust_ffi.h"
-#include "tempoch_ffi.h"
 }
 
 namespace siderust {
@@ -105,22 +106,9 @@ inline void check_status(siderust_status_t status, const char* operation) {
     }
 }
 
+/// @brief Backward-compatible wrapper — delegates to tempoch::check_status.
 inline void check_tempoch_status(tempoch_status_t status, const char* operation) {
-    if (status == TEMPOCH_STATUS_T_OK) return;
-
-    std::string msg = std::string(operation) + " failed: ";
-    switch (status) {
-        case TEMPOCH_STATUS_T_NULL_POINTER:
-            throw NullPointerError(msg + "null output pointer");
-        case TEMPOCH_STATUS_T_UTC_CONVERSION_FAILED:
-            throw SiderustException(msg + "UTC conversion failed");
-        case TEMPOCH_STATUS_T_INVALID_PERIOD:
-            throw InvalidPeriodError(msg + "invalid period");
-        case TEMPOCH_STATUS_T_NO_INTERSECTION:
-            throw SiderustException(msg + "periods do not intersect");
-        default:
-            throw SiderustException(msg + "unknown tempoch error (" + std::to_string(status) + ")");
-    }
+    tempoch::check_status(status, operation);
 }
 
 // ============================================================================

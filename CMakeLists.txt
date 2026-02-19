@@ -10,14 +10,11 @@ option(SIDERUST_BUILD_DOCS "Enable Doxygen documentation target." ON)
 find_program(CARGO_BIN cargo REQUIRED)
 
 # ---------------------------------------------------------------------------
-# Paths to siderust / siderust-ffi / tempoch-ffi (submodules or siblings)
+# Paths to siderust-ffi
 # ---------------------------------------------------------------------------
-set(SIDERUST_SUBMODULE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/siderust)
 set(SIDERUST_FFI_DIR       ${CMAKE_CURRENT_SOURCE_DIR}/siderust-ffi)
-set(TEMPOCH_FFI_DIR        ${SIDERUST_SUBMODULE_DIR}/tempoch/tempoch-ffi)
 
 set(SIDERUST_FFI_INCLUDE_DIR ${SIDERUST_FFI_DIR}/include)
-set(TEMPOCH_FFI_INCLUDE_DIR  ${TEMPOCH_FFI_DIR}/include)
 
 # Cargo features for siderust-ffi (e.g., "serde,de441")
 set(SIDERUST_FFI_FEATURES "" CACHE STRING "Cargo features for siderust-ffi")
@@ -33,36 +30,21 @@ endif()
 # Platform-specific library paths
 # ---------------------------------------------------------------------------
 set(SIDERUST_ARTIFACT_DIR ${SIDERUST_FFI_DIR}/target/release)
-set(TEMPOCH_ARTIFACT_DIR  ${TEMPOCH_FFI_DIR}/target/release)
 
 if(APPLE)
     set(SIDERUST_LIBRARY_PATH ${SIDERUST_ARTIFACT_DIR}/libsiderust_ffi.dylib)
-    set(TEMPOCH_LIBRARY_PATH  ${TEMPOCH_ARTIFACT_DIR}/libtempoch_ffi.dylib)
 elseif(WIN32)
     set(SIDERUST_LIBRARY_PATH ${SIDERUST_ARTIFACT_DIR}/siderust_ffi.dll)
     set(SIDERUST_IMPORT_LIBRARY ${SIDERUST_ARTIFACT_DIR}/siderust_ffi.dll.lib)
-    set(TEMPOCH_LIBRARY_PATH  ${TEMPOCH_ARTIFACT_DIR}/tempoch_ffi.dll)
-    set(TEMPOCH_IMPORT_LIBRARY ${TEMPOCH_ARTIFACT_DIR}/tempoch_ffi.dll.lib)
 else()
     set(SIDERUST_LIBRARY_PATH ${SIDERUST_ARTIFACT_DIR}/libsiderust_ffi.so)
-    set(TEMPOCH_LIBRARY_PATH  ${TEMPOCH_ARTIFACT_DIR}/libtempoch_ffi.so)
 endif()
 
 # ---------------------------------------------------------------------------
-# Build siderust-ffi and tempoch-ffi via Cargo
+# Build siderust-ffi via Cargo
 # ---------------------------------------------------------------------------
 
-# Build tempoch-ffi first (separate target dir)
-add_custom_target(
-    build_tempoch_ffi
-    COMMAND ${CARGO_BIN} build --release
-    WORKING_DIRECTORY ${TEMPOCH_FFI_DIR}
-    BYPRODUCTS ${TEMPOCH_LIBRARY_PATH}
-    COMMENT "Building tempoch-ffi via Cargo"
-    VERBATIM
-)
-
-# Build siderust-ffi (depends on tempoch-ffi rlib, but has its own cdylib)
+# Build siderust-ffi (depends on tempoch-ffi via tempoch-cpp subdirectory)
 add_custom_target(
     build_siderust_ffi
     COMMAND ${CARGO_BIN} build --release ${_SIDERUST_FEATURES_ARGS}
@@ -81,14 +63,6 @@ if(WIN32)
 endif()
 add_dependencies(siderust_ffi build_siderust_ffi)
 
-# Import tempoch_ffi
-add_library(tempoch_ffi SHARED IMPORTED GLOBAL)
-set_target_properties(tempoch_ffi PROPERTIES IMPORTED_LOCATION ${TEMPOCH_LIBRARY_PATH})
-if(WIN32)
-    set_target_properties(tempoch_ffi PROPERTIES IMPORTED_IMPLIB ${TEMPOCH_IMPORT_LIBRARY})
-endif()
-add_dependencies(tempoch_ffi build_tempoch_ffi)
-
 # ---------------------------------------------------------------------------
 # Header-only C++ wrapper library
 # ---------------------------------------------------------------------------
@@ -96,18 +70,25 @@ add_dependencies(tempoch_ffi build_tempoch_ffi)
 set(QTTY_FFI_FEATURES "" CACHE STRING "Cargo features for qtty-ffi" FORCE)
 add_subdirectory(qtty-cpp)
 
+# Pull in tempoch-cpp (time types) as a subdirectory
+set(TEMPOCH_FFI_FEATURES "" CACHE STRING "Cargo features for tempoch-ffi" FORCE)
+add_subdirectory(tempoch-cpp)
+
 # Paths to qtty-ffi shared library (for RPATH)
 set(QTTY_SUBMODULE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/qtty-cpp/qtty)
 set(QTTY_ARTIFACT_DIR  ${QTTY_SUBMODULE_DIR}/target/release)
+
+# Paths to tempoch-ffi shared library (for RPATH)
+set(TEMPOCH_SUBMODULE_DIR_PARENT ${CMAKE_CURRENT_SOURCE_DIR}/tempoch-cpp/tempoch)
+set(TEMPOCH_ARTIFACT_DIR  ${TEMPOCH_SUBMODULE_DIR_PARENT}/tempoch-ffi/target/release)
 
 add_library(siderust_cpp INTERFACE)
 target_include_directories(siderust_cpp INTERFACE
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<BUILD_INTERFACE:${SIDERUST_FFI_INCLUDE_DIR}>
-    $<BUILD_INTERFACE:${TEMPOCH_FFI_INCLUDE_DIR}>
     $<INSTALL_INTERFACE:include>
 )
-target_link_libraries(siderust_cpp INTERFACE siderust_ffi tempoch_ffi qtty_cpp)
+target_link_libraries(siderust_cpp INTERFACE siderust_ffi tempoch_cpp qtty_cpp)
 add_dependencies(siderust_cpp build_siderust_ffi)
 
 # ---------------------------------------------------------------------------
@@ -134,9 +115,9 @@ endif()
 
 # RPATH for shared library lookup at runtime
 if(APPLE)
-    set(_siderust_rpath "@loader_path/../siderust-ffi/target/release;@loader_path/../siderust/tempoch/tempoch-ffi/target/release;@loader_path/../qtty-cpp/qtty/target/release")
+    set(_siderust_rpath "@loader_path/../siderust-ffi/target/release;@loader_path/../tempoch-cpp/tempoch/tempoch-ffi/target/release;@loader_path/../qtty-cpp/qtty/target/release")
 elseif(UNIX)
-    set(_siderust_rpath "$ORIGIN/../siderust-ffi/target/release:$ORIGIN/../siderust/tempoch/tempoch-ffi/target/release:$ORIGIN/../qtty-cpp/qtty/target/release")
+    set(_siderust_rpath "$ORIGIN/../siderust-ffi/target/release:$ORIGIN/../tempoch-cpp/tempoch/tempoch-ffi/target/release:$ORIGIN/../qtty-cpp/qtty/target/release")
 endif()
 
 # ---------------------------------------------------------------------------
@@ -239,12 +220,7 @@ install(DIRECTORY ${SIDERUST_FFI_INCLUDE_DIR}/
     FILES_MATCHING PATTERN "*.h"
 )
 
-install(DIRECTORY ${TEMPOCH_FFI_INCLUDE_DIR}/
-    DESTINATION include
-    FILES_MATCHING PATTERN "*.h"
-)
-
-install(FILES ${SIDERUST_LIBRARY_PATH} ${TEMPOCH_LIBRARY_PATH}
+install(FILES ${SIDERUST_LIBRARY_PATH}
     DESTINATION lib
 )
 

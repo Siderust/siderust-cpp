@@ -48,7 +48,7 @@ INCLUDE_PATH           = \
     "@CMAKE_CURRENT_SOURCE_DIR@/include" \
     "@CMAKE_CURRENT_SOURCE_DIR@/qtty-cpp/include" \
     "@CMAKE_CURRENT_SOURCE_DIR@/siderust-ffi/include" \
-    "@CMAKE_CURRENT_SOURCE_DIR@/siderust/tempoch/tempoch-ffi/include"
+    "@CMAKE_CURRENT_SOURCE_DIR@/siderust-ffi/siderust/dev-deps/tempoch/tempoch-ffi/include"
 
 SOURCE_BROWSER         = YES
 INLINE_SOURCES         = NO

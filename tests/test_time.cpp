@@ -77,9 +77,9 @@ TEST(Time, PeriodIntersection) {
 TEST(Time, PeriodNoIntersection) {
     Period a(60200.0, 60201.0);
     Period b(60202.0, 60203.0);
-    EXPECT_THROW(a.intersection(b), SiderustException);
+    EXPECT_THROW(a.intersection(b), tempoch::NoIntersectionError);
 }
 
 TEST(Time, PeriodInvalidThrows) {
-    EXPECT_THROW(Period(60203.0, 60200.0), InvalidPeriodError);
+    EXPECT_THROW(Period(60203.0, 60200.0), tempoch::InvalidPeriodError);
 }

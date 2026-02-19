@@ -162,8 +162,8 @@ siderust-cpp/
 │   ├── test_bodies.cpp
 │   ├── test_altitude.cpp
 │   └── test_ephemeris.cpp
-├── siderust/                 ← git submodule
-└── siderust-ffi/             ← git submodule (or sibling)
+├── siderust-ffi/             ← git submodule (contains `siderust` as nested submodule)
+└── qtty-cpp/                 ← git submodule
 ```
 
 ## Architecture
