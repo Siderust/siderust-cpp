@@ -13,6 +13,7 @@
 #include <vector>
 
 using namespace siderust;
+using namespace qtty::literals;
 
 static const char* crossing_direction_name(CrossingDirection d) {
     return (d == CrossingDirection::Rising) ? "rising" : "setting";
@@ -67,7 +68,7 @@ static void print_culminations(const char* title, const std::vector<CulminationE
         std::printf("  %zu) ", i + 1);
         print_utc(t);
         std::printf("  alt=%.3f deg  kind=%s\n",
-                    events[i].altitude_deg,
+                    events[i].altitude.value(),
                     culmination_kind_name(events[i].kind));
     }
     if (events.size() > n) {
@@ -90,8 +91,8 @@ int main() {
     opts.with_scan_step(1.0 / 144.0).with_tolerance(1e-10);
 
     // Sun examples.
-    const auto sun_night = sun::below_threshold(obs, start, end, -18.0, opts);
-    const auto sun_cross = sun::crossings(obs, start, end, -0.833, opts);
+    const auto sun_night = sun::below_threshold(obs, start, end, -18.0_deg, opts);
+    const auto sun_cross = sun::crossings(obs, start, end, -0.833_deg, opts);
     const auto sun_culm = sun::culminations(obs, start, end, opts);
     print_periods("Sun below -18 deg (astronomical night)", sun_night);
     print_crossings("Sun crossings at -0.833 deg", sun_cross);
@@ -99,8 +100,8 @@ int main() {
     std::printf("\n");
 
     // Moon examples.
-    const auto moon_above = moon::above_threshold(obs, start, end, 20.0, opts);
-    const auto moon_cross = moon::crossings(obs, start, end, 0.0, opts);
+    const auto moon_above = moon::above_threshold(obs, start, end, 20.0_deg, opts);
+    const auto moon_cross = moon::crossings(obs, start, end, 0.0_deg, opts);
     const auto moon_culm = moon::culminations(obs, start, end, opts);
     print_periods("Moon above +20 deg", moon_above);
     print_crossings("Moon horizon crossings", moon_cross);
@@ -109,8 +110,8 @@ int main() {
 
     // Star examples.
     const auto& vega = VEGA;
-    const auto vega_above = star_altitude::above_threshold(vega, obs, start, end, 25.0, opts);
-    const auto vega_cross = star_altitude::crossings(vega, obs, start, end, 0.0, opts);
+    const auto vega_above = star_altitude::above_threshold(vega, obs, start, end, 25.0_deg, opts);
+    const auto vega_cross = star_altitude::crossings(vega, obs, start, end, 0.0_deg, opts);
     const auto vega_culm = star_altitude::culminations(vega, obs, start, end, opts);
     print_periods("VEGA above +25 deg", vega_above);
     print_crossings("VEGA horizon crossings", vega_cross);
@@ -118,13 +119,13 @@ int main() {
     std::printf("\n");
 
     // Fixed ICRS direction examples.
-    const double ra_deg = 279.23473;
-    const double dec_deg = 38.78369;
+    const auto ra = 279.23473_deg;
+    const auto dec = 38.78369_deg;
     const auto dir_above = icrs_altitude::above_threshold(
-        ra_deg, dec_deg, obs, start, end, 30.0, opts
+        ra, dec, obs, start, end, 30.0_deg, opts
     );
     const auto dir_below = icrs_altitude::below_threshold(
-        ra_deg, dec_deg, obs, start, end, 0.0, opts
+        ra, dec, obs, start, end, 0.0_deg, opts
     );
     print_periods("Fixed ICRS direction above +30 deg", dir_above);
     print_periods("Fixed ICRS direction below horizon", dir_below);

@@ -23,22 +23,23 @@ Modern, header-only C++17 wrapper for **siderust** — a high-precision astronom
 
 int main() {
     using namespace siderust;
+    using namespace qtty::literals;
 
     auto obs  = ROQUE_DE_LOS_MUCHACHOS;
     auto jd   = JulianDate::from_utc({2026, 7, 15, 22, 0, 0});
     auto mjd  = MJD::from_jd(jd);
 
     // Sun altitude
-    double alt = sun::altitude_at(obs, mjd);
-    std::printf("Sun altitude: %.4f rad\n", alt);
+    qtty::Radian alt = sun::altitude_at(obs, mjd);
+    std::printf("Sun altitude: %.4f rad\n", alt.value());
 
     // Star from catalog
     const auto& vega = VEGA;
-    double star_alt = star_altitude::altitude_at(vega, obs, mjd);
-    std::printf("Vega altitude: %.4f rad\n", star_alt);
+    qtty::Radian star_alt = star_altitude::altitude_at(vega, obs, mjd);
+    std::printf("Vega altitude: %.4f rad\n", star_alt.value());
 
     // Night periods (astronomical twilight)
-    auto nights = sun::below_threshold(obs, mjd, mjd + 1.0, -18.0);
+    auto nights = sun::below_threshold(obs, mjd, mjd + 1.0, -18.0_deg);
     for (auto& p : nights)
         std::printf("Night: MJD %.4f – %.4f\n", p.start_mjd(), p.end_mjd());
 
