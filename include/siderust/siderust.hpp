@@ -18,7 +18,7 @@
  *
  * // Template-targeted transform  — invalid pairs won't compile
  * auto ecl = vega_icrs.to_frame<EclipticMeanJ2000>(jd);   // Direction<EclipticMeanJ2000>
- * auto hor = vega_icrs.to_horizontal(jd, roque_de_los_muchachos());
+ * auto hor = vega_icrs.to_horizontal(jd, ROQUE_DE_LOS_MUCHACHOS);
  *
  * // Typed ephemeris — unit-safe AU/km positions
  * auto earth = ephemeris::earth_heliocentric(jd);   // cartesian::Position<Heliocentric, EclipticMeanJ2000, AU>

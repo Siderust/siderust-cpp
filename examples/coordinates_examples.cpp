@@ -36,7 +36,7 @@ static void spherical_direction_example() {
 
     auto ecl = vega_icrs.to<frames::EclipticMeanJ2000>(jd);
     auto eq_mod = vega_icrs.to<frames::EquatorialMeanOfDate>(jd);
-    auto hor = vega_icrs.to_horizontal(jd, roque_de_los_muchachos());
+    auto hor = vega_icrs.to_horizontal(jd, ROQUE_DE_LOS_MUCHACHOS);
 
     std::printf("   ICRS RA=%.5f Dec=%.5f\n", vega_icrs.ra().value(), vega_icrs.dec().value());
     std::printf("   Ecliptic lon=%.5f lat=%.5f\n", ecl.lon().value(), ecl.lat().value());
