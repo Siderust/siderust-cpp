@@ -38,8 +38,8 @@ static void spherical_direction_example() {
     auto eq_mod = vega_icrs.to<frames::EquatorialMeanOfDate>(jd);
     auto hor = vega_icrs.to_horizontal(jd, roque_de_los_muchachos());
 
-    std::printf("   ICRS lon=%.5f lat=%.5f\n", vega_icrs.lon.value(), vega_icrs.lat.value());
-    std::printf("   Ecliptic lon=%.5f lat=%.5f\n", ecl.lon.value(), ecl.lat.value());
+    std::printf("   ICRS RA=%.5f Dec=%.5f\n", vega_icrs.ra().value(), vega_icrs.dec().value());
+    std::printf("   Ecliptic lon=%.5f lat=%.5f\n", ecl.lon().value(), ecl.lat().value());
     std::printf("   Equatorial(MOD) RA=%.5f Dec=%.5f\n", eq_mod.ra().value(), eq_mod.dec().value());
     std::printf("   Horizontal az=%.5f alt=%.5f\n\n", hor.az().value(), hor.alt().value());
 }
@@ -52,10 +52,10 @@ static void spherical_position_example() {
     );
     auto dir = target.direction();
 
-    std::printf("   Position lon=%.2f lat=%.2f dist=%.3e m\n",
-                target.lon.value(), target.lat.value(), target.distance().value());
-    std::printf("   Direction-only lon=%.2f lat=%.2f\n\n",
-                dir.lon.value(), dir.lat.value());
+    std::printf("   Position RA=%.2f Dec=%.2f dist=%.3e m\n",
+                target.ra().value(), target.dec().value(), target.distance().value());
+    std::printf("   Direction-only RA=%.2f Dec=%.2f\n\n",
+                dir.ra().value(), dir.dec().value());
 }
 
 static void cartesian_and_units_example() {
