@@ -9,7 +9,7 @@
  */
 
 #include "ffi_core.hpp"
-#include "typed_coordinates.hpp"
+#include "coordinates.hpp"
 #include "time.hpp"
 
 namespace siderust {

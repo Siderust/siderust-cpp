@@ -9,7 +9,7 @@ Modern, header-only C++17 wrapper for **siderust** — a high-precision astronom
 | Module | What you get |
 |--------|-------------|
 | **Time** (`time.hpp`) | `JulianDate`, `MJD`, `UTC`, `Period` — value types with arithmetic and UTC round-trips |
-| **Coordinates** (`coordinates.hpp`) | `SphericalDirection`, `CartesianPosition`, `Geodetic` — frame-aware transforms |
+| **Coordinates** (`coordinates.hpp`) | Modular typed API (`coordinates/{geodetic,spherical,cartesian,types}.hpp`) with aliases like `IcrsDir`, `position::Icrs`, `direction::Ecl` |
 | **Bodies** (`bodies.hpp`) | `Star` (RAII, catalog + custom), `Planet` (8 planets), `ProperMotion`, `Orbit` |
 | **Observatories** (`observatories.hpp`) | Named sites: Roque de los Muchachos, Paranal, Mauna Kea, La Silla |
 | **Altitude** (`altitude.hpp`) | Sun / Moon / Star / ICRS altitude: instant, above/below threshold, crossings, culminations |
@@ -60,10 +60,63 @@ cmake --build .
 
 # Run example
 ./demo
+./coordinates_examples
 
 # Run tests
 ctest --output-on-failure
 ```
+
+## Docker
+
+The repository includes a root `Dockerfile` that installs all build dependencies
+(CMake, Rust, Doxygen), then runs configure/build/tests/docs during image build.
+
+```bash
+# Clone with submodules
+git clone --recurse-submodules <url>
+cd siderust-cpp
+
+# Build image (validates build + tests + docs)
+docker build -t siderust-cpp:dev .
+
+# Open an interactive shell in the container
+docker run --rm -it -v "$PWD":/workspace -w /workspace siderust-cpp:dev
+```
+
+Note: `docker build` writes generated docs inside the image layer, not your host
+filesystem.
+
+To generate docs on the host, run the docs target in a bind-mounted container:
+
+```bash
+docker run --rm \
+  -u "$(id -u):$(id -g)" \
+  -v "$PWD":/workspace \
+  -w /workspace \
+  siderust-cpp:dev \
+  bash -lc 'cmake -S . -B build -G Ninja && cmake --build build --target docs'
+```
+
+Generated HTML entry point on host:
+
+- `build/docs/doxygen/html/index.html`
+
+Generated HTML entry point inside container:
+
+- `/workspace/build/docs/doxygen/html/index.html`
+
+## API Documentation (Doxygen)
+
+If Doxygen is installed, CMake exposes a `docs` target:
+
+```bash
+cmake -S . -B build
+cmake --build build --target docs
+```
+
+Generated HTML entry point:
+
+- `build/docs/doxygen/html/index.html`
 
 ### Prerequisites
 
@@ -77,13 +130,22 @@ ctest --output-on-failure
 ```
 siderust-cpp/
 ├── CMakeLists.txt
+├── docs/
+│   ├── Doxyfile.in
+│   └── mainpage.md
 ├── cmake/
 │   └── siderust_cppConfig.cmake.in
 ├── include/siderust/
 │   ├── siderust.hpp          ← umbrella header
 │   ├── ffi_core.hpp          ← error handling, enums
 │   ├── time.hpp              ← JulianDate, MJD, Period, UTC
-│   ├── coordinates.hpp       ← SphericalDirection, CartesianPosition, Geodetic
+│   ├── coordinates.hpp       ← coordinate umbrella header
+│   ├── coordinates/
+│   │   ├── geodetic.hpp
+│   │   ├── spherical.hpp
+│   │   ├── cartesian.hpp
+│   │   ├── types.hpp
+│   │   └── conversions.hpp
 │   ├── bodies.hpp            ← Star, Planet, ProperMotion
 │   ├── observatories.hpp     ← named observatory locations
 │   ├── altitude.hpp          ← sun/moon/star altitude API
