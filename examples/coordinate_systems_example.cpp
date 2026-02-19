@@ -17,7 +17,7 @@ using namespace siderust::frames;
 int main() {
     std::printf("=== Coordinate Systems Example ===\n\n");
 
-    auto obs = roque_de_los_muchachos();
+    auto obs = ROQUE_DE_LOS_MUCHACHOS;
     auto jd = JulianDate::from_utc({2026, 7, 15, 22, 0, 0});
 
     std::printf("Observer (Geodetic): lon=%.4f deg lat=%.4f deg h=%.1f m\n",
