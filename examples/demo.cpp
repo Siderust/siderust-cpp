@@ -51,7 +51,7 @@ int main() {
     std::printf("--- Typed Coordinate API ---\n\n");
 
     // Compile-time typed ICRS direction
-    IcrsDir vega_icrs(279.23473, 38.78369);
+    spherical::direction::ICRS vega_icrs(279.23473, 38.78369);
 
     // Template-targeted transform: ICRS → EclipticMeanJ2000
     auto ecl = vega_icrs.to_frame<EclipticMeanJ2000>(jd);

@@ -9,7 +9,7 @@ Modern, header-only C++17 wrapper for **siderust** — a high-precision astronom
 | Module | What you get |
 |--------|-------------|
 | **Time** (`time.hpp`) | `JulianDate`, `MJD`, `UTC`, `Period` — value types with arithmetic and UTC round-trips |
-| **Coordinates** (`coordinates.hpp`) | Modular typed API (`coordinates/{geodetic,spherical,cartesian,types}.hpp`) with aliases like `IcrsDir`, `position::Icrs`, `direction::Ecl` |
+| **Coordinates** (`coordinates.hpp`) | Modular typed API (`coordinates/{geodetic,spherical,cartesian,types}.hpp`) plus selective alias headers under `coordinates/types/{spherical,cartesian}/...` |
 | **Bodies** (`bodies.hpp`) | `Star` (RAII, catalog + custom), `Planet` (8 planets), `ProperMotion`, `Orbit` |
 | **Observatories** (`observatories.hpp`) | Named sites: Roque de los Muchachos, Paranal, Mauna Kea, La Silla |
 | **Altitude** (`altitude.hpp`) | Sun / Moon / Star / ICRS altitude: instant, above/below threshold, crossings, culminations |
@@ -61,6 +61,9 @@ cmake --build .
 # Run example
 ./demo
 ./coordinates_examples
+./coordinate_systems_example
+./solar_system_bodies_example
+./altitude_events_example
 
 # Run tests
 ctest --output-on-failure

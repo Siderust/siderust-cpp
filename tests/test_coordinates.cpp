@@ -10,20 +10,22 @@ using namespace siderust;
 // ============================================================================
 
 TEST(TypedCoordinates, AliasNamespaces) {
-    static_assert(std::is_same_v<types::IcrsDir, IcrsDir>);
-    static_assert(std::is_same_v<types::position::ICRS, IcrsPos>);
-    static_assert(std::is_same_v<types::direction::ICRS, IcrsDir>);
-
-    static_assert(std::is_same_v<direction::Icrs, IcrsDir>);
-    static_assert(std::is_same_v<direction::Ecl, EclipticDir>);
-    static_assert(std::is_same_v<position::Icrs, IcrsPos>);
-    static_assert(std::is_same_v<position::Ecl, EclipticPos>);
+    static_assert(std::is_same_v<spherical::direction::ICRS, spherical::Direction<frames::ICRS>>);
+    static_assert(std::is_same_v<spherical::direction::EclipticMeanJ2000, spherical::Direction<frames::EclipticMeanJ2000>>);
+    static_assert(std::is_same_v<
+        spherical::position::ICRS<qtty::Meter>,
+        spherical::Position<centers::Barycentric, frames::ICRS, qtty::Meter>
+    >);
+    static_assert(std::is_same_v<
+        cartesian::position::ECEF<qtty::Meter>,
+        cartesian::Position<centers::Geocentric, frames::ECEF, qtty::Meter>
+    >);
 }
 
 TEST(TypedCoordinates, IcrsDirToEcliptic) {
     using namespace siderust::frames;
 
-    IcrsDir vega(279.23473, 38.78369);
+    spherical::direction::ICRS vega(279.23473, 38.78369);
     auto jd = JulianDate::J2000();
 
     // Compile-time typed transform: ICRS -> EclipticMeanJ2000
@@ -39,13 +41,13 @@ TEST(TypedCoordinates, IcrsDirToEcliptic) {
 TEST(TypedCoordinates, IcrsDirRoundtrip) {
     using namespace siderust::frames;
 
-    IcrsDir icrs(100.0, 30.0);
+    spherical::direction::ICRS icrs(100.0, 30.0);
     auto jd = JulianDate::J2000();
 
     auto ecl  = icrs.to_frame<EclipticMeanJ2000>(jd);
     auto back = ecl.to_frame<ICRS>(jd);
 
-    static_assert(std::is_same_v<decltype(back), IcrsDir>);
+    static_assert(std::is_same_v<decltype(back), spherical::direction::ICRS>);
     EXPECT_NEAR(back.lon.value(), 100.0, 1e-4);
     EXPECT_NEAR(back.lat.value(), 30.0, 1e-4);
 }
@@ -53,7 +55,7 @@ TEST(TypedCoordinates, IcrsDirRoundtrip) {
 TEST(TypedCoordinates, ToShorthand) {
     using namespace siderust::frames;
 
-    IcrsDir icrs(100.0, 30.0);
+    spherical::direction::ICRS icrs(100.0, 30.0);
     auto jd = JulianDate::J2000();
 
     // .to<Target>(jd) is a shorthand for .to_frame<Target>(jd)
@@ -65,7 +67,7 @@ TEST(TypedCoordinates, ToShorthand) {
 TEST(TypedCoordinates, IcrsDirToHorizontal) {
     using namespace siderust::frames;
 
-    IcrsDir vega(279.23473, 38.78369);
+    spherical::direction::ICRS vega(279.23473, 38.78369);
     auto jd  = JulianDate::from_utc({2026, 7, 15, 22, 0, 0});
     auto obs = roque_de_los_muchachos();
 
@@ -79,11 +81,11 @@ TEST(TypedCoordinates, IcrsDirToHorizontal) {
 TEST(TypedCoordinates, EquatorialToIcrs) {
     using namespace siderust::frames;
 
-    EquatorialJ2000Dir eq(100.0, 30.0);
+    spherical::direction::EquatorialMeanJ2000 eq(100.0, 30.0);
     auto jd = JulianDate::J2000();
 
     auto icrs = eq.to_frame<ICRS>(jd);
-    static_assert(std::is_same_v<decltype(icrs), IcrsDir>);
+    static_assert(std::is_same_v<decltype(icrs), spherical::direction::ICRS>);
 
     // Should be close to input (EquatorialMeanJ2000 ≈ ICRS at J2000)
     EXPECT_NEAR(icrs.lon.value(), 100.0, 0.1);
@@ -108,7 +110,7 @@ TEST(TypedCoordinates, MultiHopTransform) {
 TEST(TypedCoordinates, SameFrameIdentity) {
     using namespace siderust::frames;
 
-    IcrsDir icrs(123.456, -45.678);
+    spherical::direction::ICRS icrs(123.456, -45.678);
     auto jd = JulianDate::J2000();
 
     auto same = icrs.to_frame<ICRS>(jd);
@@ -117,7 +119,7 @@ TEST(TypedCoordinates, SameFrameIdentity) {
 }
 
 TEST(TypedCoordinates, QttyDegreeAccessors) {
-    IcrsDir d(123.456, -45.678);
+    spherical::direction::ICRS d(123.456, -45.678);
 
     // Access as qtty::Degree
     qtty::Degree lon = d.lon;
@@ -161,7 +163,7 @@ TEST(TypedCoordinates, GeodeticToCartesianEcef) {
     auto cart = geodetic_to_cartesian_ecef(geo);
 
     // Typed return: cartesian::Position<Geocentric, ECEF, Meter>
-    static_assert(std::is_same_v<decltype(cart), EcefCartPos>);
+    static_assert(std::is_same_v<decltype(cart), cartesian::position::ECEF<qtty::Meter>>);
 
     EXPECT_NEAR(cart.x().value(), 6378137.0, 1.0);
     EXPECT_NEAR(cart.y().value(), 0.0, 1.0);
@@ -174,7 +176,7 @@ TEST(TypedCoordinates, GeodeticToCartesianMember) {
     auto ecef_m = geo.to_cartesian();
     auto ecef_km = geo.to_cartesian<qtty::Kilometer>();
 
-    static_assert(std::is_same_v<decltype(ecef_m), EcefCartPos>);
+    static_assert(std::is_same_v<decltype(ecef_m), cartesian::position::ECEF<qtty::Meter>>);
     static_assert(std::is_same_v<
         decltype(ecef_km),
         cartesian::Position<centers::Geocentric, frames::ECEF, qtty::Kilometer>

@@ -174,6 +174,33 @@ if(DEFINED _siderust_rpath)
     )
 endif()
 
+add_executable(coordinate_systems_example examples/coordinate_systems_example.cpp)
+target_link_libraries(coordinate_systems_example PRIVATE siderust_cpp)
+if(DEFINED _siderust_rpath)
+    set_target_properties(coordinate_systems_example PROPERTIES
+        BUILD_RPATH ${_siderust_rpath}
+        INSTALL_RPATH ${_siderust_rpath}
+    )
+endif()
+
+add_executable(solar_system_bodies_example examples/solar_system_bodies_example.cpp)
+target_link_libraries(solar_system_bodies_example PRIVATE siderust_cpp)
+if(DEFINED _siderust_rpath)
+    set_target_properties(solar_system_bodies_example PROPERTIES
+        BUILD_RPATH ${_siderust_rpath}
+        INSTALL_RPATH ${_siderust_rpath}
+    )
+endif()
+
+add_executable(altitude_events_example examples/altitude_events_example.cpp)
+target_link_libraries(altitude_events_example PRIVATE siderust_cpp)
+if(DEFINED _siderust_rpath)
+    set_target_properties(altitude_events_example PROPERTIES
+        BUILD_RPATH ${_siderust_rpath}
+        INSTALL_RPATH ${_siderust_rpath}
+    )
+endif()
+
 # ---------------------------------------------------------------------------
 # Tests
 # ---------------------------------------------------------------------------

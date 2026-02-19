@@ -7,6 +7,11 @@ and the main methods you can expect each type to provide.
 
 - Prefer `#include <siderust/coordinates.hpp>` (or `#include <siderust/siderust.hpp>`).
 - Common aliases live in `#include <siderust/coordinates/types.hpp>`.
+- For selective aliases, include only what you need, e.g.:
+  - `#include <siderust/coordinates/types/spherical/direction/equatorial.hpp>`
+  - `#include <siderust/coordinates/types/spherical/direction/ecliptic.hpp>`
+  - `#include <siderust/coordinates/types/spherical/position/horizontal.hpp>`
+  - `#include <siderust/coordinates/types/cartesian/position/geodetic.hpp>`
 
 ## Primary coordinate types
 
@@ -52,14 +57,14 @@ Cartesian position tagged by center `C`, frame `F`, and unit `U`.
 - Fields: `comp_x`, `comp_y`, `comp_z`
 - Methods: `x()`, `y()`, `z()`, `to_c()`, `from_c(...)`, `frame_id()`, `center_id()`
 
-## Common aliases (`siderust::types::*`)
+## Common aliases (namespace-scoped)
 
-Most code should use the concise aliases in `siderust::types` (also re-exported at
-namespace root for backward compatibility). Examples:
+Aliases are grouped by coordinate kind and meaning is encoded in namespace
+rather than suffixes. Examples:
 
-- `types::IcrsDir` = `spherical::Direction<frames::ICRS>`
-- `types::IcrsPos` = `spherical::Position<centers::Barycentric, frames::ICRS>`
-- `types::EcefCartPos` = `cartesian::Position<centers::Geocentric, frames::ECEF>`
+- `spherical::direction::ICRS` = `spherical::Direction<frames::ICRS>`
+- `spherical::position::ICRS<qtty::Meter>` = `spherical::Position<centers::Barycentric, frames::ICRS, qtty::Meter>`
+- `cartesian::position::ECEF<qtty::Meter>` = `cartesian::Position<centers::Geocentric, frames::ECEF, qtty::Meter>`
+- `cartesian::position::EclipticMeanJ2000<qtty::AstronomicalUnit>` = `cartesian::Position<centers::Heliocentric, frames::EclipticMeanJ2000, qtty::AstronomicalUnit>`
 
-Browse the full list in the `coordinates/types.hpp` documentation.
-
+Browse the full list in the `coordinates/types/` headers.

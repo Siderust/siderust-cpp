@@ -13,7 +13,10 @@ TEST(Ephemeris, EarthHeliocentric) {
     auto pos = ephemeris::earth_heliocentric(jd);
 
     // Compile-time type checks
-    static_assert(std::is_same_v<decltype(pos), EclipticCartPosAU>);
+    static_assert(std::is_same_v<
+        decltype(pos),
+        cartesian::position::EclipticMeanJ2000<qtty::AstronomicalUnit>
+    >);
     static_assert(std::is_same_v<decltype(pos.comp_x), qtty::AstronomicalUnit>);
 
     // Value check — distance should be ~1 AU
@@ -34,7 +37,10 @@ TEST(Ephemeris, MoonGeocentric) {
     auto jd  = JulianDate::J2000();
     auto pos = ephemeris::moon_geocentric(jd);
 
-    static_assert(std::is_same_v<decltype(pos), MoonGeoCartPosKM>);
+    static_assert(std::is_same_v<
+        decltype(pos),
+        cartesian::position::MoonGeocentric<qtty::Kilometer>
+    >);
     static_assert(std::is_same_v<decltype(pos.comp_x), qtty::Kilometer>);
 
     double r = std::sqrt(pos.x().value() * pos.x().value() + pos.y().value() * pos.y().value() + pos.z().value() * pos.z().value());
