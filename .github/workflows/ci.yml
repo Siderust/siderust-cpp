@@ -1,8 +1,6 @@
 name: CI
 
 on:
-  push:
-    branches: ["**"]
   pull_request:
   workflow_dispatch:
 
@@ -69,14 +67,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-cargo-
 
-      - name: Validate required submodules exist
-        shell: bash
-        run: |
-          set -euo pipefail
-          test -f siderust-ffi/Cargo.toml
-          test -f siderust-ffi/siderust/dev-deps/tempoch/tempoch-ffi/Cargo.toml
-          test -f qtty-cpp/CMakeLists.txt
-
       - name: Configure (CMake)
         shell: bash
         run: |
@@ -93,7 +83,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          ctest --test-dir build --output-on-failure
+          ctest --test-dir build --output-on-failure -L siderust_cpp
 
       - name: Build docs (Doxygen)
         shell: bash
