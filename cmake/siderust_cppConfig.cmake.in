@@ -1,0 +1,10 @@
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+
+include("${CMAKE_CURRENT_LIST_DIR}/siderust_cppTargets.cmake")
+
+set(SIDERUST_FFI_LIBRARY "@PACKAGE_CMAKE_INSTALL_PREFIX@/lib/@CMAKE_SHARED_LIBRARY_PREFIX@siderust_ffi@CMAKE_SHARED_LIBRARY_SUFFIX@")
+set(TEMPOCH_FFI_LIBRARY  "@PACKAGE_CMAKE_INSTALL_PREFIX@/lib/@CMAKE_SHARED_LIBRARY_PREFIX@tempoch_ffi@CMAKE_SHARED_LIBRARY_SUFFIX@")
+
+check_required_components(siderust_cpp)
