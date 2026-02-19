@@ -13,7 +13,7 @@ protected:
     MJD      end_;
 
     void SetUp() override {
-        obs    = roque_de_los_muchachos();
+        obs    = ROQUE_DE_LOS_MUCHACHOS;
         start  = MJD::from_jd(JulianDate::from_utc({2026, 7, 15, 18, 0, 0}));
         end_   = start + 1.0;  // 24 hours
     }
@@ -92,14 +92,14 @@ TEST_F(AltitudeTest, MoonAboveThreshold) {
 // ============================================================================
 
 TEST_F(AltitudeTest, StarAltitudeAt) {
-    auto vega = Star::catalog("VEGA");
+    const auto& vega = VEGA;
     double alt = star_altitude::altitude_at(vega, obs, start);
     EXPECT_GT(alt, -PI / 2.0);
     EXPECT_LT(alt, PI / 2.0);
 }
 
 TEST_F(AltitudeTest, StarAboveThreshold) {
-    auto vega = Star::catalog("VEGA");
+    const auto& vega = VEGA;
     auto periods = star_altitude::above_threshold(vega, obs, start, end_, 30.0);
     // Vega should be well above 30° from La Palma in July
     EXPECT_GT(periods.size(), 0u);

@@ -65,14 +65,14 @@ int main() {
     std::printf("Earth heliocentric x component: %.2f km\n\n", earth_x_km.value());
 
     std::printf("Planet catalog (static properties):\n");
-    print_planet("Mercury", mercury());
-    print_planet("Venus", venus());
-    print_planet("Earth", earth());
-    print_planet("Mars", mars());
-    print_planet("Jupiter", jupiter());
-    print_planet("Saturn", saturn());
-    print_planet("Uranus", uranus());
-    print_planet("Neptune", neptune());
+    print_planet("Mercury", MERCURY);
+    print_planet("Venus", VENUS);
+    print_planet("Earth", EARTH);
+    print_planet("Mars", MARS);
+    print_planet("Jupiter", JUPITER);
+    print_planet("Saturn", SATURN);
+    print_planet("Uranus", URANUS);
+    print_planet("Neptune", NEPTUNE);
 
     return 0;
 }

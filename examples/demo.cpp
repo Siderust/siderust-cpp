@@ -25,7 +25,7 @@ int main() {
     std::printf("MJD: %.6f\n\n", mjd.value());
 
     // --- Observatory ---
-    auto obs = roque_de_los_muchachos();
+    auto obs = ROQUE_DE_LOS_MUCHACHOS;
     std::printf("Roque de los Muchachos: lon=%.4f  lat=%.4f  h=%.0f m\n\n",
                 obs.lon.value(), obs.lat.value(), obs.height.value());
 
@@ -35,7 +35,7 @@ int main() {
                 sun_alt, sun_alt * 180.0 / M_PI);
 
     // --- Star catalog ---
-    auto vega = Star::catalog("VEGA");
+    const auto& vega = VEGA;
     std::printf("Star: %s, d=%.2f ly, L=%.2f Lsun\n",
                 vega.name().c_str(), vega.distance_ly(),
                 vega.luminosity_solar());
@@ -100,7 +100,7 @@ int main() {
     std::printf("Moon distance: %.2f km\n\n", moon_r);
 
     // --- Planets ---
-    auto mars_data = mars();
+    auto mars_data = MARS;
     std::printf("Mars: mass=%.4e kg, radius=%.2f km\n",
                 mars_data.mass_kg, mars_data.radius_km);
     std::printf("  orbit: a=%.6f AU, e=%.6f\n\n",

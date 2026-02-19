@@ -24,7 +24,7 @@ Modern, header-only C++17 wrapper for **siderust** — a high-precision astronom
 int main() {
     using namespace siderust;
 
-    auto obs  = roque_de_los_muchachos();
+    auto obs  = ROQUE_DE_LOS_MUCHACHOS;
     auto jd   = JulianDate::from_utc({2026, 7, 15, 22, 0, 0});
     auto mjd  = MJD::from_jd(jd);
 
@@ -33,7 +33,7 @@ int main() {
     std::printf("Sun altitude: %.4f rad\n", alt);
 
     // Star from catalog
-    auto vega = Star::catalog("VEGA");
+    const auto& vega = VEGA;
     double star_alt = star_altitude::altitude_at(vega, obs, mjd);
     std::printf("Vega altitude: %.4f rad\n", star_alt);
 
