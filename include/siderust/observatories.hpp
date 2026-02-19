@@ -6,7 +6,7 @@
  */
 
 #include "ffi_core.hpp"
-#include "coordinates.hpp"
+#include "typed_coordinates.hpp"
 
 namespace siderust {
 
