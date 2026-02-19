@@ -39,29 +39,29 @@ int main() {
     auto vega_hor = vega_icrs.to_horizontal(jd, obs);
     auto vega_back = vega_ecl.to<ICRS>(jd);
 
-    std::printf("Vega ICRS: lon=%.6f lat=%.6f\n",
-                vega_icrs.lon.value(), vega_icrs.lat.value());
+    std::printf("Vega ICRS: RA=%.6f Dec=%.6f\n",
+                vega_icrs.ra().value(), vega_icrs.dec().value());
     std::printf("Vega EclipticMeanJ2000: lon=%.6f lat=%.6f\n",
-                vega_ecl.lon.value(), vega_ecl.lat.value());
+                vega_ecl.lon().value(), vega_ecl.lat().value());
     std::printf("Vega EquatorialMeanOfDate: RA=%.6f Dec=%.6f\n",
                 vega_eq_mod.ra().value(), vega_eq_mod.dec().value());
     std::printf("Vega EquatorialTrueOfDate: RA=%.6f Dec=%.6f\n",
                 vega_eq_tod.ra().value(), vega_eq_tod.dec().value());
     std::printf("Vega Horizontal: az=%.6f alt=%.6f\n",
                 vega_hor.az().value(), vega_hor.alt().value());
-    std::printf("Vega roundtrip ICRS<-Ecliptic: lon=%.6f lat=%.6f\n\n",
-                vega_back.lon.value(), vega_back.lat.value());
+    std::printf("Vega roundtrip ICRS<-Ecliptic: RA=%.6f Dec=%.6f\n\n",
+                vega_back.ra().value(), vega_back.dec().value());
 
     spherical::position::ICRS<qtty::AstronomicalUnit> target_sph_au(
         qtty::Degree(120.0), qtty::Degree(-25.0), qtty::AstronomicalUnit(2.0)
     );
     auto target_dir = target_sph_au.direction();
-    std::printf("Spherical ICRS position: lon=%.2f lat=%.2f dist=%.3f AU\n",
-                target_sph_au.lon.value(),
-                target_sph_au.lat.value(),
+    std::printf("Spherical ICRS position: RA=%.2f Dec=%.2f dist=%.3f AU\n",
+                target_sph_au.ra().value(),
+                target_sph_au.dec().value(),
                 target_sph_au.distance().value());
-    std::printf("Direction extracted from spherical position: lon=%.2f lat=%.2f\n\n",
-                target_dir.lon.value(), target_dir.lat.value());
+    std::printf("Direction extracted from spherical position: RA=%.2f Dec=%.2f\n\n",
+                target_dir.ra().value(), target_dir.dec().value());
 
     cartesian::position::ICRS<qtty::Meter> target_cart_m(1.5e11, -3.0e10, 2.0e10);
     cartesian::position::ICRS<qtty::AstronomicalUnit> target_cart_au(

@@ -56,29 +56,29 @@ int main() {
     // Template-targeted transform: ICRS → EclipticMeanJ2000
     auto ecl = vega_icrs.to_frame<EclipticMeanJ2000>(jd);
     std::printf("Typed ICRS (%.4f, %.4f) -> EclMeanJ2000 (%.4f, %.4f)\n",
-                vega_icrs.lon.value(), vega_icrs.lat.value(),
-                ecl.lon.value(), ecl.lat.value());
+                vega_icrs.ra().value(), vega_icrs.dec().value(),
+                ecl.lon().value(), ecl.lat().value());
 
     // Shorthand .to<>() syntax
     auto eq_j2000 = vega_icrs.to<EquatorialMeanJ2000>(jd);
     std::printf("Typed ICRS -> EquatorialJ2000 (%.4f, %.4f)\n",
-                eq_j2000.lon.value(), eq_j2000.lat.value());
+                eq_j2000.ra().value(), eq_j2000.dec().value());
 
     // Horizontal transform
     auto hor = vega_icrs.to_horizontal(jd, obs);
     std::printf("Typed Horizontal: az=%.4f  alt=%.4f deg\n\n",
-                hor.azimuth().value(), hor.altitude().value());
+                hor.az().value(), hor.al().value());
 
     // Roundtrip: ICRS → Ecliptic → ICRS
     auto back = ecl.to_frame<ICRS>(jd);
     std::printf("Roundtrip: (%.6f, %.6f) -> (%.6f, %.6f) -> (%.6f, %.6f)\n",
-                vega_icrs.lon.value(), vega_icrs.lat.value(),
-                ecl.lon.value(), ecl.lat.value(),
-                back.lon.value(), back.lat.value());
+                vega_icrs.ra().value(), vega_icrs.dec().value(),
+                ecl.lon().value(), ecl.lat().value(),
+                back.ra().value(), back.dec().value());
 
     // qtty unit-safe angle conversion
-    qtty::Radian ra_rad = vega_icrs.lon.to<qtty::Radian>();
-    std::printf("Vega RA: %.6f deg = %.6f rad\n\n", vega_icrs.lon.value(), ra_rad.value());
+    qtty::Radian ra_rad = vega_icrs.ra().to<qtty::Radian>();
+    std::printf("Vega RA: %.6f deg = %.6f rad\n\n", vega_icrs.ra().value(), ra_rad.value());
 
     // --- Typed Ephemeris ---
     std::printf("--- Typed Ephemeris ---\n\n");
