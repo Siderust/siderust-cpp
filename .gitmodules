@@ -1,0 +1,6 @@
+[submodule "siderust"]
+	path = siderust
+	url = git@github.com:Siderust/siderust.git
+[submodule "siderust-ffi"]
+	path = siderust-ffi
+	url = git@github.com:Siderust/siderust-ffi.git
