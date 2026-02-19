@@ -59,7 +59,7 @@ cmake ..
 cmake --build .
 
 # Run example
-./demo
+./siderust_demo
 ./coordinates_examples
 ./coordinate_systems_example
 ./solar_system_bodies_example
