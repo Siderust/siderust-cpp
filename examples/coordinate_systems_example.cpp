@@ -13,6 +13,7 @@
 
 using namespace siderust;
 using namespace siderust::frames;
+using namespace qtty::literals;
 
 int main() {
     std::printf("=== Coordinate Systems Example ===\n\n");
@@ -53,7 +54,7 @@ int main() {
                 vega_back.ra().value(), vega_back.dec().value());
 
     spherical::position::ICRS<qtty::AstronomicalUnit> target_sph_au(
-        qtty::Degree(120.0), qtty::Degree(-25.0), qtty::AstronomicalUnit(2.0)
+        120.0_deg, -25.0_deg, 2.0_au
     );
     auto target_dir = target_sph_au.direction();
     std::printf("Spherical ICRS position: RA=%.2f Dec=%.2f dist=%.3f AU\n",

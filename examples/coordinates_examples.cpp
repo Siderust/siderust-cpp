@@ -12,6 +12,7 @@
 #include <cstdio>
 
 using namespace siderust;
+using namespace qtty::literals;
 
 static void geodetic_and_ecef_example() {
     std::printf("1) Geodetic -> ECEF cartesian\n");
@@ -48,7 +49,7 @@ static void spherical_position_example() {
     std::printf("3) Spherical position + extracting direction\n");
 
     spherical::position::ICRS<qtty::Meter> target(
-        qtty::Degree(120.0), qtty::Degree(-25.0), qtty::Meter(2.0e17)
+        120.0_deg, -25.0_deg, 2.0e17_m
     );
     auto dir = target.direction();
 

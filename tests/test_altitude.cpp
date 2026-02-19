@@ -24,15 +24,15 @@ protected:
 // ============================================================================
 
 TEST_F(AltitudeTest, SunAltitudeAt) {
-    double alt = sun::altitude_at(obs, start);
+    qtty::Radian alt = sun::altitude_at(obs, start);
     // Should be a valid radian value
-    EXPECT_GT(alt, -PI / 2.0);
-    EXPECT_LT(alt, PI / 2.0);
+    EXPECT_GT(alt.value(), -PI / 2.0);
+    EXPECT_LT(alt.value(), PI / 2.0);
 }
 
 TEST_F(AltitudeTest, SunAboveThreshold) {
     // Find periods when sun > 0 deg (daytime)
-    auto periods = sun::above_threshold(obs, start, end_, 0.0);
+    auto periods = sun::above_threshold(obs, start, end_, qtty::Degree(0.0));
     EXPECT_GT(periods.size(), 0u);
     for (auto& p : periods) {
         EXPECT_GT(p.duration_days(), 0.0);
@@ -41,7 +41,7 @@ TEST_F(AltitudeTest, SunAboveThreshold) {
 
 TEST_F(AltitudeTest, SunBelowThreshold) {
     // Astronomical night: sun < -18°
-    auto periods = sun::below_threshold(obs, start, end_, -18.0);
+    auto periods = sun::below_threshold(obs, start, end_, qtty::Degree(-18.0));
     // In July at La Palma, astronomical night may be short but should exist
     // (or possibly not if too close to solstice — accept 0+)
     for (auto& p : periods) {
@@ -50,7 +50,7 @@ TEST_F(AltitudeTest, SunBelowThreshold) {
 }
 
 TEST_F(AltitudeTest, SunCrossings) {
-    auto events = sun::crossings(obs, start, end_, 0.0);
+    auto events = sun::crossings(obs, start, end_, qtty::Degree(0.0));
     // Expect at least 1 crossing in 24h (sunrise or sunset)
     EXPECT_GE(events.size(), 1u);
 }
@@ -63,7 +63,7 @@ TEST_F(AltitudeTest, SunCulminations) {
 
 TEST_F(AltitudeTest, SunAltitudePeriods) {
     // Find periods when sun is between -6° and 0° (civil twilight)
-    auto periods = sun::altitude_periods(obs, start, end_, -6.0, 0.0);
+    auto periods = sun::altitude_periods(obs, start, end_, qtty::Degree(-6.0), qtty::Degree(0.0));
     for (auto& p : periods) {
         EXPECT_GT(p.duration_days(), 0.0);
     }
@@ -74,13 +74,13 @@ TEST_F(AltitudeTest, SunAltitudePeriods) {
 // ============================================================================
 
 TEST_F(AltitudeTest, MoonAltitudeAt) {
-    double alt = moon::altitude_at(obs, start);
-    EXPECT_GT(alt, -PI / 2.0);
-    EXPECT_LT(alt, PI / 2.0);
+    qtty::Radian alt = moon::altitude_at(obs, start);
+    EXPECT_GT(alt.value(), -PI / 2.0);
+    EXPECT_LT(alt.value(), PI / 2.0);
 }
 
 TEST_F(AltitudeTest, MoonAboveThreshold) {
-    auto periods = moon::above_threshold(obs, start, end_, 0.0);
+    auto periods = moon::above_threshold(obs, start, end_, qtty::Degree(0.0));
     // Moon may or may not be above horizon for this date; just no crash
     for (auto& p : periods) {
         EXPECT_GT(p.duration_days(), 0.0);
@@ -93,14 +93,14 @@ TEST_F(AltitudeTest, MoonAboveThreshold) {
 
 TEST_F(AltitudeTest, StarAltitudeAt) {
     const auto& vega = VEGA;
-    double alt = star_altitude::altitude_at(vega, obs, start);
-    EXPECT_GT(alt, -PI / 2.0);
-    EXPECT_LT(alt, PI / 2.0);
+    qtty::Radian alt = star_altitude::altitude_at(vega, obs, start);
+    EXPECT_GT(alt.value(), -PI / 2.0);
+    EXPECT_LT(alt.value(), PI / 2.0);
 }
 
 TEST_F(AltitudeTest, StarAboveThreshold) {
     const auto& vega = VEGA;
-    auto periods = star_altitude::above_threshold(vega, obs, start, end_, 30.0);
+    auto periods = star_altitude::above_threshold(vega, obs, start, end_, qtty::Degree(30.0));
     // Vega should be well above 30° from La Palma in July
     EXPECT_GT(periods.size(), 0u);
 }
@@ -111,13 +111,13 @@ TEST_F(AltitudeTest, StarAboveThreshold) {
 
 TEST_F(AltitudeTest, IcrsAltitudeAt) {
     // Vega coordinates
-    double alt = icrs_altitude::altitude_at(279.23, 38.78, obs, start);
-    EXPECT_GT(alt, -PI / 2.0);
-    EXPECT_LT(alt, PI / 2.0);
+    qtty::Radian alt = icrs_altitude::altitude_at(qtty::Degree(279.23), qtty::Degree(38.78), obs, start);
+    EXPECT_GT(alt.value(), -PI / 2.0);
+    EXPECT_LT(alt.value(), PI / 2.0);
 }
 
 TEST_F(AltitudeTest, IcrsAboveThreshold) {
     auto periods = icrs_altitude::above_threshold(
-        279.23, 38.78, obs, start, end_, 30.0);
+        qtty::Degree(279.23), qtty::Degree(38.78), obs, start, end_, qtty::Degree(30.0));
     EXPECT_GT(periods.size(), 0u);
 }
