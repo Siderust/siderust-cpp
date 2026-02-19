@@ -1,9 +1,9 @@
-[submodule "siderust-ffi"]
-	path = siderust-ffi
-	url = git@github.com:Siderust/siderust-ffi.git
 [submodule "qtty-cpp"]
 	path = qtty-cpp
 	url = git@github.com:VPRamon/qtty-cpp.git
 [submodule "tempoch-cpp"]
 	path = tempoch-cpp
 	url = git@github.com:Siderust/tempoch-cpp.git
+[submodule "siderust"]
+	path = siderust
+	url = git@github.com:Siderust/siderust.git

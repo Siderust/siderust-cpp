@@ -4,6 +4,7 @@ cmake-build-*/
 out/
 build-make/
 build-verify/
+build-ci-config-check/
 
 # IDE files
 .vscode/

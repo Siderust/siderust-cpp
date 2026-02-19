@@ -88,7 +88,7 @@ inline std::vector<Period> periods_from_c(tempoch_period_mjd_t* ptr, uintptr_t c
     for (uintptr_t i = 0; i < count; ++i) {
         result.push_back(Period::from_c(ptr[i]));
     }
-    tempoch_periods_free(ptr, count);
+    siderust_periods_free(ptr, count);
     return result;
 }
 

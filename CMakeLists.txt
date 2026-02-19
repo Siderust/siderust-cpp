@@ -10,9 +10,9 @@ option(SIDERUST_BUILD_DOCS "Enable Doxygen documentation target." ON)
 find_program(CARGO_BIN cargo REQUIRED)
 
 # ---------------------------------------------------------------------------
-# Paths to siderust-ffi
+# Paths to siderust-ffi (inside the siderust submodule)
 # ---------------------------------------------------------------------------
-set(SIDERUST_FFI_DIR       ${CMAKE_CURRENT_SOURCE_DIR}/siderust-ffi)
+set(SIDERUST_FFI_DIR       ${CMAKE_CURRENT_SOURCE_DIR}/siderust/siderust-ffi)
 
 set(SIDERUST_FFI_INCLUDE_DIR ${SIDERUST_FFI_DIR}/include)
 
@@ -29,7 +29,7 @@ endif()
 # ---------------------------------------------------------------------------
 # Platform-specific library paths
 # ---------------------------------------------------------------------------
-set(SIDERUST_ARTIFACT_DIR ${SIDERUST_FFI_DIR}/target/release)
+set(SIDERUST_ARTIFACT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/siderust/target/release)
 
 if(APPLE)
     set(SIDERUST_LIBRARY_PATH ${SIDERUST_ARTIFACT_DIR}/libsiderust_ffi.dylib)
@@ -115,9 +115,9 @@ endif()
 
 # RPATH for shared library lookup at runtime
 if(APPLE)
-    set(_siderust_rpath "@loader_path/../siderust-ffi/target/release;@loader_path/../tempoch-cpp/tempoch/tempoch-ffi/target/release;@loader_path/../qtty-cpp/qtty/target/release")
+    set(_siderust_rpath "@loader_path/../siderust/target/release;@loader_path/../tempoch-cpp/tempoch/tempoch-ffi/target/release;@loader_path/../qtty-cpp/qtty/target/release")
 elseif(UNIX)
-    set(_siderust_rpath "$ORIGIN/../siderust-ffi/target/release:$ORIGIN/../tempoch-cpp/tempoch/tempoch-ffi/target/release:$ORIGIN/../qtty-cpp/qtty/target/release")
+    set(_siderust_rpath "$ORIGIN/../siderust/target/release:$ORIGIN/../tempoch-cpp/tempoch/tempoch-ffi/target/release:$ORIGIN/../qtty-cpp/qtty/target/release")
 endif()
 
 # ---------------------------------------------------------------------------
@@ -137,10 +137,10 @@ enable_testing()
 # ---------------------------------------------------------------------------
 # Example
 # ---------------------------------------------------------------------------
-add_executable(demo examples/demo.cpp)
-target_link_libraries(demo PRIVATE siderust_cpp)
+add_executable(siderust_demo examples/demo.cpp)
+target_link_libraries(siderust_demo PRIVATE siderust_cpp)
 if(DEFINED _siderust_rpath)
-    set_target_properties(demo PROPERTIES
+    set_target_properties(siderust_demo PROPERTIES
         BUILD_RPATH ${_siderust_rpath}
         INSTALL_RPATH ${_siderust_rpath}
     )
@@ -205,7 +205,9 @@ if(DEFINED _siderust_rpath)
 endif()
 
 include(GoogleTest)
-gtest_discover_tests(test_siderust)
+gtest_discover_tests(test_siderust
+    PROPERTIES LABELS "siderust_cpp"
+)
 
 # ---------------------------------------------------------------------------
 # Installation
