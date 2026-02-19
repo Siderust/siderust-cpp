@@ -23,41 +23,41 @@ namespace ephemeris {
 /**
  * @brief Sun's barycentric position (EclipticMeanJ2000, AU) via VSOP87.
  */
-inline HelioBaryCartPosAU sun_barycentric(const JulianDate& jd) {
+inline cartesian::position::HelioBarycentric<qtty::AstronomicalUnit> sun_barycentric(const JulianDate& jd) {
     siderust_cartesian_pos_t out;
     check_status(siderust_vsop87_sun_barycentric(jd.value(), &out),
                  "ephemeris::sun_barycentric");
-    return HelioBaryCartPosAU::from_c(out);
+    return cartesian::position::HelioBarycentric<qtty::AstronomicalUnit>::from_c(out);
 }
 
 /**
  * @brief Earth's barycentric position (EclipticMeanJ2000, AU) via VSOP87.
  */
-inline GeoBaryCartPosAU earth_barycentric(const JulianDate& jd) {
+inline cartesian::position::GeoBarycentric<qtty::AstronomicalUnit> earth_barycentric(const JulianDate& jd) {
     siderust_cartesian_pos_t out;
     check_status(siderust_vsop87_earth_barycentric(jd.value(), &out),
                  "ephemeris::earth_barycentric");
-    return GeoBaryCartPosAU::from_c(out);
+    return cartesian::position::GeoBarycentric<qtty::AstronomicalUnit>::from_c(out);
 }
 
 /**
  * @brief Earth's heliocentric position (EclipticMeanJ2000, AU) via VSOP87.
  */
-inline EclipticCartPosAU earth_heliocentric(const JulianDate& jd) {
+inline cartesian::position::EclipticMeanJ2000<qtty::AstronomicalUnit> earth_heliocentric(const JulianDate& jd) {
     siderust_cartesian_pos_t out;
     check_status(siderust_vsop87_earth_heliocentric(jd.value(), &out),
                  "ephemeris::earth_heliocentric");
-    return EclipticCartPosAU::from_c(out);
+    return cartesian::position::EclipticMeanJ2000<qtty::AstronomicalUnit>::from_c(out);
 }
 
 /**
  * @brief Moon's geocentric position (EclipticMeanJ2000, km) via ELP2000.
  */
-inline MoonGeoCartPosKM moon_geocentric(const JulianDate& jd) {
+inline cartesian::position::MoonGeocentric<qtty::Kilometer> moon_geocentric(const JulianDate& jd) {
     siderust_cartesian_pos_t out;
     check_status(siderust_vsop87_moon_geocentric(jd.value(), &out),
                  "ephemeris::moon_geocentric");
-    return MoonGeoCartPosKM::from_c(out);
+    return cartesian::position::MoonGeocentric<qtty::Kilometer>::from_c(out);
 }
 
 } // namespace ephemeris

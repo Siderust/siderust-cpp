@@ -31,7 +31,7 @@ static void geodetic_and_ecef_example() {
 static void spherical_direction_example() {
     std::printf("2) Spherical direction frame conversions\n");
 
-    direction::Icrs vega_icrs(279.23473, 38.78369);
+    spherical::direction::ICRS vega_icrs(279.23473, 38.78369);
     auto jd = JulianDate::from_utc({2026, 7, 15, 22, 0, 0});
 
     auto ecl = vega_icrs.to<frames::EclipticMeanJ2000>(jd);
@@ -47,7 +47,9 @@ static void spherical_direction_example() {
 static void spherical_position_example() {
     std::printf("3) Spherical position + extracting direction\n");
 
-    position::Icrs target(qtty::Degree(120.0), qtty::Degree(-25.0), qtty::Meter(2.0e17));
+    spherical::position::ICRS<qtty::Meter> target(
+        qtty::Degree(120.0), qtty::Degree(-25.0), qtty::Meter(2.0e17)
+    );
     auto dir = target.direction();
 
     std::printf("   Position lon=%.2f lat=%.2f dist=%.3e m\n",
@@ -60,7 +62,7 @@ static void cartesian_and_units_example() {
     std::printf("4) Cartesian coordinate creation + unit conversion\n");
 
     cartesian::Direction<frames::ICRS> axis_x(1.0, 0.0, 0.0);
-    types::EclipticCartPosAU sample_helio_au(1.0, 0.25, -0.1);
+    cartesian::position::EclipticMeanJ2000<qtty::AstronomicalUnit> sample_helio_au(1.0, 0.25, -0.1);
 
     auto x_km = sample_helio_au.x().to<qtty::Kilometer>();
     auto y_km = sample_helio_au.y().to<qtty::Kilometer>();
@@ -75,8 +77,8 @@ static void ephemeris_typed_example() {
     std::printf("5) Typed ephemeris coordinates\n");
 
     auto jd = JulianDate::J2000();
-    auto earth = ephemeris::earth_heliocentric(jd);  // EclipticCartPosAU
-    auto moon = ephemeris::moon_geocentric(jd);      // MoonGeoCartPosKM
+    auto earth = ephemeris::earth_heliocentric(jd);  // cartesian::position::EclipticMeanJ2000<qtty::AstronomicalUnit>
+    auto moon = ephemeris::moon_geocentric(jd);      // cartesian::position::MoonGeocentric<qtty::Kilometer>
 
     std::printf("   Earth heliocentric (AU) x=%.8f y=%.8f z=%.8f\n",
                 earth.x().value(), earth.y().value(), earth.z().value());
