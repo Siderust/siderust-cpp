@@ -9,6 +9,7 @@ RAII wrappers for FFI handles, and exception-based error reporting.
 - `siderust/siderust.hpp`: umbrella include for the full public API.
 - `siderust/time.hpp`: `UTC`, `JulianDate`, `MJD`, and `Period`.
 - `siderust/coordinates.hpp`: modular coordinate API (`coordinates/geodetic.hpp`, `coordinates/spherical.hpp`, `coordinates/cartesian.hpp`, `coordinates/types.hpp`).
+- \ref coordinate_types : quick reference for coordinate types and main methods.
 - `siderust/frames.hpp`: compile-time frame tags and transform traits.
 - `siderust/centers.hpp`: compile-time center tags and center-shift traits.
 - `siderust/bodies.hpp`: `Star`, `Planet`, and orbital/proper-motion types.

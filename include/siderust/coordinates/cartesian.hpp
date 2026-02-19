@@ -2,6 +2,7 @@
 
 /**
  * @file cartesian.hpp
+ * @ingroup coordinates_cartesian
  * @brief Typed cartesian coordinate templates.
  */
 
@@ -18,14 +19,17 @@ namespace cartesian {
  * @brief A unit-vector direction in Cartesian form, compile-time frame-tagged.
  *
  * Mirrors Rust's `affn::cartesian::Direction<F>`.
+ *
+ * @ingroup coordinates_cartesian
+ * @tparam F Reference frame tag (e.g. `frames::ICRS`).
  */
 template<typename F>
 struct Direction {
     static_assert(frames::is_frame_v<F>, "F must be a valid frame tag");
 
-    double x;
-    double y;
-    double z;
+    double x; ///< X component (unitless).
+    double y; ///< Y component (unitless).
+    double z; ///< Z component (unitless).
 
     Direction() : x(0), y(0), z(0) {}
     Direction(double x_, double y_, double z_) : x(x_), y(y_), z(z_) {}
@@ -39,15 +43,20 @@ struct Direction {
  * @brief A 3D Cartesian position, compile-time tagged by center, frame, unit.
  *
  * Mirrors Rust's `affn::cartesian::Position<C, F, U>`.
+ *
+ * @ingroup coordinates_cartesian
+ * @tparam C Reference center tag (e.g. `centers::Geocentric`).
+ * @tparam F Reference frame tag (e.g. `frames::ECEF`).
+ * @tparam U Length unit (default: `qtty::Meter`).
  */
 template<typename C, typename F, typename U = qtty::Meter>
 struct Position {
     static_assert(frames::is_frame_v<F>, "F must be a valid frame tag");
     static_assert(centers::is_center_v<C>, "C must be a valid center tag");
 
-    U comp_x;
-    U comp_y;
-    U comp_z;
+    U comp_x; ///< X component.
+    U comp_y; ///< Y component.
+    U comp_z; ///< Z component.
 
     Position()
         : comp_x(U(0)), comp_y(U(0)), comp_z(U(0)) {}

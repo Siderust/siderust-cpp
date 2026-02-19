@@ -2,11 +2,14 @@
 
 /**
  * @file types.hpp
+ * @ingroup coordinates_types
  * @brief Concise aliases for common typed coordinates.
  *
  * Mirrors the Rust `coordinates::types` style:
  * - concise aliases (`IcrsDir`, `IcrsPos`, ...)
  * - nested compatibility namespaces (`types::direction`, `types::position`)
+ *
+ * This header is intended as the "index" of commonly used coordinate types.
  */
 
 #include "cartesian.hpp"
@@ -14,48 +17,90 @@
 
 namespace siderust {
 
+/// Common, readable aliases for typed coordinates.
 namespace types {
+
+/** @addtogroup coordinates_types
+ * @{
+ */
 
 // ============================================================================
 // Concise aliases
 // ============================================================================
 
-// -- Spherical Directions --
+/// @name Spherical directions
+/// @{
+/// ICRS spherical direction (RA/Dec).
 using IcrsDir                 = spherical::Direction<frames::ICRS>;
+/// ICRF spherical direction (RA/Dec; treated ≡ ICRS).
 using IcrfDir                 = spherical::Direction<frames::ICRF>;
+/// Mean ecliptic & equinox of J2000.0 direction (lon/lat).
 using EclipticDir             = spherical::Direction<frames::EclipticMeanJ2000>;
+/// Mean equatorial of J2000.0 direction (RA/Dec).
 using EquatorialJ2000Dir      = spherical::Direction<frames::EquatorialMeanJ2000>;
+/// Mean equatorial of date direction (RA/Dec).
 using EquatorialMeanOfDateDir = spherical::Direction<frames::EquatorialMeanOfDate>;
+/// True equatorial of date direction (RA/Dec).
 using EquatorialTrueOfDateDir = spherical::Direction<frames::EquatorialTrueOfDate>;
+/// Local horizontal direction (az/alt).
 using HorizontalDir           = spherical::Direction<frames::Horizontal>;
+/// Galactic direction (l/b).
 using GalacticDir             = spherical::Direction<frames::Galactic>;
+/// @}
 
-// -- Spherical Positions --
+/// @name Spherical positions
+/// @{
+/// Barycentric ICRS spherical position.
 using IcrsPos       = spherical::Position<centers::Barycentric, frames::ICRS>;
+/// Geocentric ICRS spherical position.
 using GcrsPos       = spherical::Position<centers::Geocentric, frames::ICRS>;
+/// Heliocentric ICRS spherical position.
 using HcrsPos       = spherical::Position<centers::Heliocentric, frames::ICRS>;
+/// Heliocentric mean-ecliptic-of-J2000 spherical position.
 using EclipticPos   = spherical::Position<centers::Heliocentric, frames::EclipticMeanJ2000>;
+/// Topocentric horizontal spherical position.
 using HorizontalPos = spherical::Position<centers::Topocentric, frames::Horizontal>;
+/// @}
 
-// -- Cartesian Directions --
+/// @name Cartesian directions
+/// @{
+/// ICRS cartesian direction.
 using IcrsCartDir     = cartesian::Direction<frames::ICRS>;
+/// Mean ecliptic & equinox of J2000.0 cartesian direction.
 using EclipticCartDir = cartesian::Direction<frames::EclipticMeanJ2000>;
+/// @}
 
-// -- Cartesian Positions (Meter) --
+/// @name Cartesian positions (meter)
+/// @{
+/// Barycentric ICRS cartesian position in meters.
 using IcrsCartPos     = cartesian::Position<centers::Barycentric, frames::ICRS>;
+/// Geocentric ICRS cartesian position in meters.
 using GcrsCartPos     = cartesian::Position<centers::Geocentric, frames::ICRS>;
+/// Heliocentric mean-ecliptic-of-J2000 cartesian position in meters.
 using EclipticCartPos = cartesian::Position<centers::Heliocentric, frames::EclipticMeanJ2000>;
+/// Geocentric ECEF cartesian position in meters.
 using EcefCartPos     = cartesian::Position<centers::Geocentric, frames::ECEF>;
+/// @}
 
-// -- Cartesian Positions (AU) --
+/// @name Cartesian positions (astronomical unit)
+/// @{
+/// Barycentric ICRS cartesian position in AU.
 using IcrsCartPosAU      = cartesian::Position<centers::Barycentric, frames::ICRS, qtty::AstronomicalUnit>;
+/// Geocentric ICRS cartesian position in AU.
 using GcrsCartPosAU      = cartesian::Position<centers::Geocentric, frames::ICRS, qtty::AstronomicalUnit>;
+/// Heliocentric mean-ecliptic-of-J2000 cartesian position in AU.
 using EclipticCartPosAU  = cartesian::Position<centers::Heliocentric, frames::EclipticMeanJ2000, qtty::AstronomicalUnit>;
+/// Barycentric mean-ecliptic-of-J2000 cartesian position in AU.
 using HelioBaryCartPosAU = cartesian::Position<centers::Barycentric, frames::EclipticMeanJ2000, qtty::AstronomicalUnit>;
+/// Barycentric mean-ecliptic-of-J2000 cartesian position in AU (compat alias).
 using GeoBaryCartPosAU   = cartesian::Position<centers::Barycentric, frames::EclipticMeanJ2000, qtty::AstronomicalUnit>;
+/// @}
 
-// -- Cartesian Positions (Kilometer) --
+/// @name Cartesian positions (kilometer)
+/// @{
+/// Geocentric mean-ecliptic-of-J2000 cartesian position in km.
 using MoonGeoCartPosKM = cartesian::Position<centers::Geocentric, frames::EclipticMeanJ2000, qtty::Kilometer>;
+/// @}
 
 // ============================================================================
 // Rust-style compatibility namespaces
@@ -82,9 +127,21 @@ using ICRS                = IcrsPos;
 
 } // namespace types
 
+/** @} */ // end of group coordinates_types
+
 // ============================================================================
 // Backward-compatible root aliases
 // ============================================================================
+
+/** @addtogroup coordinates_types
+ * @{
+ */
+
+/** @name Backward-compatible root aliases
+ *
+ * Prefer the explicit `siderust::types::*` names in new code.
+ * @{
+ */
 
 using types::EcefCartPos;
 using types::EclipticCartDir;
@@ -111,6 +168,8 @@ using types::IcrsCartPosAU;
 using types::IcrsDir;
 using types::IcrsPos;
 using types::MoonGeoCartPosKM;
+
+/** @} */ // end of name Backward-compatible root aliases
 
 // ============================================================================
 // Intuitive short namespaces
@@ -149,5 +208,7 @@ using HCRS = Hcrs;
 using EclipticMeanJ2000 = Ecl;
 using Horizontal = Hor;
 }
+
+/** @} */ // end of group coordinates_types
 
 } // namespace siderust

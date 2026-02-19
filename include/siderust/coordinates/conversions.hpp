@@ -2,6 +2,7 @@
 
 /**
  * @file conversions.hpp
+ * @ingroup coordinates_conversions
  * @brief Free coordinate conversion helpers.
  */
 
@@ -27,6 +28,8 @@ Geodetic::to_cartesian() const {
 
 /**
  * @brief Convert a Geodetic (WGS84) to ECEF Cartesian position.
+ *
+ * @ingroup coordinates_conversions
  */
 inline EcefCartPos geodetic_to_cartesian_ecef(const Geodetic& geo) {
     return geo.to_cartesian<qtty::Meter>();
