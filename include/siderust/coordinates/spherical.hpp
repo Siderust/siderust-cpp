@@ -2,6 +2,7 @@
 
 /**
  * @file spherical.hpp
+ * @ingroup coordinates_spherical
  * @brief Typed spherical coordinate templates.
  */
 
@@ -22,7 +23,20 @@ namespace spherical {
  *
  * Mirrors Rust's `affn::spherical::Direction<F>`.
  *
+ * @ingroup coordinates_spherical
  * @tparam F  Reference frame tag (e.g. `frames::ICRS`).
+ *
+ * @par Components
+ * Stored as degrees (`qtty::Degree`):
+ * - `lon` — the azimuthal component
+ * - `lat` — the polar component
+ *
+ * @par Accessors
+ * - Always available: `azimuthal()`, `polar()`
+ * - Frame-dependent convenience accessors are enabled with SFINAE:
+ *   - `ra()/dec()` if `frames::has_ra_dec_v<F>`
+ *   - `az()/alt()` (and long forms) if `frames::has_az_alt_v<F>`
+ *   - `longitude()/latitude()` if `frames::has_lon_lat_v<F>`
  */
 template<typename F>
 struct Direction {
@@ -40,22 +54,27 @@ struct Direction {
     Direction(double lon_deg, double lat_deg)
         : lon(qtty::Degree(lon_deg)), lat(qtty::Degree(lat_deg)) {}
 
-    // -- Frame info --
+    /// @name Frame info
+    /// @{
     static constexpr siderust_frame_t frame_id() {
         return frames::FrameTraits<F>::ffi_id;
     }
     static constexpr const char* frame_name() {
         return frames::FrameTraits<F>::name();
     }
+    /// @}
 
-    // -- Generic accessors (always available, frame-agnostic) --
+    /// @name Generic accessors (always available, frame-agnostic)
+    /// @{
 
     /// Azimuthal component (RA, longitude, azimuth ... frame-dependent).
     qtty::Degree azimuthal() const { return lon; }
     /// Polar component (Dec, latitude, altitude ... frame-dependent).
     qtty::Degree polar() const { return lat; }
+    /// @}
 
-    // -- RA / Dec (equatorial frames: ICRS, ICRF, Equatorial* only) --
+    /// @name RA / Dec (equatorial frames only)
+    /// @{
 
     /** @brief Right ascension. Only available for equatorial frames. */
     template<typename F_ = F, std::enable_if_t<frames::has_ra_dec_v<F_>, int> = 0>
@@ -64,8 +83,10 @@ struct Direction {
     /** @brief Declination. Only available for equatorial frames. */
     template<typename F_ = F, std::enable_if_t<frames::has_ra_dec_v<F_>, int> = 0>
     qtty::Degree dec() const { return lat; }
+    /// @}
 
-    // -- Azimuth / Altitude (Horizontal frame only) --
+    /// @name Azimuth / Altitude (Horizontal frame only)
+    /// @{
 
     /** @brief Azimuth (short form). Only available for Horizontal frame. */
     template<typename F_ = F, std::enable_if_t<frames::has_az_alt_v<F_>, int> = 0>
@@ -82,8 +103,10 @@ struct Direction {
     /** @brief Altitude (long form). Only available for Horizontal frame. */
     template<typename F_ = F, std::enable_if_t<frames::has_az_alt_v<F_>, int> = 0>
     qtty::Degree altitude() const { return lat; }
+    /// @}
 
-    // -- Longitude / Latitude (ecliptic, galactic, and generic frames) --
+    /// @name Longitude / Latitude (lon/lat frames)
+    /// @{
 
     /** @brief Ecliptic / galactic longitude. Only for lon/lat frames. */
     template<typename F_ = F, std::enable_if_t<frames::has_lon_lat_v<F_>, int> = 0>
@@ -92,7 +115,10 @@ struct Direction {
     /** @brief Ecliptic / galactic latitude. Only for lon/lat frames. */
     template<typename F_ = F, std::enable_if_t<frames::has_lon_lat_v<F_>, int> = 0>
     qtty::Degree latitude() const { return lat; }
+    /// @}
 
+    /// @name FFI interop
+    /// @{
     siderust_spherical_dir_t to_c() const {
         return {lon.value(), lat.value(), frame_id()};
     }
@@ -100,12 +126,15 @@ struct Direction {
     static Direction from_c(const siderust_spherical_dir_t& c) {
         return Direction(c.lon_deg, c.lat_deg);
     }
+    /// @}
 
     /**
      * @brief Transform to a different reference frame.
      *
      * Only enabled for frame pairs with a FrameRotationProvider in the FFI.
      * Attempting an unsupported transform is a compile-time error.
+     *
+     * @tparam Target Destination frame tag.
      */
     template<typename Target>
     std::enable_if_t<
@@ -164,6 +193,11 @@ struct Direction {
  * @brief A spherical position (direction + distance), compile-time tagged.
  *
  * Mirrors Rust's `affn::spherical::Position<C, F, U>`.
+ *
+ * @ingroup coordinates_spherical
+ * @tparam C Reference center tag (e.g. `centers::Barycentric`).
+ * @tparam F Reference frame tag (e.g. `frames::ICRS`).
+ * @tparam U Distance unit (default: `qtty::Meter`).
  */
 template<typename C, typename F, typename U = qtty::Meter>
 struct Position {

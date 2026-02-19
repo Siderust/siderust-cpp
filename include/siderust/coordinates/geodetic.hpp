@@ -2,6 +2,7 @@
 
 /**
  * @file geodetic.hpp
+ * @ingroup coordinates_geodetic
  * @brief WGS84 geodetic coordinate type.
  */
 
@@ -21,6 +22,8 @@ struct Position;
  * @brief Geodetic position (WGS84 ellipsoid).
  *
  * Fixed to frame=ECEF, center=Geocentric. Uses qtty quantities.
+ *
+ * @ingroup coordinates_geodetic
  */
 struct Geodetic {
     qtty::Degree lon;    ///< Longitude (east positive).
