@@ -205,7 +205,9 @@ if(DEFINED _siderust_rpath)
 endif()
 
 include(GoogleTest)
-gtest_discover_tests(test_siderust)
+gtest_discover_tests(test_siderust
+    PROPERTIES LABELS "siderust_cpp"
+)
 
 # ---------------------------------------------------------------------------
 # Installation

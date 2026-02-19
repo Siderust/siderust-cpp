@@ -1,8 +1,6 @@
 name: CI
 
 on:
-  push:
-    branches: ["**"]
   pull_request:
   workflow_dispatch:
 
@@ -85,7 +83,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          ctest --test-dir build --output-on-failure
+          ctest --test-dir build --output-on-failure -L siderust_cpp
 
       - name: Build docs (Doxygen)
         shell: bash
