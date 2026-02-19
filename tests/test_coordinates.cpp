@@ -35,7 +35,7 @@ TEST(TypedCoordinates, IcrsDirToEcliptic) {
     static_assert(std::is_same_v<decltype(ecl), spherical::Direction<EclipticMeanJ2000>>,
                   "to_frame<EclipticMeanJ2000> must return Direction<EclipticMeanJ2000>");
 
-    EXPECT_NEAR(ecl.lat.value(), 61.7, 0.5);
+    EXPECT_NEAR(ecl.lat().value(), 61.7, 0.5);
 }
 
 TEST(TypedCoordinates, IcrsDirRoundtrip) {
@@ -48,8 +48,8 @@ TEST(TypedCoordinates, IcrsDirRoundtrip) {
     auto back = ecl.to_frame<ICRS>(jd);
 
     static_assert(std::is_same_v<decltype(back), spherical::direction::ICRS>);
-    EXPECT_NEAR(back.lon.value(), 100.0, 1e-4);
-    EXPECT_NEAR(back.lat.value(), 30.0, 1e-4);
+    EXPECT_NEAR(back.ra().value(), 100.0, 1e-4);
+    EXPECT_NEAR(back.dec().value(), 30.0, 1e-4);
 }
 
 TEST(TypedCoordinates, ToShorthand) {
@@ -61,7 +61,7 @@ TEST(TypedCoordinates, ToShorthand) {
     // .to<Target>(jd) is a shorthand for .to_frame<Target>(jd)
     auto ecl = icrs.to<EclipticMeanJ2000>(jd);
     static_assert(std::is_same_v<decltype(ecl), spherical::Direction<EclipticMeanJ2000>>);
-    EXPECT_NEAR(ecl.lat.value(), 30.0, 30.0); // sanity check — something was computed
+    EXPECT_NEAR(ecl.lat().value(), 30.0, 30.0); // sanity check — something was computed
 }
 
 TEST(TypedCoordinates, IcrsDirToHorizontal) {
@@ -88,8 +88,8 @@ TEST(TypedCoordinates, EquatorialToIcrs) {
     static_assert(std::is_same_v<decltype(icrs), spherical::direction::ICRS>);
 
     // Should be close to input (EquatorialMeanJ2000 ≈ ICRS at J2000)
-    EXPECT_NEAR(icrs.lon.value(), 100.0, 0.1);
-    EXPECT_NEAR(icrs.lat.value(), 30.0, 0.1);
+    EXPECT_NEAR(icrs.ra().value(), 100.0, 0.1);
+    EXPECT_NEAR(icrs.dec().value(), 30.0, 0.1);
 }
 
 TEST(TypedCoordinates, MultiHopTransform) {
@@ -103,8 +103,8 @@ TEST(TypedCoordinates, MultiHopTransform) {
     static_assert(std::is_same_v<decltype(true_od), spherical::Direction<EquatorialTrueOfDate>>);
 
     // At J2000, nutation is small — should be close
-    EXPECT_NEAR(true_od.lon.value(), 100.0, 0.1);
-    EXPECT_NEAR(true_od.lat.value(), 30.0, 0.1);
+    EXPECT_NEAR(true_od.ra().value(), 100.0, 0.1);
+    EXPECT_NEAR(true_od.dec().value(), 30.0, 0.1);
 }
 
 TEST(TypedCoordinates, SameFrameIdentity) {
@@ -114,22 +114,22 @@ TEST(TypedCoordinates, SameFrameIdentity) {
     auto jd = JulianDate::J2000();
 
     auto same = icrs.to_frame<ICRS>(jd);
-    EXPECT_DOUBLE_EQ(same.lon.value(), 123.456);
-    EXPECT_DOUBLE_EQ(same.lat.value(), -45.678);
+    EXPECT_DOUBLE_EQ(same.ra().value(), 123.456);
+    EXPECT_DOUBLE_EQ(same.dec().value(), -45.678);
 }
 
 TEST(TypedCoordinates, QttyDegreeAccessors) {
     spherical::direction::ICRS d(123.456, -45.678);
 
-    // Access as qtty::Degree
-    qtty::Degree lon = d.lon;
-    qtty::Degree lat = d.lat;
-    EXPECT_DOUBLE_EQ(lon.value(), 123.456);
-    EXPECT_DOUBLE_EQ(lat.value(), -45.678);
+    // Frame-specific getters for ICRS.
+    qtty::Degree ra = d.ra();
+    qtty::Degree dec = d.dec();
+    EXPECT_DOUBLE_EQ(ra.value(), 123.456);
+    EXPECT_DOUBLE_EQ(dec.value(), -45.678);
 
     // Convert to radians through qtty
-    qtty::Radian lon_rad = lon.to<qtty::Radian>();
-    EXPECT_NEAR(lon_rad.value(), 123.456 * M_PI / 180.0, 1e-10);
+    qtty::Radian ra_rad = ra.to<qtty::Radian>();
+    EXPECT_NEAR(ra_rad.value(), 123.456 * M_PI / 180.0, 1e-10);
 }
 
 // ============================================================================
