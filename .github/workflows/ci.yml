@@ -15,7 +15,7 @@ permissions:
 
 jobs:
   build-test-docs:
-    name: Build + Test + Docs (siderust submodule)
+    name: Build + Test + Docs
     runs-on: ubuntu-22.04
     env:
       CARGO_TERM_COLOR: always
@@ -27,14 +27,14 @@ jobs:
           submodules: recursive
           fetch-depth: 0
 
-      - name: Show selected siderust revision
+      - name: Show selected dependency revisions
         shell: bash
         run: |
           set -euo pipefail
           git submodule status --recursive
           echo
-          echo "siderust:     $(git -C siderust rev-parse HEAD) ($(git -C siderust describe --tags --always 2>/dev/null || true))"
           echo "siderust-ffi: $(git -C siderust-ffi rev-parse HEAD) ($(git -C siderust-ffi describe --tags --always 2>/dev/null || true))"
+          echo "siderust:     $(git -C siderust-ffi/siderust rev-parse HEAD) ($(git -C siderust-ffi/siderust describe --tags --always 2>/dev/null || true))"
 
       - name: Install system dependencies
         shell: bash
@@ -62,7 +62,7 @@ jobs:
             ~/.cargo/registry
             ~/.cargo/git
             siderust-ffi/target
-            siderust/tempoch/tempoch-ffi/target
+            siderust-ffi/siderust/dev-deps/tempoch/tempoch-ffi/target
             qtty-cpp/qtty/target
             qtty-cpp/qtty/qtty-ffi/target
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
@@ -74,7 +74,7 @@ jobs:
         run: |
           set -euo pipefail
           test -f siderust-ffi/Cargo.toml
-          test -f siderust/tempoch/tempoch-ffi/Cargo.toml
+          test -f siderust-ffi/siderust/dev-deps/tempoch/tempoch-ffi/Cargo.toml
           test -f qtty-cpp/CMakeLists.txt
 
       - name: Configure (CMake)
@@ -100,4 +100,3 @@ jobs:
         run: |
           set -euo pipefail
           cmake --build build --target docs
-

@@ -2,6 +2,8 @@
 build/
 cmake-build-*/
 out/
+build-make/
+build-verify/
 
 # IDE files
 .vscode/
