@@ -1,0 +1,49 @@
+# Build directories
+build/
+cmake-build-*/
+out/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Compiled files
+*.o
+*.so
+*.dylib
+*.dll
+*.a
+*.lib
+*.exe
+
+# Test binaries
+test_ffi
+test_basic
+demo
+
+# CMake generated files
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+CTestTestfile.cmake
+Makefile
+*.cmake
+Testing/
+install_manifest.txt
+compile_commands.json
+
+# Dependencies
+_deps/
+
+# Coverage files
+*.gcov
+*.gcda
+*.gcno
+coverage/
+
+# Package manager
+vcpkg_installed/
