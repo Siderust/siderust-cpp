@@ -137,10 +137,10 @@ enable_testing()
 # ---------------------------------------------------------------------------
 # Example
 # ---------------------------------------------------------------------------
-add_executable(demo examples/demo.cpp)
-target_link_libraries(demo PRIVATE siderust_cpp)
+add_executable(siderust_demo examples/demo.cpp)
+target_link_libraries(siderust_demo PRIVATE siderust_cpp)
 if(DEFINED _siderust_rpath)
-    set_target_properties(demo PROPERTIES
+    set_target_properties(siderust_demo PROPERTIES
         BUILD_RPATH ${_siderust_rpath}
         INSTALL_RPATH ${_siderust_rpath}
     )
