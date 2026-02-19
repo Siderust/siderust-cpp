@@ -91,6 +91,14 @@ add_dependencies(tempoch_ffi build_tempoch_ffi)
 # ---------------------------------------------------------------------------
 # Header-only C++ wrapper library
 # ---------------------------------------------------------------------------
+# Pull in qtty-cpp (unit-safe quantities) as a subdirectory
+set(QTTY_FFI_FEATURES "" CACHE STRING "Cargo features for qtty-ffi" FORCE)
+add_subdirectory(qtty-cpp)
+
+# Paths to qtty-ffi shared library (for RPATH)
+set(QTTY_SUBMODULE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/qtty-cpp/qtty)
+set(QTTY_ARTIFACT_DIR  ${QTTY_SUBMODULE_DIR}/target/release)
+
 add_library(siderust_cpp INTERFACE)
 target_include_directories(siderust_cpp INTERFACE
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -98,14 +106,14 @@ target_include_directories(siderust_cpp INTERFACE
     $<BUILD_INTERFACE:${TEMPOCH_FFI_INCLUDE_DIR}>
     $<INSTALL_INTERFACE:include>
 )
-target_link_libraries(siderust_cpp INTERFACE siderust_ffi tempoch_ffi)
+target_link_libraries(siderust_cpp INTERFACE siderust_ffi tempoch_ffi qtty_cpp)
 add_dependencies(siderust_cpp build_siderust_ffi)
 
 # RPATH for shared library lookup at runtime
 if(APPLE)
-    set(_siderust_rpath "@loader_path/../siderust-ffi/target/release;@loader_path/../siderust/tempoch/tempoch-ffi/target/release")
+    set(_siderust_rpath "@loader_path/../siderust-ffi/target/release;@loader_path/../siderust/tempoch/tempoch-ffi/target/release;@loader_path/../qtty-cpp/qtty/target/release")
 elseif(UNIX)
-    set(_siderust_rpath "$ORIGIN/../siderust-ffi/target/release:$ORIGIN/../siderust/tempoch/tempoch-ffi/target/release")
+    set(_siderust_rpath "$ORIGIN/../siderust-ffi/target/release:$ORIGIN/../siderust/tempoch/tempoch-ffi/target/release:$ORIGIN/../qtty-cpp/qtty/target/release")
 endif()
 
 # ---------------------------------------------------------------------------
