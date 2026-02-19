@@ -78,7 +78,7 @@ static void print_culminations(const char* title, const std::vector<CulminationE
 int main() {
     std::printf("=== Altitude Events Example ===\n\n");
 
-    const auto obs = mauna_kea();
+    const auto obs = MAUNA_KEA;
     const auto start = MJD::from_utc({2026, 7, 15, 0, 0, 0});
     const auto end = start + 2.0;
 
@@ -108,7 +108,7 @@ int main() {
     std::printf("\n");
 
     // Star examples.
-    const auto vega = Star::catalog("VEGA");
+    const auto& vega = VEGA;
     const auto vega_above = star_altitude::above_threshold(vega, obs, start, end, 25.0, opts);
     const auto vega_cross = star_altitude::crossings(vega, obs, start, end, 0.0, opts);
     const auto vega_culm = star_altitude::culminations(vega, obs, start, end, opts);

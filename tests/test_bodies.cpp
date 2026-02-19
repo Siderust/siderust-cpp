@@ -8,14 +8,14 @@ using namespace siderust;
 // ============================================================================
 
 TEST(Bodies, StarCatalogVega) {
-    auto vega = Star::catalog("VEGA");
+    const auto& vega = VEGA;
     EXPECT_EQ(vega.name(), "Vega");
     EXPECT_NEAR(vega.distance_ly(), 25.0, 1.0);
     EXPECT_GT(vega.luminosity_solar(), 1.0);
 }
 
 TEST(Bodies, StarCatalogSirius) {
-    auto sirius = Star::catalog("SIRIUS");
+    const auto& sirius = SIRIUS;
     EXPECT_EQ(sirius.name(), "Sirius");
     EXPECT_NEAR(sirius.distance_ly(), 8.6, 0.5);
 }
@@ -60,26 +60,26 @@ TEST(Bodies, StarCreateWithProperMotion) {
 // ============================================================================
 
 TEST(Bodies, PlanetEarth) {
-    auto e = earth();
+    auto e = EARTH;
     EXPECT_NEAR(e.mass_kg, 5.972e24, 0.01e24);
     EXPECT_NEAR(e.radius_km, 6371.0, 10.0);
     EXPECT_NEAR(e.orbit.semi_major_axis_au, 1.0, 0.01);
 }
 
 TEST(Bodies, PlanetMars) {
-    auto m = mars();
+    auto m = MARS;
     EXPECT_GT(m.mass_kg, 0);
     EXPECT_NEAR(m.orbit.semi_major_axis_au, 1.524, 0.01);
 }
 
 TEST(Bodies, AllPlanets) {
-    // Ensure all planet getters work without throwing
-    EXPECT_NO_THROW(mercury());
-    EXPECT_NO_THROW(venus());
-    EXPECT_NO_THROW(earth());
-    EXPECT_NO_THROW(mars());
-    EXPECT_NO_THROW(jupiter());
-    EXPECT_NO_THROW(saturn());
-    EXPECT_NO_THROW(uranus());
-    EXPECT_NO_THROW(neptune());
+    // Ensure all static constants are populated.
+    EXPECT_GT(MERCURY.mass_kg, 0.0);
+    EXPECT_GT(VENUS.mass_kg, 0.0);
+    EXPECT_GT(EARTH.mass_kg, 0.0);
+    EXPECT_GT(MARS.mass_kg, 0.0);
+    EXPECT_GT(JUPITER.mass_kg, 0.0);
+    EXPECT_GT(SATURN.mass_kg, 0.0);
+    EXPECT_GT(URANUS.mass_kg, 0.0);
+    EXPECT_GT(NEPTUNE.mass_kg, 0.0);
 }
