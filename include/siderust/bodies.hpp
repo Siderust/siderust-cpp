@@ -75,25 +75,77 @@ struct Planet {
     }
 };
 
-// Planet catalog accessors ---------------------------------------------------
+/**
+ * @brief Planet catalog entry for Mercury.
+ */
+inline Planet mercury() {
+    siderust_planet_t out;
+    check_status(siderust_planet_mercury(&out), "mercury");
+    return Planet::from_c(out);
+}
 
-#define SIDERUST_PLANET_GETTER(Name, fn)          \
-    inline Planet Name() {                        \
-        siderust_planet_t out;                    \
-        check_status(fn(&out), #Name);            \
-        return Planet::from_c(out);               \
-    }
+/**
+ * @brief Planet catalog entry for Venus.
+ */
+inline Planet venus() {
+    siderust_planet_t out;
+    check_status(siderust_planet_venus(&out), "venus");
+    return Planet::from_c(out);
+}
 
-SIDERUST_PLANET_GETTER(mercury, siderust_planet_mercury)
-SIDERUST_PLANET_GETTER(venus,   siderust_planet_venus)
-SIDERUST_PLANET_GETTER(earth,   siderust_planet_earth)
-SIDERUST_PLANET_GETTER(mars,    siderust_planet_mars)
-SIDERUST_PLANET_GETTER(jupiter, siderust_planet_jupiter)
-SIDERUST_PLANET_GETTER(saturn,  siderust_planet_saturn)
-SIDERUST_PLANET_GETTER(uranus,  siderust_planet_uranus)
-SIDERUST_PLANET_GETTER(neptune, siderust_planet_neptune)
+/**
+ * @brief Planet catalog entry for Earth.
+ */
+inline Planet earth() {
+    siderust_planet_t out;
+    check_status(siderust_planet_earth(&out), "earth");
+    return Planet::from_c(out);
+}
 
-#undef SIDERUST_PLANET_GETTER
+/**
+ * @brief Planet catalog entry for Mars.
+ */
+inline Planet mars() {
+    siderust_planet_t out;
+    check_status(siderust_planet_mars(&out), "mars");
+    return Planet::from_c(out);
+}
+
+/**
+ * @brief Planet catalog entry for Jupiter.
+ */
+inline Planet jupiter() {
+    siderust_planet_t out;
+    check_status(siderust_planet_jupiter(&out), "jupiter");
+    return Planet::from_c(out);
+}
+
+/**
+ * @brief Planet catalog entry for Saturn.
+ */
+inline Planet saturn() {
+    siderust_planet_t out;
+    check_status(siderust_planet_saturn(&out), "saturn");
+    return Planet::from_c(out);
+}
+
+/**
+ * @brief Planet catalog entry for Uranus.
+ */
+inline Planet uranus() {
+    siderust_planet_t out;
+    check_status(siderust_planet_uranus(&out), "uranus");
+    return Planet::from_c(out);
+}
+
+/**
+ * @brief Planet catalog entry for Neptune.
+ */
+inline Planet neptune() {
+    siderust_planet_t out;
+    check_status(siderust_planet_neptune(&out), "neptune");
+    return Planet::from_c(out);
+}
 
 // ============================================================================
 // Star (RAII)

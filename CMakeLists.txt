@@ -4,6 +4,7 @@ project(siderust_cpp VERSION 0.1.0 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+option(SIDERUST_BUILD_DOCS "Enable Doxygen documentation target." ON)
 
 # Find Cargo for building Rust libraries
 find_program(CARGO_BIN cargo REQUIRED)
@@ -109,6 +110,28 @@ target_include_directories(siderust_cpp INTERFACE
 target_link_libraries(siderust_cpp INTERFACE siderust_ffi tempoch_ffi qtty_cpp)
 add_dependencies(siderust_cpp build_siderust_ffi)
 
+# ---------------------------------------------------------------------------
+# Doxygen documentation
+# ---------------------------------------------------------------------------
+if(SIDERUST_BUILD_DOCS)
+    find_package(Doxygen QUIET)
+    if(DOXYGEN_FOUND)
+        set(SIDERUST_DOXYFILE_IN  ${CMAKE_CURRENT_SOURCE_DIR}/docs/Doxyfile.in)
+        set(SIDERUST_DOXYFILE_OUT ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile.siderust_cpp)
+        configure_file(${SIDERUST_DOXYFILE_IN} ${SIDERUST_DOXYFILE_OUT} @ONLY)
+
+        add_custom_target(docs
+            COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/docs/doxygen
+            COMMAND ${DOXYGEN_EXECUTABLE} ${SIDERUST_DOXYFILE_OUT}
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+            COMMENT "Generating API documentation with Doxygen"
+            VERBATIM
+        )
+    else()
+        message(STATUS "Doxygen not found; 'docs' target will not be available")
+    endif()
+endif()
+
 # RPATH for shared library lookup at runtime
 if(APPLE)
     set(_siderust_rpath "@loader_path/../siderust-ffi/target/release;@loader_path/../siderust/tempoch/tempoch-ffi/target/release;@loader_path/../qtty-cpp/qtty/target/release")
@@ -137,6 +160,15 @@ add_executable(demo examples/demo.cpp)
 target_link_libraries(demo PRIVATE siderust_cpp)
 if(DEFINED _siderust_rpath)
     set_target_properties(demo PROPERTIES
+        BUILD_RPATH ${_siderust_rpath}
+        INSTALL_RPATH ${_siderust_rpath}
+    )
+endif()
+
+add_executable(coordinates_examples examples/coordinates_examples.cpp)
+target_link_libraries(coordinates_examples PRIVATE siderust_cpp)
+if(DEFINED _siderust_rpath)
+    set_target_properties(coordinates_examples PROPERTIES
         BUILD_RPATH ${_siderust_rpath}
         INSTALL_RPATH ${_siderust_rpath}
     )

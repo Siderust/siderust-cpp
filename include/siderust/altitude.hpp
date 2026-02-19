@@ -213,6 +213,9 @@ inline std::vector<Period> altitude_periods(
 
 namespace moon {
 
+/**
+ * @brief Compute the Moon's altitude (radians) at a given MJD instant.
+ */
 inline double altitude_at(const Geodetic& obs, const MJD& mjd) {
     double out;
     check_status(siderust_moon_altitude_at(obs.to_c(), mjd.value(), &out),
@@ -220,6 +223,9 @@ inline double altitude_at(const Geodetic& obs, const MJD& mjd) {
     return out;
 }
 
+/**
+ * @brief Find periods when the Moon is above a threshold altitude.
+ */
 inline std::vector<Period> above_threshold(
     const Geodetic& obs, const MJD& start, const MJD& end,
     double threshold_deg, const SearchOptions& opts = {})
@@ -232,6 +238,9 @@ inline std::vector<Period> above_threshold(
     return detail::periods_from_c(ptr, count);
 }
 
+/**
+ * @brief Find periods when the Moon is below a threshold altitude.
+ */
 inline std::vector<Period> below_threshold(
     const Geodetic& obs, const MJD& start, const MJD& end,
     double threshold_deg, const SearchOptions& opts = {})
@@ -244,6 +253,9 @@ inline std::vector<Period> below_threshold(
     return detail::periods_from_c(ptr, count);
 }
 
+/**
+ * @brief Find threshold-crossing events for the Moon.
+ */
 inline std::vector<CrossingEvent> crossings(
     const Geodetic& obs, const MJD& start, const MJD& end,
     double threshold_deg, const SearchOptions& opts = {})
@@ -256,6 +268,9 @@ inline std::vector<CrossingEvent> crossings(
     return detail::crossings_from_c(ptr, count);
 }
 
+/**
+ * @brief Find culmination events for the Moon.
+ */
 inline std::vector<CulminationEvent> culminations(
     const Geodetic& obs, const MJD& start, const MJD& end,
     const SearchOptions& opts = {})
@@ -268,6 +283,9 @@ inline std::vector<CulminationEvent> culminations(
     return detail::culminations_from_c(ptr, count);
 }
 
+/**
+ * @brief Find periods when the Moon's altitude is within [min, max].
+ */
 inline std::vector<Period> altitude_periods(
     const Geodetic& obs, const MJD& start, const MJD& end,
     double min_alt_deg, double max_alt_deg)
@@ -288,6 +306,9 @@ inline std::vector<Period> altitude_periods(
 
 namespace star_altitude {
 
+/**
+ * @brief Compute a star's altitude (radians) at a given MJD instant.
+ */
 inline double altitude_at(const Star& s, const Geodetic& obs, const MJD& mjd) {
     double out;
     check_status(siderust_star_altitude_at(
@@ -296,6 +317,9 @@ inline double altitude_at(const Star& s, const Geodetic& obs, const MJD& mjd) {
     return out;
 }
 
+/**
+ * @brief Find periods when a star is above a threshold altitude.
+ */
 inline std::vector<Period> above_threshold(
     const Star& s, const Geodetic& obs, const MJD& start, const MJD& end,
     double threshold_deg, const SearchOptions& opts = {})
@@ -308,6 +332,9 @@ inline std::vector<Period> above_threshold(
     return detail::periods_from_c(ptr, count);
 }
 
+/**
+ * @brief Find periods when a star is below a threshold altitude.
+ */
 inline std::vector<Period> below_threshold(
     const Star& s, const Geodetic& obs, const MJD& start, const MJD& end,
     double threshold_deg, const SearchOptions& opts = {})
@@ -320,6 +347,9 @@ inline std::vector<Period> below_threshold(
     return detail::periods_from_c(ptr, count);
 }
 
+/**
+ * @brief Find threshold-crossing events for a star.
+ */
 inline std::vector<CrossingEvent> crossings(
     const Star& s, const Geodetic& obs, const MJD& start, const MJD& end,
     double threshold_deg, const SearchOptions& opts = {})
@@ -332,6 +362,9 @@ inline std::vector<CrossingEvent> crossings(
     return detail::crossings_from_c(ptr, count);
 }
 
+/**
+ * @brief Find culmination events for a star.
+ */
 inline std::vector<CulminationEvent> culminations(
     const Star& s, const Geodetic& obs, const MJD& start, const MJD& end,
     const SearchOptions& opts = {})
@@ -352,6 +385,9 @@ inline std::vector<CulminationEvent> culminations(
 
 namespace icrs_altitude {
 
+/**
+ * @brief Compute altitude (radians) for a fixed ICRS direction.
+ */
 inline double altitude_at(double ra_deg, double dec_deg,
                           const Geodetic& obs, const MJD& mjd) {
     double out;
@@ -361,6 +397,9 @@ inline double altitude_at(double ra_deg, double dec_deg,
     return out;
 }
 
+/**
+ * @brief Find periods when a fixed ICRS direction is above a threshold.
+ */
 inline std::vector<Period> above_threshold(
     double ra_deg, double dec_deg,
     const Geodetic& obs, const MJD& start, const MJD& end,
@@ -374,6 +413,9 @@ inline std::vector<Period> above_threshold(
     return detail::periods_from_c(ptr, count);
 }
 
+/**
+ * @brief Find periods when a fixed ICRS direction is below a threshold.
+ */
 inline std::vector<Period> below_threshold(
     double ra_deg, double dec_deg,
     const Geodetic& obs, const MJD& start, const MJD& end,

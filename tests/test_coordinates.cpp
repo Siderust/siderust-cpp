@@ -1,12 +1,24 @@
 #include <gtest/gtest.h>
 #include <siderust/siderust.hpp>
 #include <cmath>
+#include <type_traits>
 
 using namespace siderust;
 
 // ============================================================================
 // New Typed Direction<F> API
 // ============================================================================
+
+TEST(TypedCoordinates, AliasNamespaces) {
+    static_assert(std::is_same_v<types::IcrsDir, IcrsDir>);
+    static_assert(std::is_same_v<types::position::ICRS, IcrsPos>);
+    static_assert(std::is_same_v<types::direction::ICRS, IcrsDir>);
+
+    static_assert(std::is_same_v<direction::Icrs, IcrsDir>);
+    static_assert(std::is_same_v<direction::Ecl, EclipticDir>);
+    static_assert(std::is_same_v<position::Icrs, IcrsPos>);
+    static_assert(std::is_same_v<position::Ecl, EclipticPos>);
+}
 
 TEST(TypedCoordinates, IcrsDirToEcliptic) {
     using namespace siderust::frames;
@@ -154,4 +166,20 @@ TEST(TypedCoordinates, GeodeticToCartesianEcef) {
     EXPECT_NEAR(cart.x().value(), 6378137.0, 1.0);
     EXPECT_NEAR(cart.y().value(), 0.0, 1.0);
     EXPECT_NEAR(cart.z().value(), 0.0, 1.0);
+}
+
+TEST(TypedCoordinates, GeodeticToCartesianMember) {
+    auto geo = geodetic(0.0, 0.0, 0.0);
+
+    auto ecef_m = geo.to_cartesian();
+    auto ecef_km = geo.to_cartesian<qtty::Kilometer>();
+
+    static_assert(std::is_same_v<decltype(ecef_m), EcefCartPos>);
+    static_assert(std::is_same_v<
+        decltype(ecef_km),
+        cartesian::Position<centers::Geocentric, frames::ECEF, qtty::Kilometer>
+    >);
+
+    EXPECT_NEAR(ecef_m.x().value(), 6378137.0, 1.0);
+    EXPECT_NEAR(ecef_km.x().value(), 6378.137, 1e-3);
 }
