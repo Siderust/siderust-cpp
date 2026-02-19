@@ -168,6 +168,52 @@ struct SphericalNaming<EclipticMeanJ2000> {
 };
 
 // ============================================================================
+// Frame Capability Traits
+// ============================================================================
+
+/**
+ * @brief True for equatorial frames that expose right-ascension / declination.
+ *
+ * Use `has_ra_dec_v<F>` in `std::enable_if_t` to gate RA/Dec accessors.
+ */
+template<typename F> struct has_ra_dec : std::false_type {};
+template<> struct has_ra_dec<ICRS>               : std::true_type {};
+template<> struct has_ra_dec<ICRF>               : std::true_type {};
+template<> struct has_ra_dec<EquatorialMeanJ2000>  : std::true_type {};
+template<> struct has_ra_dec<EquatorialMeanOfDate> : std::true_type {};
+template<> struct has_ra_dec<EquatorialTrueOfDate> : std::true_type {};
+template<typename F>
+inline constexpr bool has_ra_dec_v = has_ra_dec<F>::value;
+
+/**
+ * @brief True for the horizontal frame that exposes azimuth / altitude.
+ *
+ * Use `has_az_alt_v<F>` to gate Az/Alt accessors.
+ */
+template<typename F> struct has_az_alt : std::false_type {};
+template<> struct has_az_alt<Horizontal> : std::true_type {};
+template<typename F>
+inline constexpr bool has_az_alt_v = has_az_alt<F>::value;
+
+/**
+ * @brief True for ecliptic and galactic frames that use longitude / latitude.
+ *
+ * Use `has_lon_lat_v<F>` to gate lon/lat accessors.
+ */
+template<typename F> struct has_lon_lat : std::false_type {};
+template<> struct has_lon_lat<EclipticMeanJ2000>  : std::true_type {};
+template<> struct has_lon_lat<EclipticOfDate>     : std::true_type {};
+template<> struct has_lon_lat<EclipticTrueOfDate> : std::true_type {};
+template<> struct has_lon_lat<Galactic>           : std::true_type {};
+template<> struct has_lon_lat<CIRS>               : std::true_type {};
+template<> struct has_lon_lat<GCRS>               : std::true_type {};
+template<> struct has_lon_lat<TIRS>               : std::true_type {};
+template<> struct has_lon_lat<ECEF>               : std::true_type {};
+template<> struct has_lon_lat<ITRF>               : std::true_type {};
+template<typename F>
+inline constexpr bool has_lon_lat_v = has_lon_lat<F>::value;
+
+// ============================================================================
 // Transform-Valid Predicate
 // ============================================================================
 
