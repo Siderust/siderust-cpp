@@ -138,7 +138,7 @@ inline std::vector<Period> above_threshold(
     qtty::Degree threshold, const SearchOptions& opts = {}) {
     tempoch_period_mjd_t* ptr   = nullptr;
     uintptr_t             count = 0;
-    check_status(siderust_sun_above_threshold_window(
+    check_status(siderust_sun_above_threshold(
                      obs.to_c(), window.c_inner(), threshold.value(),
                      opts.to_c(), &ptr, &count),
                  "sun::above_threshold");
@@ -162,7 +162,7 @@ inline std::vector<Period> below_threshold(
     qtty::Degree threshold, const SearchOptions& opts = {}) {
     tempoch_period_mjd_t* ptr   = nullptr;
     uintptr_t             count = 0;
-    check_status(siderust_sun_below_threshold_window(
+    check_status(siderust_sun_below_threshold(
                      obs.to_c(), window.c_inner(), threshold.value(),
                      opts.to_c(), &ptr, &count),
                  "sun::below_threshold");
@@ -186,7 +186,7 @@ inline std::vector<CrossingEvent> crossings(
     qtty::Degree threshold, const SearchOptions& opts = {}) {
     siderust_crossing_event_t* ptr   = nullptr;
     uintptr_t                  count = 0;
-    check_status(siderust_sun_crossings_window(
+    check_status(siderust_sun_crossings(
                      obs.to_c(), window.c_inner(), threshold.value(),
                      opts.to_c(), &ptr, &count),
                  "sun::crossings");
@@ -210,7 +210,7 @@ inline std::vector<CulminationEvent> culminations(
     const SearchOptions& opts = {}) {
     siderust_culmination_event_t* ptr   = nullptr;
     uintptr_t                     count = 0;
-    check_status(siderust_sun_culminations_window(
+    check_status(siderust_sun_culminations(
                      obs.to_c(), window.c_inner(),
                      opts.to_c(), &ptr, &count),
                  "sun::culminations");
@@ -282,7 +282,7 @@ inline std::vector<Period> above_threshold(
     qtty::Degree threshold, const SearchOptions& opts = {}) {
     tempoch_period_mjd_t* ptr   = nullptr;
     uintptr_t             count = 0;
-    check_status(siderust_moon_above_threshold_window(
+    check_status(siderust_moon_above_threshold(
                      obs.to_c(), window.c_inner(), threshold.value(),
                      opts.to_c(), &ptr, &count),
                  "moon::above_threshold");
@@ -306,7 +306,7 @@ inline std::vector<Period> below_threshold(
     qtty::Degree threshold, const SearchOptions& opts = {}) {
     tempoch_period_mjd_t* ptr   = nullptr;
     uintptr_t             count = 0;
-    check_status(siderust_moon_below_threshold_window(
+    check_status(siderust_moon_below_threshold(
                      obs.to_c(), window.c_inner(), threshold.value(),
                      opts.to_c(), &ptr, &count),
                  "moon::below_threshold");
@@ -330,7 +330,7 @@ inline std::vector<CrossingEvent> crossings(
     qtty::Degree threshold, const SearchOptions& opts = {}) {
     siderust_crossing_event_t* ptr   = nullptr;
     uintptr_t                  count = 0;
-    check_status(siderust_moon_crossings_window(
+    check_status(siderust_moon_crossings(
                      obs.to_c(), window.c_inner(), threshold.value(),
                      opts.to_c(), &ptr, &count),
                  "moon::crossings");
@@ -354,7 +354,7 @@ inline std::vector<CulminationEvent> culminations(
     const SearchOptions& opts = {}) {
     siderust_culmination_event_t* ptr   = nullptr;
     uintptr_t                     count = 0;
-    check_status(siderust_moon_culminations_window(
+    check_status(siderust_moon_culminations(
                      obs.to_c(), window.c_inner(),
                      opts.to_c(), &ptr, &count),
                  "moon::culminations");
@@ -427,7 +427,7 @@ inline std::vector<Period> above_threshold(
     qtty::Degree threshold, const SearchOptions& opts = {}) {
     tempoch_period_mjd_t* ptr   = nullptr;
     uintptr_t             count = 0;
-    check_status(siderust_star_above_threshold_window(
+    check_status(siderust_star_above_threshold(
                      s.c_handle(), obs.to_c(), window.c_inner(), threshold.value(),
                      opts.to_c(), &ptr, &count),
                  "star_altitude::above_threshold");
@@ -451,7 +451,7 @@ inline std::vector<Period> below_threshold(
     qtty::Degree threshold, const SearchOptions& opts = {}) {
     tempoch_period_mjd_t* ptr   = nullptr;
     uintptr_t             count = 0;
-    check_status(siderust_star_below_threshold_window(
+    check_status(siderust_star_below_threshold(
                      s.c_handle(), obs.to_c(), window.c_inner(), threshold.value(),
                      opts.to_c(), &ptr, &count),
                  "star_altitude::below_threshold");
@@ -475,7 +475,7 @@ inline std::vector<CrossingEvent> crossings(
     qtty::Degree threshold, const SearchOptions& opts = {}) {
     siderust_crossing_event_t* ptr   = nullptr;
     uintptr_t                  count = 0;
-    check_status(siderust_star_crossings_window(
+    check_status(siderust_star_crossings(
                      s.c_handle(), obs.to_c(), window.c_inner(), threshold.value(),
                      opts.to_c(), &ptr, &count),
                  "star_altitude::crossings");
@@ -499,7 +499,7 @@ inline std::vector<CulminationEvent> culminations(
     const SearchOptions& opts = {}) {
     siderust_culmination_event_t* ptr   = nullptr;
     uintptr_t                     count = 0;
-    check_status(siderust_star_culminations_window(
+    check_status(siderust_star_culminations(
                      s.c_handle(), obs.to_c(), window.c_inner(),
                      opts.to_c(), &ptr, &count),
                  "star_altitude::culminations");
