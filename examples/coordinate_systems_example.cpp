@@ -1,5 +1,6 @@
 /**
  * @file coordinate_systems_example.cpp
+ * @example coordinate_systems_example.cpp
  * @brief Coordinate systems and frame transform walkthrough.
  *
  * Usage:
