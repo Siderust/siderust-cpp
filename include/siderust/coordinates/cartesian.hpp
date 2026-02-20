@@ -23,7 +23,7 @@ namespace cartesian {
  * @ingroup coordinates_cartesian
  * @tparam F Reference frame tag (e.g. `frames::ICRS`).
  */
-template<typename F>
+template <typename F>
 struct Direction {
     static_assert(frames::is_frame_v<F>, "F must be a valid frame tag");
 
@@ -49,7 +49,7 @@ struct Direction {
  * @tparam F Reference frame tag (e.g. `frames::ECEF`).
  * @tparam U Length unit (default: `qtty::Meter`).
  */
-template<typename C, typename F, typename U = qtty::Meter>
+template <typename C, typename F, typename U = qtty::Meter>
 struct Position {
     static_assert(frames::is_frame_v<F>, "F must be a valid frame tag");
     static_assert(centers::is_center_v<C>, "C must be a valid center tag");
@@ -71,7 +71,7 @@ struct Position {
     U y() const { return comp_y; }
     U z() const { return comp_z; }
 
-    static constexpr siderust_frame_t frame_id() { return frames::FrameTraits<F>::ffi_id; }
+    static constexpr siderust_frame_t  frame_id() { return frames::FrameTraits<F>::ffi_id; }
     static constexpr siderust_center_t center_id() { return centers::CenterTraits<C>::ffi_id; }
 
     /// Convert to C FFI struct.
