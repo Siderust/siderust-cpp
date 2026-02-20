@@ -5,8 +5,8 @@
  * @brief Named observatory locations.
  */
 
-#include "ffi_core.hpp"
 #include "coordinates.hpp"
+#include "ffi_core.hpp"
 
 namespace siderust {
 
