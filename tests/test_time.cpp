@@ -19,7 +19,7 @@ TEST(Time, JulianDateFromUtc) {
 }
 
 TEST(Time, JulianDateRoundtripUtc) {
-    UTC original(2026, 7, 15, 22, 0, 0);
+    UTC  original(2026, 7, 15, 22, 0, 0);
     auto jd  = JulianDate::from_utc(original);
     auto utc = jd.to_utc();
     EXPECT_EQ(utc.year, 2026);
@@ -69,7 +69,7 @@ TEST(Time, PeriodDuration) {
 TEST(Time, PeriodIntersection) {
     Period a(60200.0, 60202.0);
     Period b(60201.0, 60203.0);
-    auto c = a.intersection(b);
+    auto   c = a.intersection(b);
     EXPECT_NEAR(c.start_mjd(), 60201.0, 1e-10);
     EXPECT_NEAR(c.end_mjd(), 60202.0, 1e-10);
 }

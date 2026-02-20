@@ -1,13 +1,13 @@
+#include <cmath>
 #include <gtest/gtest.h>
 #include <siderust/siderust.hpp>
-#include <cmath>
 
 using namespace siderust;
 
 static const double PI = 3.14159265358979323846;
 
 class AltitudeTest : public ::testing::Test {
-protected:
+  protected:
     Geodetic obs;
     MJD      start;
     MJD      end_;
@@ -16,7 +16,7 @@ protected:
     void SetUp() override {
         obs    = ROQUE_DE_LOS_MUCHACHOS;
         start  = MJD::from_jd(JulianDate::from_utc({2026, 7, 15, 18, 0, 0}));
-        end_   = start + 1.0;  // 24 hours
+        end_   = start + 1.0; // 24 hours
         window = Period(start, end_);
     }
 };
@@ -94,15 +94,15 @@ TEST_F(AltitudeTest, MoonAboveThreshold) {
 // ============================================================================
 
 TEST_F(AltitudeTest, StarAltitudeAt) {
-    const auto& vega = VEGA;
-    qtty::Radian alt = star_altitude::altitude_at(vega, obs, start);
+    const auto&  vega = VEGA;
+    qtty::Radian alt  = star_altitude::altitude_at(vega, obs, start);
     EXPECT_GT(alt.value(), -PI / 2.0);
     EXPECT_LT(alt.value(), PI / 2.0);
 }
 
 TEST_F(AltitudeTest, StarAboveThreshold) {
-    const auto& vega = VEGA;
-    auto periods = star_altitude::above_threshold(vega, obs, window, qtty::Degree(30.0));
+    const auto& vega    = VEGA;
+    auto        periods = star_altitude::above_threshold(vega, obs, window, qtty::Degree(30.0));
     // Vega should be well above 30° from La Palma in July
     EXPECT_GT(periods.size(), 0u);
 }
@@ -113,14 +113,14 @@ TEST_F(AltitudeTest, StarAboveThreshold) {
 
 TEST_F(AltitudeTest, IcrsAltitudeAt) {
     const spherical::direction::ICRS vega_icrs(qtty::Degree(279.23), qtty::Degree(38.78));
-    qtty::Radian alt = icrs_altitude::altitude_at(vega_icrs, obs, start);
+    qtty::Radian                     alt = icrs_altitude::altitude_at(vega_icrs, obs, start);
     EXPECT_GT(alt.value(), -PI / 2.0);
     EXPECT_LT(alt.value(), PI / 2.0);
 }
 
 TEST_F(AltitudeTest, IcrsAboveThreshold) {
     const spherical::direction::ICRS vega_icrs(qtty::Degree(279.23), qtty::Degree(38.78));
-    auto periods = icrs_altitude::above_threshold(
-        vega_icrs, obs, window, qtty::Degree(30.0));
+    auto                             periods = icrs_altitude::above_threshold(
+                                    vega_icrs, obs, window, qtty::Degree(30.0));
     EXPECT_GT(periods.size(), 0u);
 }

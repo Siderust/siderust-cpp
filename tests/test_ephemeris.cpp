@@ -1,6 +1,6 @@
+#include <cmath>
 #include <gtest/gtest.h>
 #include <siderust/siderust.hpp>
-#include <cmath>
 
 using namespace siderust;
 
@@ -14,9 +14,8 @@ TEST(Ephemeris, EarthHeliocentric) {
 
     // Compile-time type checks
     static_assert(std::is_same_v<
-        decltype(pos),
-        cartesian::position::EclipticMeanJ2000<qtty::AstronomicalUnit>
-    >);
+                  decltype(pos),
+                  cartesian::position::EclipticMeanJ2000<qtty::AstronomicalUnit>>);
     static_assert(std::is_same_v<decltype(pos.comp_x), qtty::AstronomicalUnit>);
 
     // Value check — distance should be ~1 AU
@@ -38,9 +37,8 @@ TEST(Ephemeris, MoonGeocentric) {
     auto pos = ephemeris::moon_geocentric(jd);
 
     static_assert(std::is_same_v<
-        decltype(pos),
-        cartesian::position::MoonGeocentric<qtty::Kilometer>
-    >);
+                  decltype(pos),
+                  cartesian::position::MoonGeocentric<qtty::Kilometer>>);
     static_assert(std::is_same_v<decltype(pos.comp_x), qtty::Kilometer>);
 
     double r = std::sqrt(pos.x().value() * pos.x().value() + pos.y().value() * pos.y().value() + pos.z().value() * pos.z().value());

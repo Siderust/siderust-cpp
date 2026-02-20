@@ -8,9 +8,9 @@
  * RAII-managed output arrays.
  */
 
-#include "ffi_core.hpp"
-#include "coordinates.hpp"
 #include "bodies.hpp"
+#include "coordinates.hpp"
+#include "ffi_core.hpp"
 #include "time.hpp"
 #include <vector>
 
@@ -25,7 +25,7 @@ namespace siderust {
  */
 struct CrossingEvent {
     MJD               time;
-    CrossingDirection  direction;
+    CrossingDirection direction;
 
     static CrossingEvent from_c(const siderust_crossing_event_t& c) {
         return {MJD(c.mjd), static_cast<CrossingDirection>(c.direction)};
@@ -36,9 +36,9 @@ struct CrossingEvent {
  * @brief A culmination (local altitude extremum) event.
  */
 struct CulminationEvent {
-    MJD              time;
-    qtty::Degree     altitude;
-    CulminationKind  kind;
+    MJD             time;
+    qtty::Degree    altitude;
+    CulminationKind kind;
 
     static CulminationEvent from_c(const siderust_culmination_event_t& c) {
         return {MJD(c.mjd), qtty::Degree(c.altitude_deg), static_cast<CulminationKind>(c.kind)};
@@ -135,13 +135,13 @@ inline qtty::Radian altitude_at(const Geodetic& obs, const MJD& mjd) {
  */
 inline std::vector<Period> above_threshold(
     const Geodetic& obs, const Period& window,
-    qtty::Degree threshold, const SearchOptions& opts = {})
-{
-    tempoch_period_mjd_t* ptr = nullptr; uintptr_t count = 0;
+    qtty::Degree threshold, const SearchOptions& opts = {}) {
+    tempoch_period_mjd_t* ptr   = nullptr;
+    uintptr_t             count = 0;
     check_status(siderust_sun_above_threshold_window(
-        obs.to_c(), window.c_inner(), threshold.value(),
-        opts.to_c(), &ptr, &count),
-        "sun::above_threshold");
+                     obs.to_c(), window.c_inner(), threshold.value(),
+                     opts.to_c(), &ptr, &count),
+                 "sun::above_threshold");
     return detail::periods_from_c(ptr, count);
 }
 
@@ -150,8 +150,7 @@ inline std::vector<Period> above_threshold(
  */
 inline std::vector<Period> above_threshold(
     const Geodetic& obs, const MJD& start, const MJD& end,
-    qtty::Degree threshold, const SearchOptions& opts = {})
-{
+    qtty::Degree threshold, const SearchOptions& opts = {}) {
     return above_threshold(obs, Period(start, end), threshold, opts);
 }
 
@@ -160,13 +159,13 @@ inline std::vector<Period> above_threshold(
  */
 inline std::vector<Period> below_threshold(
     const Geodetic& obs, const Period& window,
-    qtty::Degree threshold, const SearchOptions& opts = {})
-{
-    tempoch_period_mjd_t* ptr = nullptr; uintptr_t count = 0;
+    qtty::Degree threshold, const SearchOptions& opts = {}) {
+    tempoch_period_mjd_t* ptr   = nullptr;
+    uintptr_t             count = 0;
     check_status(siderust_sun_below_threshold_window(
-        obs.to_c(), window.c_inner(), threshold.value(),
-        opts.to_c(), &ptr, &count),
-        "sun::below_threshold");
+                     obs.to_c(), window.c_inner(), threshold.value(),
+                     opts.to_c(), &ptr, &count),
+                 "sun::below_threshold");
     return detail::periods_from_c(ptr, count);
 }
 
@@ -175,8 +174,7 @@ inline std::vector<Period> below_threshold(
  */
 inline std::vector<Period> below_threshold(
     const Geodetic& obs, const MJD& start, const MJD& end,
-    qtty::Degree threshold, const SearchOptions& opts = {})
-{
+    qtty::Degree threshold, const SearchOptions& opts = {}) {
     return below_threshold(obs, Period(start, end), threshold, opts);
 }
 
@@ -185,13 +183,13 @@ inline std::vector<Period> below_threshold(
  */
 inline std::vector<CrossingEvent> crossings(
     const Geodetic& obs, const Period& window,
-    qtty::Degree threshold, const SearchOptions& opts = {})
-{
-    siderust_crossing_event_t* ptr = nullptr; uintptr_t count = 0;
+    qtty::Degree threshold, const SearchOptions& opts = {}) {
+    siderust_crossing_event_t* ptr   = nullptr;
+    uintptr_t                  count = 0;
     check_status(siderust_sun_crossings_window(
-        obs.to_c(), window.c_inner(), threshold.value(),
-        opts.to_c(), &ptr, &count),
-        "sun::crossings");
+                     obs.to_c(), window.c_inner(), threshold.value(),
+                     opts.to_c(), &ptr, &count),
+                 "sun::crossings");
     return detail::crossings_from_c(ptr, count);
 }
 
@@ -200,8 +198,7 @@ inline std::vector<CrossingEvent> crossings(
  */
 inline std::vector<CrossingEvent> crossings(
     const Geodetic& obs, const MJD& start, const MJD& end,
-    qtty::Degree threshold, const SearchOptions& opts = {})
-{
+    qtty::Degree threshold, const SearchOptions& opts = {}) {
     return crossings(obs, Period(start, end), threshold, opts);
 }
 
@@ -210,13 +207,13 @@ inline std::vector<CrossingEvent> crossings(
  */
 inline std::vector<CulminationEvent> culminations(
     const Geodetic& obs, const Period& window,
-    const SearchOptions& opts = {})
-{
-    siderust_culmination_event_t* ptr = nullptr; uintptr_t count = 0;
+    const SearchOptions& opts = {}) {
+    siderust_culmination_event_t* ptr   = nullptr;
+    uintptr_t                     count = 0;
     check_status(siderust_sun_culminations_window(
-        obs.to_c(), window.c_inner(),
-        opts.to_c(), &ptr, &count),
-        "sun::culminations");
+                     obs.to_c(), window.c_inner(),
+                     opts.to_c(), &ptr, &count),
+                 "sun::culminations");
     return detail::culminations_from_c(ptr, count);
 }
 
@@ -225,8 +222,7 @@ inline std::vector<CulminationEvent> culminations(
  */
 inline std::vector<CulminationEvent> culminations(
     const Geodetic& obs, const MJD& start, const MJD& end,
-    const SearchOptions& opts = {})
-{
+    const SearchOptions& opts = {}) {
     return culminations(obs, Period(start, end), opts);
 }
 
@@ -235,11 +231,11 @@ inline std::vector<CulminationEvent> culminations(
  */
 inline std::vector<Period> altitude_periods(
     const Geodetic& obs, const Period& window,
-    qtty::Degree min_alt, qtty::Degree max_alt)
-{
-    siderust_altitude_query_t q = {obs.to_c(), window.start().value(), window.end().value(),
-                                   min_alt.value(), max_alt.value()};
-    tempoch_period_mjd_t* ptr = nullptr; uintptr_t count = 0;
+    qtty::Degree min_alt, qtty::Degree max_alt) {
+    siderust_altitude_query_t q     = {obs.to_c(), window.start().value(), window.end().value(),
+                                       min_alt.value(), max_alt.value()};
+    tempoch_period_mjd_t*     ptr   = nullptr;
+    uintptr_t                 count = 0;
     check_status(siderust_sun_altitude_periods(q, &ptr, &count),
                  "sun::altitude_periods");
     return detail::periods_from_c(ptr, count);
@@ -250,11 +246,11 @@ inline std::vector<Period> altitude_periods(
  */
 inline std::vector<Period> altitude_periods(
     const Geodetic& obs, const MJD& start, const MJD& end,
-    qtty::Degree min_alt, qtty::Degree max_alt)
-{
-    siderust_altitude_query_t q = {obs.to_c(), start.value(), end.value(),
-                                   min_alt.value(), max_alt.value()};
-    tempoch_period_mjd_t* ptr = nullptr; uintptr_t count = 0;
+    qtty::Degree min_alt, qtty::Degree max_alt) {
+    siderust_altitude_query_t q     = {obs.to_c(), start.value(), end.value(),
+                                       min_alt.value(), max_alt.value()};
+    tempoch_period_mjd_t*     ptr   = nullptr;
+    uintptr_t                 count = 0;
     check_status(siderust_sun_altitude_periods(q, &ptr, &count),
                  "sun::altitude_periods");
     return detail::periods_from_c(ptr, count);
@@ -283,13 +279,13 @@ inline qtty::Radian altitude_at(const Geodetic& obs, const MJD& mjd) {
  */
 inline std::vector<Period> above_threshold(
     const Geodetic& obs, const Period& window,
-    qtty::Degree threshold, const SearchOptions& opts = {})
-{
-    tempoch_period_mjd_t* ptr = nullptr; uintptr_t count = 0;
+    qtty::Degree threshold, const SearchOptions& opts = {}) {
+    tempoch_period_mjd_t* ptr   = nullptr;
+    uintptr_t             count = 0;
     check_status(siderust_moon_above_threshold_window(
-        obs.to_c(), window.c_inner(), threshold.value(),
-        opts.to_c(), &ptr, &count),
-        "moon::above_threshold");
+                     obs.to_c(), window.c_inner(), threshold.value(),
+                     opts.to_c(), &ptr, &count),
+                 "moon::above_threshold");
     return detail::periods_from_c(ptr, count);
 }
 
@@ -298,8 +294,7 @@ inline std::vector<Period> above_threshold(
  */
 inline std::vector<Period> above_threshold(
     const Geodetic& obs, const MJD& start, const MJD& end,
-    qtty::Degree threshold, const SearchOptions& opts = {})
-{
+    qtty::Degree threshold, const SearchOptions& opts = {}) {
     return above_threshold(obs, Period(start, end), threshold, opts);
 }
 
@@ -308,13 +303,13 @@ inline std::vector<Period> above_threshold(
  */
 inline std::vector<Period> below_threshold(
     const Geodetic& obs, const Period& window,
-    qtty::Degree threshold, const SearchOptions& opts = {})
-{
-    tempoch_period_mjd_t* ptr = nullptr; uintptr_t count = 0;
+    qtty::Degree threshold, const SearchOptions& opts = {}) {
+    tempoch_period_mjd_t* ptr   = nullptr;
+    uintptr_t             count = 0;
     check_status(siderust_moon_below_threshold_window(
-        obs.to_c(), window.c_inner(), threshold.value(),
-        opts.to_c(), &ptr, &count),
-        "moon::below_threshold");
+                     obs.to_c(), window.c_inner(), threshold.value(),
+                     opts.to_c(), &ptr, &count),
+                 "moon::below_threshold");
     return detail::periods_from_c(ptr, count);
 }
 
@@ -323,8 +318,7 @@ inline std::vector<Period> below_threshold(
  */
 inline std::vector<Period> below_threshold(
     const Geodetic& obs, const MJD& start, const MJD& end,
-    qtty::Degree threshold, const SearchOptions& opts = {})
-{
+    qtty::Degree threshold, const SearchOptions& opts = {}) {
     return below_threshold(obs, Period(start, end), threshold, opts);
 }
 
@@ -333,13 +327,13 @@ inline std::vector<Period> below_threshold(
  */
 inline std::vector<CrossingEvent> crossings(
     const Geodetic& obs, const Period& window,
-    qtty::Degree threshold, const SearchOptions& opts = {})
-{
-    siderust_crossing_event_t* ptr = nullptr; uintptr_t count = 0;
+    qtty::Degree threshold, const SearchOptions& opts = {}) {
+    siderust_crossing_event_t* ptr   = nullptr;
+    uintptr_t                  count = 0;
     check_status(siderust_moon_crossings_window(
-        obs.to_c(), window.c_inner(), threshold.value(),
-        opts.to_c(), &ptr, &count),
-        "moon::crossings");
+                     obs.to_c(), window.c_inner(), threshold.value(),
+                     opts.to_c(), &ptr, &count),
+                 "moon::crossings");
     return detail::crossings_from_c(ptr, count);
 }
 
@@ -348,8 +342,7 @@ inline std::vector<CrossingEvent> crossings(
  */
 inline std::vector<CrossingEvent> crossings(
     const Geodetic& obs, const MJD& start, const MJD& end,
-    qtty::Degree threshold, const SearchOptions& opts = {})
-{
+    qtty::Degree threshold, const SearchOptions& opts = {}) {
     return crossings(obs, Period(start, end), threshold, opts);
 }
 
@@ -358,13 +351,13 @@ inline std::vector<CrossingEvent> crossings(
  */
 inline std::vector<CulminationEvent> culminations(
     const Geodetic& obs, const Period& window,
-    const SearchOptions& opts = {})
-{
-    siderust_culmination_event_t* ptr = nullptr; uintptr_t count = 0;
+    const SearchOptions& opts = {}) {
+    siderust_culmination_event_t* ptr   = nullptr;
+    uintptr_t                     count = 0;
     check_status(siderust_moon_culminations_window(
-        obs.to_c(), window.c_inner(),
-        opts.to_c(), &ptr, &count),
-        "moon::culminations");
+                     obs.to_c(), window.c_inner(),
+                     opts.to_c(), &ptr, &count),
+                 "moon::culminations");
     return detail::culminations_from_c(ptr, count);
 }
 
@@ -373,8 +366,7 @@ inline std::vector<CulminationEvent> culminations(
  */
 inline std::vector<CulminationEvent> culminations(
     const Geodetic& obs, const MJD& start, const MJD& end,
-    const SearchOptions& opts = {})
-{
+    const SearchOptions& opts = {}) {
     return culminations(obs, Period(start, end), opts);
 }
 
@@ -383,11 +375,11 @@ inline std::vector<CulminationEvent> culminations(
  */
 inline std::vector<Period> altitude_periods(
     const Geodetic& obs, const Period& window,
-    qtty::Degree min_alt, qtty::Degree max_alt)
-{
-    siderust_altitude_query_t q = {obs.to_c(), window.start().value(), window.end().value(),
-                                   min_alt.value(), max_alt.value()};
-    tempoch_period_mjd_t* ptr = nullptr; uintptr_t count = 0;
+    qtty::Degree min_alt, qtty::Degree max_alt) {
+    siderust_altitude_query_t q     = {obs.to_c(), window.start().value(), window.end().value(),
+                                       min_alt.value(), max_alt.value()};
+    tempoch_period_mjd_t*     ptr   = nullptr;
+    uintptr_t                 count = 0;
     check_status(siderust_moon_altitude_periods(q, &ptr, &count),
                  "moon::altitude_periods");
     return detail::periods_from_c(ptr, count);
@@ -398,11 +390,11 @@ inline std::vector<Period> altitude_periods(
  */
 inline std::vector<Period> altitude_periods(
     const Geodetic& obs, const MJD& start, const MJD& end,
-    qtty::Degree min_alt, qtty::Degree max_alt)
-{
-    siderust_altitude_query_t q = {obs.to_c(), start.value(), end.value(),
-                                   min_alt.value(), max_alt.value()};
-    tempoch_period_mjd_t* ptr = nullptr; uintptr_t count = 0;
+    qtty::Degree min_alt, qtty::Degree max_alt) {
+    siderust_altitude_query_t q     = {obs.to_c(), start.value(), end.value(),
+                                       min_alt.value(), max_alt.value()};
+    tempoch_period_mjd_t*     ptr   = nullptr;
+    uintptr_t                 count = 0;
     check_status(siderust_moon_altitude_periods(q, &ptr, &count),
                  "moon::altitude_periods");
     return detail::periods_from_c(ptr, count);
@@ -422,8 +414,8 @@ namespace star_altitude {
 inline qtty::Radian altitude_at(const Star& s, const Geodetic& obs, const MJD& mjd) {
     double out;
     check_status(siderust_star_altitude_at(
-        s.c_handle(), obs.to_c(), mjd.value(), &out),
-        "star_altitude::altitude_at");
+                     s.c_handle(), obs.to_c(), mjd.value(), &out),
+                 "star_altitude::altitude_at");
     return qtty::Radian(out);
 }
 
@@ -432,13 +424,13 @@ inline qtty::Radian altitude_at(const Star& s, const Geodetic& obs, const MJD& m
  */
 inline std::vector<Period> above_threshold(
     const Star& s, const Geodetic& obs, const Period& window,
-    qtty::Degree threshold, const SearchOptions& opts = {})
-{
-    tempoch_period_mjd_t* ptr = nullptr; uintptr_t count = 0;
+    qtty::Degree threshold, const SearchOptions& opts = {}) {
+    tempoch_period_mjd_t* ptr   = nullptr;
+    uintptr_t             count = 0;
     check_status(siderust_star_above_threshold_window(
-        s.c_handle(), obs.to_c(), window.c_inner(), threshold.value(),
-        opts.to_c(), &ptr, &count),
-        "star_altitude::above_threshold");
+                     s.c_handle(), obs.to_c(), window.c_inner(), threshold.value(),
+                     opts.to_c(), &ptr, &count),
+                 "star_altitude::above_threshold");
     return detail::periods_from_c(ptr, count);
 }
 
@@ -447,8 +439,7 @@ inline std::vector<Period> above_threshold(
  */
 inline std::vector<Period> above_threshold(
     const Star& s, const Geodetic& obs, const MJD& start, const MJD& end,
-    qtty::Degree threshold, const SearchOptions& opts = {})
-{
+    qtty::Degree threshold, const SearchOptions& opts = {}) {
     return above_threshold(s, obs, Period(start, end), threshold, opts);
 }
 
@@ -457,13 +448,13 @@ inline std::vector<Period> above_threshold(
  */
 inline std::vector<Period> below_threshold(
     const Star& s, const Geodetic& obs, const Period& window,
-    qtty::Degree threshold, const SearchOptions& opts = {})
-{
-    tempoch_period_mjd_t* ptr = nullptr; uintptr_t count = 0;
+    qtty::Degree threshold, const SearchOptions& opts = {}) {
+    tempoch_period_mjd_t* ptr   = nullptr;
+    uintptr_t             count = 0;
     check_status(siderust_star_below_threshold_window(
-        s.c_handle(), obs.to_c(), window.c_inner(), threshold.value(),
-        opts.to_c(), &ptr, &count),
-        "star_altitude::below_threshold");
+                     s.c_handle(), obs.to_c(), window.c_inner(), threshold.value(),
+                     opts.to_c(), &ptr, &count),
+                 "star_altitude::below_threshold");
     return detail::periods_from_c(ptr, count);
 }
 
@@ -472,8 +463,7 @@ inline std::vector<Period> below_threshold(
  */
 inline std::vector<Period> below_threshold(
     const Star& s, const Geodetic& obs, const MJD& start, const MJD& end,
-    qtty::Degree threshold, const SearchOptions& opts = {})
-{
+    qtty::Degree threshold, const SearchOptions& opts = {}) {
     return below_threshold(s, obs, Period(start, end), threshold, opts);
 }
 
@@ -482,13 +472,13 @@ inline std::vector<Period> below_threshold(
  */
 inline std::vector<CrossingEvent> crossings(
     const Star& s, const Geodetic& obs, const Period& window,
-    qtty::Degree threshold, const SearchOptions& opts = {})
-{
-    siderust_crossing_event_t* ptr = nullptr; uintptr_t count = 0;
+    qtty::Degree threshold, const SearchOptions& opts = {}) {
+    siderust_crossing_event_t* ptr   = nullptr;
+    uintptr_t                  count = 0;
     check_status(siderust_star_crossings_window(
-        s.c_handle(), obs.to_c(), window.c_inner(), threshold.value(),
-        opts.to_c(), &ptr, &count),
-        "star_altitude::crossings");
+                     s.c_handle(), obs.to_c(), window.c_inner(), threshold.value(),
+                     opts.to_c(), &ptr, &count),
+                 "star_altitude::crossings");
     return detail::crossings_from_c(ptr, count);
 }
 
@@ -497,8 +487,7 @@ inline std::vector<CrossingEvent> crossings(
  */
 inline std::vector<CrossingEvent> crossings(
     const Star& s, const Geodetic& obs, const MJD& start, const MJD& end,
-    qtty::Degree threshold, const SearchOptions& opts = {})
-{
+    qtty::Degree threshold, const SearchOptions& opts = {}) {
     return crossings(s, obs, Period(start, end), threshold, opts);
 }
 
@@ -507,13 +496,13 @@ inline std::vector<CrossingEvent> crossings(
  */
 inline std::vector<CulminationEvent> culminations(
     const Star& s, const Geodetic& obs, const Period& window,
-    const SearchOptions& opts = {})
-{
-    siderust_culmination_event_t* ptr = nullptr; uintptr_t count = 0;
+    const SearchOptions& opts = {}) {
+    siderust_culmination_event_t* ptr   = nullptr;
+    uintptr_t                     count = 0;
     check_status(siderust_star_culminations_window(
-        s.c_handle(), obs.to_c(), window.c_inner(),
-        opts.to_c(), &ptr, &count),
-        "star_altitude::culminations");
+                     s.c_handle(), obs.to_c(), window.c_inner(),
+                     opts.to_c(), &ptr, &count),
+                 "star_altitude::culminations");
     return detail::culminations_from_c(ptr, count);
 }
 
@@ -522,8 +511,7 @@ inline std::vector<CulminationEvent> culminations(
  */
 inline std::vector<CulminationEvent> culminations(
     const Star& s, const Geodetic& obs, const MJD& start, const MJD& end,
-    const SearchOptions& opts = {})
-{
+    const SearchOptions& opts = {}) {
     return culminations(s, obs, Period(start, end), opts);
 }
 
@@ -542,8 +530,8 @@ inline qtty::Radian altitude_at(const spherical::direction::ICRS& dir,
                                 const Geodetic& obs, const MJD& mjd) {
     double out;
     check_status(siderust_icrs_altitude_at(
-        dir.to_c(), obs.to_c(), mjd.value(), &out),
-        "icrs_altitude::altitude_at");
+                     dir.to_c(), obs.to_c(), mjd.value(), &out),
+                 "icrs_altitude::altitude_at");
     return qtty::Radian(out);
 }
 
@@ -561,13 +549,13 @@ inline qtty::Radian altitude_at(qtty::Degree ra, qtty::Degree dec,
 inline std::vector<Period> above_threshold(
     const spherical::direction::ICRS& dir,
     const Geodetic& obs, const Period& window,
-    qtty::Degree threshold, const SearchOptions& opts = {})
-{
-    tempoch_period_mjd_t* ptr = nullptr; uintptr_t count = 0;
+    qtty::Degree threshold, const SearchOptions& opts = {}) {
+    tempoch_period_mjd_t* ptr   = nullptr;
+    uintptr_t             count = 0;
     check_status(siderust_icrs_above_threshold(
-        dir.to_c(), obs.to_c(), window.c_inner(),
-        threshold.value(), opts.to_c(), &ptr, &count),
-        "icrs_altitude::above_threshold");
+                     dir.to_c(), obs.to_c(), window.c_inner(),
+                     threshold.value(), opts.to_c(), &ptr, &count),
+                 "icrs_altitude::above_threshold");
     return detail::periods_from_c(ptr, count);
 }
 
@@ -577,15 +565,13 @@ inline std::vector<Period> above_threshold(
 inline std::vector<Period> above_threshold(
     qtty::Degree ra, qtty::Degree dec,
     const Geodetic& obs, const MJD& start, const MJD& end,
-    qtty::Degree threshold, const SearchOptions& opts = {})
-{
+    qtty::Degree threshold, const SearchOptions& opts = {}) {
     return above_threshold(
         spherical::direction::ICRS(ra, dec),
         obs,
         Period(start, end),
         threshold,
-        opts
-    );
+        opts);
 }
 
 /**
@@ -594,13 +580,13 @@ inline std::vector<Period> above_threshold(
 inline std::vector<Period> below_threshold(
     const spherical::direction::ICRS& dir,
     const Geodetic& obs, const Period& window,
-    qtty::Degree threshold, const SearchOptions& opts = {})
-{
-    tempoch_period_mjd_t* ptr = nullptr; uintptr_t count = 0;
+    qtty::Degree threshold, const SearchOptions& opts = {}) {
+    tempoch_period_mjd_t* ptr   = nullptr;
+    uintptr_t             count = 0;
     check_status(siderust_icrs_below_threshold(
-        dir.to_c(), obs.to_c(), window.c_inner(),
-        threshold.value(), opts.to_c(), &ptr, &count),
-        "icrs_altitude::below_threshold");
+                     dir.to_c(), obs.to_c(), window.c_inner(),
+                     threshold.value(), opts.to_c(), &ptr, &count),
+                 "icrs_altitude::below_threshold");
     return detail::periods_from_c(ptr, count);
 }
 
@@ -610,15 +596,13 @@ inline std::vector<Period> below_threshold(
 inline std::vector<Period> below_threshold(
     qtty::Degree ra, qtty::Degree dec,
     const Geodetic& obs, const MJD& start, const MJD& end,
-    qtty::Degree threshold, const SearchOptions& opts = {})
-{
+    qtty::Degree threshold, const SearchOptions& opts = {}) {
     return below_threshold(
         spherical::direction::ICRS(ra, dec),
         obs,
         Period(start, end),
         threshold,
-        opts
-    );
+        opts);
 }
 
 } // namespace icrs_altitude
