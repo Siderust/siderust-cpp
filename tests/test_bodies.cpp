@@ -36,13 +36,13 @@ TEST(Bodies, StarMoveSemantics) {
 TEST(Bodies, StarCreate) {
     auto s = Star::create(
         "TestStar",
-        100.0,  // distance_ly
-        1.0,    // mass_solar
-        1.0,    // radius_solar
-        1.0,    // luminosity_solar
-        180.0,  // ra_deg
-        45.0,   // dec_deg
-        2451545.0  // epoch_jd (J2000)
+        100.0,    // distance_ly
+        1.0,      // mass_solar
+        1.0,      // radius_solar
+        1.0,      // luminosity_solar
+        180.0,    // ra_deg
+        45.0,     // dec_deg
+        2451545.0 // epoch_jd (J2000)
     );
     EXPECT_EQ(s.name(), "TestStar");
     EXPECT_NEAR(s.distance_ly(), 100.0, 1e-6);
@@ -50,8 +50,8 @@ TEST(Bodies, StarCreate) {
 
 TEST(Bodies, StarCreateWithProperMotion) {
     ProperMotion pm(0.001, -0.002, RaConvention::MuAlphaStar);
-    auto s = Star::create("PMStar", 50.0, 1.0, 1.0, 1.0,
-                          100.0, 30.0, 2451545.0, pm);
+    auto         s = Star::create("PMStar", 50.0, 1.0, 1.0, 1.0,
+                                  100.0, 30.0, 2451545.0, pm);
     EXPECT_EQ(s.name(), "PMStar");
 }
 

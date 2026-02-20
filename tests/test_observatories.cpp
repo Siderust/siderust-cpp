@@ -14,7 +14,7 @@ TEST(Observatories, RoqueDeLos) {
 TEST(Observatories, ElParanal) {
     auto obs = EL_PARANAL;
     EXPECT_LT(obs.lon.value(), 0.0);
-    EXPECT_LT(obs.lat.value(), 0.0);  // Southern hemisphere
+    EXPECT_LT(obs.lat.value(), 0.0); // Southern hemisphere
     EXPECT_GT(obs.height.value(), 2000.0);
 }
 

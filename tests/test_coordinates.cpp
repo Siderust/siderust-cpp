@@ -1,6 +1,6 @@
+#include <cmath>
 #include <gtest/gtest.h>
 #include <siderust/siderust.hpp>
-#include <cmath>
 #include <type_traits>
 
 using namespace siderust;
@@ -13,20 +13,18 @@ TEST(TypedCoordinates, AliasNamespaces) {
     static_assert(std::is_same_v<spherical::direction::ICRS, spherical::Direction<frames::ICRS>>);
     static_assert(std::is_same_v<spherical::direction::EclipticMeanJ2000, spherical::Direction<frames::EclipticMeanJ2000>>);
     static_assert(std::is_same_v<
-        spherical::position::ICRS<qtty::Meter>,
-        spherical::Position<centers::Barycentric, frames::ICRS, qtty::Meter>
-    >);
+                  spherical::position::ICRS<qtty::Meter>,
+                  spherical::Position<centers::Barycentric, frames::ICRS, qtty::Meter>>);
     static_assert(std::is_same_v<
-        cartesian::position::ECEF<qtty::Meter>,
-        cartesian::Position<centers::Geocentric, frames::ECEF, qtty::Meter>
-    >);
+                  cartesian::position::ECEF<qtty::Meter>,
+                  cartesian::Position<centers::Geocentric, frames::ECEF, qtty::Meter>>);
 }
 
 TEST(TypedCoordinates, IcrsDirToEcliptic) {
     using namespace siderust::frames;
 
     spherical::direction::ICRS vega(279.23473, 38.78369);
-    auto jd = JulianDate::J2000();
+    auto                       jd = JulianDate::J2000();
 
     // Compile-time typed transform: ICRS -> EclipticMeanJ2000
     auto ecl = vega.to_frame<EclipticMeanJ2000>(jd);
@@ -42,7 +40,7 @@ TEST(TypedCoordinates, IcrsDirRoundtrip) {
     using namespace siderust::frames;
 
     spherical::direction::ICRS icrs(100.0, 30.0);
-    auto jd = JulianDate::J2000();
+    auto                       jd = JulianDate::J2000();
 
     auto ecl  = icrs.to_frame<EclipticMeanJ2000>(jd);
     auto back = ecl.to_frame<ICRS>(jd);
@@ -56,7 +54,7 @@ TEST(TypedCoordinates, ToShorthand) {
     using namespace siderust::frames;
 
     spherical::direction::ICRS icrs(100.0, 30.0);
-    auto jd = JulianDate::J2000();
+    auto                       jd = JulianDate::J2000();
 
     // .to<Target>(jd) is a shorthand for .to_frame<Target>(jd)
     auto ecl = icrs.to<EclipticMeanJ2000>(jd);
@@ -68,8 +66,8 @@ TEST(TypedCoordinates, IcrsDirToHorizontal) {
     using namespace siderust::frames;
 
     spherical::direction::ICRS vega(279.23473, 38.78369);
-    auto jd  = JulianDate::from_utc({2026, 7, 15, 22, 0, 0});
-    auto obs = ROQUE_DE_LOS_MUCHACHOS;
+    auto                       jd  = JulianDate::from_utc({2026, 7, 15, 22, 0, 0});
+    auto                       obs = ROQUE_DE_LOS_MUCHACHOS;
 
     auto hor = vega.to_horizontal(jd, obs);
 
@@ -82,7 +80,7 @@ TEST(TypedCoordinates, EquatorialToIcrs) {
     using namespace siderust::frames;
 
     spherical::direction::EquatorialMeanJ2000 eq(100.0, 30.0);
-    auto jd = JulianDate::J2000();
+    auto                                      jd = JulianDate::J2000();
 
     auto icrs = eq.to_frame<ICRS>(jd);
     static_assert(std::is_same_v<decltype(icrs), spherical::direction::ICRS>);
@@ -97,7 +95,7 @@ TEST(TypedCoordinates, MultiHopTransform) {
 
     // EquatorialMeanOfDate -> EquatorialTrueOfDate (through hub)
     spherical::Direction<EquatorialMeanOfDate> mean_od(100.0, 30.0);
-    auto jd = JulianDate::J2000();
+    auto                                       jd = JulianDate::J2000();
 
     auto true_od = mean_od.to_frame<EquatorialTrueOfDate>(jd);
     static_assert(std::is_same_v<decltype(true_od), spherical::Direction<EquatorialTrueOfDate>>);
@@ -111,7 +109,7 @@ TEST(TypedCoordinates, SameFrameIdentity) {
     using namespace siderust::frames;
 
     spherical::direction::ICRS icrs(123.456, -45.678);
-    auto jd = JulianDate::J2000();
+    auto                       jd = JulianDate::J2000();
 
     auto same = icrs.to_frame<ICRS>(jd);
     EXPECT_DOUBLE_EQ(same.ra().value(), 123.456);
@@ -122,7 +120,7 @@ TEST(TypedCoordinates, QttyDegreeAccessors) {
     spherical::direction::ICRS d(123.456, -45.678);
 
     // Frame-specific getters for ICRS.
-    qtty::Degree ra = d.ra();
+    qtty::Degree ra  = d.ra();
     qtty::Degree dec = d.dec();
     EXPECT_DOUBLE_EQ(ra.value(), 123.456);
     EXPECT_DOUBLE_EQ(dec.value(), -45.678);
@@ -159,7 +157,7 @@ TEST(TypedCoordinates, GeodeticQttyFields) {
 // ============================================================================
 
 TEST(TypedCoordinates, GeodeticToCartesianEcef) {
-    auto geo = geodetic(0.0, 0.0, 0.0);
+    auto geo  = geodetic(0.0, 0.0, 0.0);
     auto cart = geodetic_to_cartesian_ecef(geo);
 
     // Typed return: cartesian::Position<Geocentric, ECEF, Meter>
@@ -173,14 +171,13 @@ TEST(TypedCoordinates, GeodeticToCartesianEcef) {
 TEST(TypedCoordinates, GeodeticToCartesianMember) {
     auto geo = geodetic(0.0, 0.0, 0.0);
 
-    auto ecef_m = geo.to_cartesian();
+    auto ecef_m  = geo.to_cartesian();
     auto ecef_km = geo.to_cartesian<qtty::Kilometer>();
 
     static_assert(std::is_same_v<decltype(ecef_m), cartesian::position::ECEF<qtty::Meter>>);
     static_assert(std::is_same_v<
-        decltype(ecef_km),
-        cartesian::Position<centers::Geocentric, frames::ECEF, qtty::Kilometer>
-    >);
+                  decltype(ecef_km),
+                  cartesian::Position<centers::Geocentric, frames::ECEF, qtty::Kilometer>>);
 
     EXPECT_NEAR(ecef_m.x().value(), 6378137.0, 1.0);
     EXPECT_NEAR(ecef_km.x().value(), 6378.137, 1e-3);

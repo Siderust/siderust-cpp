@@ -6,15 +6,15 @@
  * @brief WGS84 geodetic coordinate type.
  */
 
-#include "../ffi_core.hpp"
 #include "../centers.hpp"
+#include "../ffi_core.hpp"
 #include "../frames.hpp"
 
 #include <qtty/qtty.hpp>
 
 namespace siderust {
 namespace cartesian {
-template<typename C, typename F, typename U>
+template <typename C, typename F, typename U>
 struct Position;
 }
 
@@ -56,7 +56,7 @@ struct Geodetic {
      *
      * @tparam U Output length unit (default: meter).
      */
-    template<typename U = qtty::Meter>
+    template <typename U = qtty::Meter>
     cartesian::Position<centers::Geocentric, frames::ECEF, U> to_cartesian() const;
 };
 

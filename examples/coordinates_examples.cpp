@@ -18,8 +18,8 @@ static void geodetic_and_ecef_example() {
     std::printf("1) Geodetic -> ECEF cartesian\n");
 
     Geodetic obs(-17.8890, 28.7610, 2396.0);
-    auto ecef = obs.to_cartesian();
-    auto ecef_km = obs.to_cartesian<qtty::Kilometer>();
+    auto     ecef    = obs.to_cartesian();
+    auto     ecef_km = obs.to_cartesian<qtty::Kilometer>();
 
     std::printf("   Geodetic lon=%.4f deg lat=%.4f deg h=%.1f m\n",
                 obs.lon.value(), obs.lat.value(), obs.height.value());
@@ -33,11 +33,11 @@ static void spherical_direction_example() {
     std::printf("2) Spherical direction frame conversions\n");
 
     spherical::direction::ICRS vega_icrs(279.23473, 38.78369);
-    auto jd = JulianDate::from_utc({2026, 7, 15, 22, 0, 0});
+    auto                       jd = JulianDate::from_utc({2026, 7, 15, 22, 0, 0});
 
-    auto ecl = vega_icrs.to<frames::EclipticMeanJ2000>(jd);
+    auto ecl    = vega_icrs.to<frames::EclipticMeanJ2000>(jd);
     auto eq_mod = vega_icrs.to<frames::EquatorialMeanOfDate>(jd);
-    auto hor = vega_icrs.to_horizontal(jd, ROQUE_DE_LOS_MUCHACHOS);
+    auto hor    = vega_icrs.to_horizontal(jd, ROQUE_DE_LOS_MUCHACHOS);
 
     std::printf("   ICRS RA=%.5f Dec=%.5f\n", vega_icrs.ra().value(), vega_icrs.dec().value());
     std::printf("   Ecliptic lon=%.5f lat=%.5f\n", ecl.lon().value(), ecl.lat().value());
@@ -49,8 +49,7 @@ static void spherical_position_example() {
     std::printf("3) Spherical position + extracting direction\n");
 
     spherical::position::ICRS<qtty::Meter> target(
-        120.0_deg, -25.0_deg, 2.0e17_m
-    );
+        120.0_deg, -25.0_deg, 2.0e17_m);
     auto dir = target.direction();
 
     std::printf("   Position RA=%.2f Dec=%.2f dist=%.3e m\n",
@@ -62,7 +61,7 @@ static void spherical_position_example() {
 static void cartesian_and_units_example() {
     std::printf("4) Cartesian coordinate creation + unit conversion\n");
 
-    cartesian::Direction<frames::ICRS> axis_x(1.0, 0.0, 0.0);
+    cartesian::Direction<frames::ICRS>                             axis_x(1.0, 0.0, 0.0);
     cartesian::position::EclipticMeanJ2000<qtty::AstronomicalUnit> sample_helio_au(1.0, 0.25, -0.1);
 
     auto x_km = sample_helio_au.x().to<qtty::Kilometer>();
@@ -77,9 +76,9 @@ static void cartesian_and_units_example() {
 static void ephemeris_typed_example() {
     std::printf("5) Typed ephemeris coordinates\n");
 
-    auto jd = JulianDate::J2000();
-    auto earth = ephemeris::earth_heliocentric(jd);  // cartesian::position::EclipticMeanJ2000<qtty::AstronomicalUnit>
-    auto moon = ephemeris::moon_geocentric(jd);      // cartesian::position::MoonGeocentric<qtty::Kilometer>
+    auto jd    = JulianDate::J2000();
+    auto earth = ephemeris::earth_heliocentric(jd); // cartesian::position::EclipticMeanJ2000<qtty::AstronomicalUnit>
+    auto moon  = ephemeris::moon_geocentric(jd);    // cartesian::position::MoonGeocentric<qtty::Kilometer>
 
     std::printf("   Earth heliocentric (AU) x=%.8f y=%.8f z=%.8f\n",
                 earth.x().value(), earth.y().value(), earth.z().value());
