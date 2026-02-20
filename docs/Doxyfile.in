@@ -2,6 +2,7 @@ DOXYFILE_ENCODING      = UTF-8
 PROJECT_NAME           = "siderust-cpp"
 PROJECT_NUMBER         = "@PROJECT_VERSION@"
 PROJECT_BRIEF          = "Header-only C++ wrapper for siderust"
+PROJECT_LOGO           = /logo.webp
 OUTPUT_DIRECTORY       = "@CMAKE_CURRENT_BINARY_DIR@/docs/doxygen"
 OUTPUT_LANGUAGE        = English
 BRIEF_MEMBER_DESC      = YES
