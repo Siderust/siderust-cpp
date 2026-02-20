@@ -1,5 +1,6 @@
 /**
  * @file demo.cpp
+ * @example demo.cpp
  * @brief Demonstrates the siderust C++ API.
  *
  * Usage:

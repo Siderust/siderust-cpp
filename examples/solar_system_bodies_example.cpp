@@ -1,5 +1,6 @@
 /**
  * @file solar_system_bodies_example.cpp
+ * @example solar_system_bodies_example.cpp
  * @brief Solar-system body ephemeris and catalog examples.
  *
  * Usage:

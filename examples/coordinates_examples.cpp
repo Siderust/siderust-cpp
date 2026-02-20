@@ -1,5 +1,6 @@
 /**
  * @file coordinates_examples.cpp
+ * @example coordinates_examples.cpp
  * @brief Focused examples for creating and converting typed coordinates.
  *
  * Usage:
