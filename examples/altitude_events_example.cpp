@@ -1,5 +1,6 @@
 /**
  * @file altitude_events_example.cpp
+ * @example altitude_events_example.cpp
  * @brief Altitude windows, crossings, and culminations for Sun, Moon, and
  * stars.
  *
