@@ -25,52 +25,52 @@ namespace siderust {
 // ============================================================================
 
 class SiderustException : public std::runtime_error {
-public:
+  public:
     explicit SiderustException(const std::string& msg) : std::runtime_error(msg) {}
 };
 
 class NullPointerError : public SiderustException {
-public:
+  public:
     explicit NullPointerError(const std::string& msg) : SiderustException(msg) {}
 };
 
 class InvalidFrameError : public SiderustException {
-public:
+  public:
     explicit InvalidFrameError(const std::string& msg) : SiderustException(msg) {}
 };
 
 class InvalidCenterError : public SiderustException {
-public:
+  public:
     explicit InvalidCenterError(const std::string& msg) : SiderustException(msg) {}
 };
 
 class TransformFailedError : public SiderustException {
-public:
+  public:
     explicit TransformFailedError(const std::string& msg) : SiderustException(msg) {}
 };
 
 class InvalidBodyError : public SiderustException {
-public:
+  public:
     explicit InvalidBodyError(const std::string& msg) : SiderustException(msg) {}
 };
 
 class UnknownStarError : public SiderustException {
-public:
+  public:
     explicit UnknownStarError(const std::string& msg) : SiderustException(msg) {}
 };
 
 class InvalidPeriodError : public SiderustException {
-public:
+  public:
     explicit InvalidPeriodError(const std::string& msg) : SiderustException(msg) {}
 };
 
 class AllocationFailedError : public SiderustException {
-public:
+  public:
     explicit AllocationFailedError(const std::string& msg) : SiderustException(msg) {}
 };
 
 class InvalidArgumentError : public SiderustException {
-public:
+  public:
     explicit InvalidArgumentError(const std::string& msg) : SiderustException(msg) {}
 };
 
@@ -79,30 +79,31 @@ public:
 // ============================================================================
 
 inline void check_status(siderust_status_t status, const char* operation) {
-    if (status == SIDERUST_STATUS_T_OK) return;
+    if (status == SIDERUST_STATUS_T_OK)
+        return;
 
     std::string msg = std::string(operation) + " failed: ";
     switch (status) {
-        case SIDERUST_STATUS_T_NULL_POINTER:
-            throw NullPointerError(msg + "null output pointer");
-        case SIDERUST_STATUS_T_INVALID_FRAME:
-            throw InvalidFrameError(msg + "invalid or unsupported frame");
-        case SIDERUST_STATUS_T_INVALID_CENTER:
-            throw InvalidCenterError(msg + "invalid or unsupported center");
-        case SIDERUST_STATUS_T_TRANSFORM_FAILED:
-            throw TransformFailedError(msg + "coordinate transform failed");
-        case SIDERUST_STATUS_T_INVALID_BODY:
-            throw InvalidBodyError(msg + "invalid body");
-        case SIDERUST_STATUS_T_UNKNOWN_STAR:
-            throw UnknownStarError(msg + "unknown star name");
-        case SIDERUST_STATUS_T_INVALID_PERIOD:
-            throw InvalidPeriodError(msg + "invalid period (start > end)");
-        case SIDERUST_STATUS_T_ALLOCATION_FAILED:
-            throw AllocationFailedError(msg + "memory allocation failed");
-        case SIDERUST_STATUS_T_INVALID_ARGUMENT:
-            throw InvalidArgumentError(msg + "invalid argument");
-        default:
-            throw SiderustException(msg + "unknown error (" + std::to_string(status) + ")");
+    case SIDERUST_STATUS_T_NULL_POINTER:
+        throw NullPointerError(msg + "null output pointer");
+    case SIDERUST_STATUS_T_INVALID_FRAME:
+        throw InvalidFrameError(msg + "invalid or unsupported frame");
+    case SIDERUST_STATUS_T_INVALID_CENTER:
+        throw InvalidCenterError(msg + "invalid or unsupported center");
+    case SIDERUST_STATUS_T_TRANSFORM_FAILED:
+        throw TransformFailedError(msg + "coordinate transform failed");
+    case SIDERUST_STATUS_T_INVALID_BODY:
+        throw InvalidBodyError(msg + "invalid body");
+    case SIDERUST_STATUS_T_UNKNOWN_STAR:
+        throw UnknownStarError(msg + "unknown star name");
+    case SIDERUST_STATUS_T_INVALID_PERIOD:
+        throw InvalidPeriodError(msg + "invalid period (start > end)");
+    case SIDERUST_STATUS_T_ALLOCATION_FAILED:
+        throw AllocationFailedError(msg + "memory allocation failed");
+    case SIDERUST_STATUS_T_INVALID_ARGUMENT:
+        throw InvalidArgumentError(msg + "invalid argument");
+    default:
+        throw SiderustException(msg + "unknown error (" + std::to_string(status) + ")");
     }
 }
 
@@ -116,21 +117,21 @@ inline void check_tempoch_status(tempoch_status_t status, const char* operation)
 // ============================================================================
 
 enum class Frame : int32_t {
-    ICRS                   = SIDERUST_FRAME_T_ICRS,
-    EclipticMeanJ2000      = SIDERUST_FRAME_T_ECLIPTIC_MEAN_J2000,
-    EquatorialMeanJ2000    = SIDERUST_FRAME_T_EQUATORIAL_MEAN_J2000,
-    EquatorialMeanOfDate   = SIDERUST_FRAME_T_EQUATORIAL_MEAN_OF_DATE,
-    EquatorialTrueOfDate   = SIDERUST_FRAME_T_EQUATORIAL_TRUE_OF_DATE,
-    Horizontal             = SIDERUST_FRAME_T_HORIZONTAL,
-    ECEF                   = SIDERUST_FRAME_T_ECEF,
-    Galactic               = SIDERUST_FRAME_T_GALACTIC,
-    GCRS                   = SIDERUST_FRAME_T_GCRS,
-    EclipticOfDate         = SIDERUST_FRAME_T_ECLIPTIC_OF_DATE,
-    EclipticTrueOfDate     = SIDERUST_FRAME_T_ECLIPTIC_TRUE_OF_DATE,
-    CIRS                   = SIDERUST_FRAME_T_CIRS,
-    TIRS                   = SIDERUST_FRAME_T_TIRS,
-    ITRF                   = SIDERUST_FRAME_T_ITRF,
-    ICRF                   = SIDERUST_FRAME_T_ICRF,
+    ICRS                 = SIDERUST_FRAME_T_ICRS,
+    EclipticMeanJ2000    = SIDERUST_FRAME_T_ECLIPTIC_MEAN_J2000,
+    EquatorialMeanJ2000  = SIDERUST_FRAME_T_EQUATORIAL_MEAN_J2000,
+    EquatorialMeanOfDate = SIDERUST_FRAME_T_EQUATORIAL_MEAN_OF_DATE,
+    EquatorialTrueOfDate = SIDERUST_FRAME_T_EQUATORIAL_TRUE_OF_DATE,
+    Horizontal           = SIDERUST_FRAME_T_HORIZONTAL,
+    ECEF                 = SIDERUST_FRAME_T_ECEF,
+    Galactic             = SIDERUST_FRAME_T_GALACTIC,
+    GCRS                 = SIDERUST_FRAME_T_GCRS,
+    EclipticOfDate       = SIDERUST_FRAME_T_ECLIPTIC_OF_DATE,
+    EclipticTrueOfDate   = SIDERUST_FRAME_T_ECLIPTIC_TRUE_OF_DATE,
+    CIRS                 = SIDERUST_FRAME_T_CIRS,
+    TIRS                 = SIDERUST_FRAME_T_TIRS,
+    ITRF                 = SIDERUST_FRAME_T_ITRF,
+    ICRF                 = SIDERUST_FRAME_T_ICRF,
 };
 
 enum class Center : int32_t {
