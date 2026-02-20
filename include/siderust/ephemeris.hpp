@@ -8,8 +8,8 @@
  * correct center, frame, and unit for each ephemeris query.
  */
 
-#include "ffi_core.hpp"
 #include "coordinates.hpp"
+#include "ffi_core.hpp"
 #include "time.hpp"
 
 namespace siderust {

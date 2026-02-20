@@ -14,7 +14,7 @@
 
 using namespace siderust;
 
-template<typename PosT>
+template <typename PosT>
 static double norm3(const PosT& p) {
     const double x = p.x().value();
     const double y = p.y().value();
@@ -38,10 +38,10 @@ int main() {
     auto jd = JulianDate::from_utc({2026, 7, 15, 0, 0, 0});
     std::printf("Epoch JD: %.6f\n\n", jd.value());
 
-    auto sun_bary = ephemeris::sun_barycentric(jd);
-    auto earth_bary = ephemeris::earth_barycentric(jd);
+    auto sun_bary    = ephemeris::sun_barycentric(jd);
+    auto earth_bary  = ephemeris::earth_barycentric(jd);
     auto earth_helio = ephemeris::earth_heliocentric(jd);
-    auto moon_geo = ephemeris::moon_geocentric(jd);
+    auto moon_geo    = ephemeris::moon_geocentric(jd);
 
     std::printf("Sun barycentric (EclipticMeanJ2000, AU):\n");
     std::printf("  x=%.9f y=%.9f z=%.9f\n",
