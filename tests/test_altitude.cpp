@@ -11,11 +11,13 @@ protected:
     Geodetic obs;
     MJD      start;
     MJD      end_;
+    Period   window{MJD(0.0), MJD(1.0)};
 
     void SetUp() override {
         obs    = ROQUE_DE_LOS_MUCHACHOS;
         start  = MJD::from_jd(JulianDate::from_utc({2026, 7, 15, 18, 0, 0}));
         end_   = start + 1.0;  // 24 hours
+        window = Period(start, end_);
     }
 };
 
@@ -32,7 +34,7 @@ TEST_F(AltitudeTest, SunAltitudeAt) {
 
 TEST_F(AltitudeTest, SunAboveThreshold) {
     // Find periods when sun > 0 deg (daytime)
-    auto periods = sun::above_threshold(obs, start, end_, qtty::Degree(0.0));
+    auto periods = sun::above_threshold(obs, window, qtty::Degree(0.0));
     EXPECT_GT(periods.size(), 0u);
     for (auto& p : periods) {
         EXPECT_GT(p.duration_days(), 0.0);
@@ -41,7 +43,7 @@ TEST_F(AltitudeTest, SunAboveThreshold) {
 
 TEST_F(AltitudeTest, SunBelowThreshold) {
     // Astronomical night: sun < -18°
-    auto periods = sun::below_threshold(obs, start, end_, qtty::Degree(-18.0));
+    auto periods = sun::below_threshold(obs, window, qtty::Degree(-18.0));
     // In July at La Palma, astronomical night may be short but should exist
     // (or possibly not if too close to solstice — accept 0+)
     for (auto& p : periods) {
@@ -50,20 +52,20 @@ TEST_F(AltitudeTest, SunBelowThreshold) {
 }
 
 TEST_F(AltitudeTest, SunCrossings) {
-    auto events = sun::crossings(obs, start, end_, qtty::Degree(0.0));
+    auto events = sun::crossings(obs, window, qtty::Degree(0.0));
     // Expect at least 1 crossing in 24h (sunrise or sunset)
     EXPECT_GE(events.size(), 1u);
 }
 
 TEST_F(AltitudeTest, SunCulminations) {
-    auto events = sun::culminations(obs, start, end_);
+    auto events = sun::culminations(obs, window);
     // At least one culmination (meridian passage)
     EXPECT_GE(events.size(), 1u);
 }
 
 TEST_F(AltitudeTest, SunAltitudePeriods) {
     // Find periods when sun is between -6° and 0° (civil twilight)
-    auto periods = sun::altitude_periods(obs, start, end_, qtty::Degree(-6.0), qtty::Degree(0.0));
+    auto periods = sun::altitude_periods(obs, window, qtty::Degree(-6.0), qtty::Degree(0.0));
     for (auto& p : periods) {
         EXPECT_GT(p.duration_days(), 0.0);
     }
@@ -80,7 +82,7 @@ TEST_F(AltitudeTest, MoonAltitudeAt) {
 }
 
 TEST_F(AltitudeTest, MoonAboveThreshold) {
-    auto periods = moon::above_threshold(obs, start, end_, qtty::Degree(0.0));
+    auto periods = moon::above_threshold(obs, window, qtty::Degree(0.0));
     // Moon may or may not be above horizon for this date; just no crash
     for (auto& p : periods) {
         EXPECT_GT(p.duration_days(), 0.0);
@@ -100,7 +102,7 @@ TEST_F(AltitudeTest, StarAltitudeAt) {
 
 TEST_F(AltitudeTest, StarAboveThreshold) {
     const auto& vega = VEGA;
-    auto periods = star_altitude::above_threshold(vega, obs, start, end_, qtty::Degree(30.0));
+    auto periods = star_altitude::above_threshold(vega, obs, window, qtty::Degree(30.0));
     // Vega should be well above 30° from La Palma in July
     EXPECT_GT(periods.size(), 0u);
 }
@@ -110,14 +112,15 @@ TEST_F(AltitudeTest, StarAboveThreshold) {
 // ============================================================================
 
 TEST_F(AltitudeTest, IcrsAltitudeAt) {
-    // Vega coordinates
-    qtty::Radian alt = icrs_altitude::altitude_at(qtty::Degree(279.23), qtty::Degree(38.78), obs, start);
+    const spherical::direction::ICRS vega_icrs(qtty::Degree(279.23), qtty::Degree(38.78));
+    qtty::Radian alt = icrs_altitude::altitude_at(vega_icrs, obs, start);
     EXPECT_GT(alt.value(), -PI / 2.0);
     EXPECT_LT(alt.value(), PI / 2.0);
 }
 
 TEST_F(AltitudeTest, IcrsAboveThreshold) {
+    const spherical::direction::ICRS vega_icrs(qtty::Degree(279.23), qtty::Degree(38.78));
     auto periods = icrs_altitude::above_threshold(
-        qtty::Degree(279.23), qtty::Degree(38.78), obs, start, end_, qtty::Degree(30.0));
+        vega_icrs, obs, window, qtty::Degree(30.0));
     EXPECT_GT(periods.size(), 0u);
 }
