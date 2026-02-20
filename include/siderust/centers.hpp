@@ -23,16 +23,16 @@ namespace centers {
 // Center Trait
 // ============================================================================
 
-template<typename C>
-struct CenterTraits;  // primary — intentionally undefined
+template <typename C>
+struct CenterTraits; // primary — intentionally undefined
 
-template<typename C, typename = void>
+template <typename C, typename = void>
 struct is_center : std::false_type {};
 
-template<typename C>
+template <typename C>
 struct is_center<C, std::void_t<decltype(CenterTraits<C>::ffi_id)>> : std::true_type {};
 
-template<typename C>
+template <typename C>
 inline constexpr bool is_center_v = is_center<C>::value;
 
 // ============================================================================
@@ -57,38 +57,38 @@ struct Bodycentric {};
 /// Marker for simple (no-parameter) centers.
 struct NoParams {};
 
-template<>
+template <>
 struct CenterTraits<Barycentric> {
     static constexpr siderust_center_t ffi_id = SIDERUST_CENTER_T_BARYCENTRIC;
-    using Params = NoParams;
+    using Params                              = NoParams;
     static constexpr const char* name() { return "Barycentric"; }
 };
 
-template<>
+template <>
 struct CenterTraits<Heliocentric> {
     static constexpr siderust_center_t ffi_id = SIDERUST_CENTER_T_HELIOCENTRIC;
-    using Params = NoParams;
+    using Params                              = NoParams;
     static constexpr const char* name() { return "Heliocentric"; }
 };
 
-template<>
+template <>
 struct CenterTraits<Geocentric> {
     static constexpr siderust_center_t ffi_id = SIDERUST_CENTER_T_GEOCENTRIC;
-    using Params = NoParams;
+    using Params                              = NoParams;
     static constexpr const char* name() { return "Geocentric"; }
 };
 
-template<>
+template <>
 struct CenterTraits<Topocentric> {
     static constexpr siderust_center_t ffi_id = SIDERUST_CENTER_T_TOPOCENTRIC;
-    using Params = Geodetic;  // forward-declared
+    using Params                              = Geodetic; // forward-declared
     static constexpr const char* name() { return "Topocentric"; }
 };
 
-template<>
+template <>
 struct CenterTraits<Bodycentric> {
     static constexpr siderust_center_t ffi_id = SIDERUST_CENTER_T_BODYCENTRIC;
-    using Params = NoParams;  // placeholder for BodycentricParams
+    using Params                              = NoParams; // placeholder for BodycentricParams
     static constexpr const char* name() { return "Bodycentric"; }
 };
 
@@ -102,15 +102,17 @@ struct CenterTraits<Bodycentric> {
  * Hub = Barycentric.  Supported shifts: Barycentric ↔ Heliocentric,
  * Barycentric ↔ Geocentric, and the composed Heliocentric ↔ Geocentric.
  */
-template<typename From, typename To>
+template <typename From, typename To>
 struct has_center_transform : std::false_type {};
 
-template<typename C>
+template <typename C>
 struct has_center_transform<C, C> : std::true_type {};
 
-#define SIDERUST_CENTER_TRANSFORM_PAIR(A, B) \
-    template<> struct has_center_transform<A, B> : std::true_type {}; \
-    template<> struct has_center_transform<B, A> : std::true_type {}
+#define SIDERUST_CENTER_TRANSFORM_PAIR(A, B)               \
+    template <>                                            \
+    struct has_center_transform<A, B> : std::true_type {}; \
+    template <>                                            \
+    struct has_center_transform<B, A> : std::true_type {}
 
 SIDERUST_CENTER_TRANSFORM_PAIR(Barycentric, Heliocentric);
 SIDERUST_CENTER_TRANSFORM_PAIR(Barycentric, Geocentric);
@@ -118,7 +120,7 @@ SIDERUST_CENTER_TRANSFORM_PAIR(Heliocentric, Geocentric);
 
 #undef SIDERUST_CENTER_TRANSFORM_PAIR
 
-template<typename From, typename To>
+template <typename From, typename To>
 inline constexpr bool has_center_transform_v = has_center_transform<From, To>::value;
 
 } // namespace centers

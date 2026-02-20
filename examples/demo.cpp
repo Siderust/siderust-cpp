@@ -6,9 +6,9 @@
  *   cd build && cmake .. && cmake --build . && ./demo
  */
 
-#include <siderust/siderust.hpp>
 #include <cmath>
 #include <cstdio>
+#include <siderust/siderust.hpp>
 
 int main() {
     using namespace siderust;
@@ -97,7 +97,7 @@ int main() {
     auto moon = ephemeris::moon_geocentric(jd);
     std::printf("Moon geocentric (typed km): (%.2f, %.2f, %.2f)\n",
                 moon.x().value(), moon.y().value(), moon.z().value());
-    auto moon_r = std::sqrt(moon.x().value()*moon.x().value() + moon.y().value()*moon.y().value() + moon.z().value()*moon.z().value());
+    auto moon_r = std::sqrt(moon.x().value() * moon.x().value() + moon.y().value() * moon.y().value() + moon.z().value() * moon.z().value());
     std::printf("Moon distance: %.2f km\n\n", moon_r);
 
     // --- Planets ---
@@ -111,7 +111,7 @@ int main() {
     // --- Night periods (sun below -18°) ---
     auto night_start = mjd;
     auto night_end   = mjd + 1.0;
-    auto nights = sun::below_threshold(obs, night_start, night_end, -18.0_deg);
+    auto nights      = sun::below_threshold(obs, night_start, night_end, -18.0_deg);
     std::printf("Astronomical night periods (sun < -18 deg):\n");
     for (auto& p : nights) {
         std::printf("  MJD %.6f – %.6f  (%.2f hours)\n",

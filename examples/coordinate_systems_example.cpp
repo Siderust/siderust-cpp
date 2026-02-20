@@ -19,12 +19,12 @@ int main() {
     std::printf("=== Coordinate Systems Example ===\n\n");
 
     auto obs = ROQUE_DE_LOS_MUCHACHOS;
-    auto jd = JulianDate::from_utc({2026, 7, 15, 22, 0, 0});
+    auto jd  = JulianDate::from_utc({2026, 7, 15, 22, 0, 0});
 
     std::printf("Observer (Geodetic): lon=%.4f deg lat=%.4f deg h=%.1f m\n",
                 obs.lon.value(), obs.lat.value(), obs.height.value());
 
-    auto ecef_m = obs.to_cartesian<qtty::Meter>();
+    auto ecef_m  = obs.to_cartesian<qtty::Meter>();
     auto ecef_km = obs.to_cartesian<qtty::Kilometer>();
     std::printf("Observer (ECEF): x=%.2f m y=%.2f m z=%.2f m\n",
                 ecef_m.x().value(), ecef_m.y().value(), ecef_m.z().value());
@@ -34,11 +34,11 @@ int main() {
     // Vega J2000 ICRS direction.
     spherical::direction::ICRS vega_icrs(279.23473, 38.78369);
 
-    auto vega_ecl = vega_icrs.to<EclipticMeanJ2000>(jd);
+    auto vega_ecl    = vega_icrs.to<EclipticMeanJ2000>(jd);
     auto vega_eq_mod = vega_icrs.to<EquatorialMeanOfDate>(jd);
     auto vega_eq_tod = vega_icrs.to<EquatorialTrueOfDate>(jd);
-    auto vega_hor = vega_icrs.to_horizontal(jd, obs);
-    auto vega_back = vega_ecl.to<ICRS>(jd);
+    auto vega_hor    = vega_icrs.to_horizontal(jd, obs);
+    auto vega_back   = vega_ecl.to<ICRS>(jd);
 
     std::printf("Vega ICRS: RA=%.6f Dec=%.6f\n",
                 vega_icrs.ra().value(), vega_icrs.dec().value());
@@ -54,8 +54,7 @@ int main() {
                 vega_back.ra().value(), vega_back.dec().value());
 
     spherical::position::ICRS<qtty::AstronomicalUnit> target_sph_au(
-        120.0_deg, -25.0_deg, 2.0_au
-    );
+        120.0_deg, -25.0_deg, 2.0_au);
     auto target_dir = target_sph_au.direction();
     std::printf("Spherical ICRS position: RA=%.2f Dec=%.2f dist=%.3f AU\n",
                 target_sph_au.ra().value(),
@@ -64,12 +63,11 @@ int main() {
     std::printf("Direction extracted from spherical position: RA=%.2f Dec=%.2f\n\n",
                 target_dir.ra().value(), target_dir.dec().value());
 
-    cartesian::position::ICRS<qtty::Meter> target_cart_m(1.5e11, -3.0e10, 2.0e10);
+    cartesian::position::ICRS<qtty::Meter>            target_cart_m(1.5e11, -3.0e10, 2.0e10);
     cartesian::position::ICRS<qtty::AstronomicalUnit> target_cart_au(
         target_cart_m.x().to<qtty::AstronomicalUnit>(),
         target_cart_m.y().to<qtty::AstronomicalUnit>(),
-        target_cart_m.z().to<qtty::AstronomicalUnit>()
-    );
+        target_cart_m.z().to<qtty::AstronomicalUnit>());
 
     std::printf("Cartesian ICRS position: x=%.3e m y=%.3e m z=%.3e m\n",
                 target_cart_m.x().value(),
