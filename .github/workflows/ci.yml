@@ -10,8 +10,69 @@ concurrency:
 
 permissions:
   contents: read
+  checks: write
+  pull-requests: write
 
 jobs:
+  lint-cpp:
+    name: C++ Lint (clang-format + clang-tidy)
+    runs-on: ubuntu-22.04
+    env:
+      CARGO_TERM_COLOR: always
+    steps:
+      - name: Checkout (with submodules)
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Install system dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            cmake \
+            ninja-build \
+            clang-format \
+            clang-tidy
+
+      - name: Set up Rust (stable)
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
+
+      - name: Configure (CMake, compile commands)
+        shell: bash
+        run: |
+          set -euo pipefail
+          cmake -S . -B build -G Ninja -DSIDERUST_BUILD_DOCS=OFF -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+
+      - name: clang-format check
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t files < <(git ls-files '*.hpp' '*.cpp')
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "No C++ files found."
+            exit 0
+          fi
+          clang-format --dry-run --Werror "${files[@]}"
+
+      - name: clang-tidy check
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t cpp_files < <(git ls-files '*.cpp')
+          if [ ${#cpp_files[@]} -eq 0 ]; then
+            echo "No C++ source files found."
+            exit 0
+          fi
+          for file in "${cpp_files[@]}"; do
+            echo "Running clang-tidy on ${file}"
+            clang-tidy -p build --warnings-as-errors='*' "${file}"
+          done
+
   build-test-docs:
     name: Build + Test + Docs
     runs-on: ubuntu-22.04
@@ -90,3 +151,114 @@ jobs:
         run: |
           set -euo pipefail
           cmake --build build --target docs
+
+  coverage:
+    name: Test & Coverage
+    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.draft == false }}
+    runs-on: ubuntu-22.04
+    env:
+      CARGO_TERM_COLOR: always
+    steps:
+      - name: Checkout (with submodules)
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Install system dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential \
+            cmake \
+            ninja-build \
+            pkg-config \
+            libssl-dev \
+            gcovr
+
+      - name: Set up Rust (stable)
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
+
+      - name: Configure (CMake, coverage)
+        shell: bash
+        run: |
+          set -euo pipefail
+          cmake -S . -B build-coverage -G Ninja \
+            -DSIDERUST_BUILD_DOCS=OFF \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DCMAKE_CXX_FLAGS="--coverage" \
+            -DCMAKE_EXE_LINKER_FLAGS="--coverage"
+
+      - name: Build tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          cmake --build build-coverage --target test_siderust
+
+      - name: Run tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          ctest --test-dir build-coverage --output-on-failure -L siderust_cpp
+
+      - name: Coverage (Cobertura XML)
+        shell: bash
+        run: |
+          set -euo pipefail
+          gcovr \
+            --root . \
+            --exclude 'build-coverage/.*' \
+            --exclude 'siderust/.*' \
+            --exclude 'qtty-cpp/.*' \
+            --exclude 'tempoch-cpp/.*' \
+            --exclude 'tests/.*' \
+            --exclude 'examples/.*' \
+            --xml \
+            --output coverage.xml
+
+      - name: Coverage (HTML)
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p coverage_html
+          gcovr \
+            --root . \
+            --exclude 'build-coverage/.*' \
+            --exclude 'siderust/.*' \
+            --exclude 'qtty-cpp/.*' \
+            --exclude 'tempoch-cpp/.*' \
+            --exclude 'tests/.*' \
+            --exclude 'examples/.*' \
+            --html-details \
+            --output coverage_html/index.html
+
+      - name: Build coverage summary (Markdown)
+        uses: irongut/CodeCoverageSummary@v1.3.0
+        with:
+          filename: coverage.xml
+          badge: true
+          format: markdown
+          output: file
+
+      - name: Publish to Job Summary
+        shell: bash
+        run: cat code-coverage-results.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Post coverage as PR comment
+        if: github.event_name == 'pull_request'
+        uses: mshick/add-pr-comment@v2
+        with:
+          message-path: code-coverage-results.md
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload coverage HTML
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-html
+          path: coverage_html
+          retention-days: 7
