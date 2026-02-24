@@ -262,4 +262,43 @@ inline std::vector<Period> illumination_range(
 
 } // namespace moon
 
+// ============================================================================
+// Convenience helpers (pure C++, no FFI)
+// ============================================================================
+
+/**
+ * @brief Get the illuminated fraction as a percentage [0, 100].
+ */
+inline double illuminated_percent(const MoonPhaseGeometry& geom) {
+    return geom.illuminated_fraction * 100.0;
+}
+
+/**
+ * @brief Check if a phase label describes a waxing moon.
+ */
+inline bool is_waxing(MoonPhaseLabel label) {
+    switch (label) {
+    case MoonPhaseLabel::WaxingCrescent:
+    case MoonPhaseLabel::FirstQuarter:
+    case MoonPhaseLabel::WaxingGibbous:
+        return true;
+    default:
+        return false;
+    }
+}
+
+/**
+ * @brief Check if a phase label describes a waning moon.
+ */
+inline bool is_waning(MoonPhaseLabel label) {
+    switch (label) {
+    case MoonPhaseLabel::WaningGibbous:
+    case MoonPhaseLabel::LastQuarter:
+    case MoonPhaseLabel::WaningCrescent:
+        return true;
+    default:
+        return false;
+    }
+}
+
 } // namespace siderust
