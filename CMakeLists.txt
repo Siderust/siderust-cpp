@@ -29,7 +29,7 @@ endif()
 # ---------------------------------------------------------------------------
 # Platform-specific library paths
 # ---------------------------------------------------------------------------
-set(SIDERUST_ARTIFACT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/siderust/siderust-ffi/target/release)
+set(SIDERUST_ARTIFACT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/siderust/target/release)
 
 if(APPLE)
     set(SIDERUST_LIBRARY_PATH ${SIDERUST_ARTIFACT_DIR}/libsiderust_ffi.dylib)
