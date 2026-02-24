@@ -9,6 +9,7 @@
  */
 
 #include <cstddef>
+#include <ostream>
 #include <stdexcept>
 #include <string>
 
@@ -162,6 +163,30 @@ enum class CulminationKind : int32_t {
     Max = SIDERUST_CULMINATION_KIND_T_MAX,
     Min = SIDERUST_CULMINATION_KIND_T_MIN,
 };
+
+// ============================================================================
+// Stream operators for enums
+// ============================================================================
+
+inline std::ostream& operator<<(std::ostream& os, CrossingDirection dir) {
+    switch (dir) {
+    case CrossingDirection::Rising:
+        return os << "rising";
+    case CrossingDirection::Setting:
+        return os << "setting";
+    }
+    return os << "unknown";
+}
+
+inline std::ostream& operator<<(std::ostream& os, CulminationKind kind) {
+    switch (kind) {
+    case CulminationKind::Max:
+        return os << "max";
+    case CulminationKind::Min:
+        return os << "min";
+    }
+    return os << "unknown";
+}
 
 enum class RaConvention : int32_t {
     MuAlpha     = SIDERUST_RA_CONVENTION_T_MU_ALPHA,

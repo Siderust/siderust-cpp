@@ -13,28 +13,6 @@
 
 namespace {
 
-const char* crossing_direction_name(siderust::CrossingDirection dir) {
-    using siderust::CrossingDirection;
-    switch (dir) {
-    case CrossingDirection::Rising:
-        return "rising";
-    case CrossingDirection::Setting:
-        return "setting";
-    }
-    return "unknown";
-}
-
-const char* culmination_kind_name(siderust::CulminationKind kind) {
-    using siderust::CulminationKind;
-    switch (kind) {
-    case CulminationKind::Max:
-        return "max";
-    case CulminationKind::Min:
-        return "min";
-    }
-    return "unknown";
-}
-
 void print_periods(const std::vector<siderust::Period>& periods, std::size_t limit) {
     const std::size_t n = std::min(periods.size(), limit);
     for (std::size_t i = 0; i < n; ++i) {
@@ -71,7 +49,7 @@ int main() {
     if (!sun_cross.empty()) {
         const auto& c = sun_cross.front();
         std::cout << "  First crossing: " << c.time.to_utc()
-                  << " (" << crossing_direction_name(c.direction) << ")\n";
+                  << " (" << c.direction << ")\n";
     }
 
     auto moon_culm = moon::culminations(obs, window, opts);
@@ -79,7 +57,7 @@ int main() {
     if (!moon_culm.empty()) {
         const auto& c = moon_culm.front();
         std::cout << "  First culmination: " << c.time.to_utc()
-                  << " kind=" << culmination_kind_name(c.kind)
+                  << " kind=" << c.kind
                   << " alt=" << c.altitude.value() << " deg\n";
     }
 
