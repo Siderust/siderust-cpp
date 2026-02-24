@@ -17,6 +17,7 @@
 #include "coordinates.hpp"
 #include "ffi_core.hpp"
 #include "time.hpp"
+#include "trackable.hpp"
 #include <utility>
 #include <vector>
 
@@ -31,7 +32,7 @@ namespace siderust {
  * auto alt = vega.altitude_at(obs, now);
  * @endcode
  */
-class Target {
+class Target : public Trackable {
   public:
     // ------------------------------------------------------------------
     // Construction / destruction
@@ -111,7 +112,7 @@ class Target {
     /**
      * @brief Compute altitude (degrees) at a given MJD instant.
      */
-    qtty::Degree altitude_at(const Geodetic& obs, const MJD& mjd) const {
+    qtty::Degree altitude_at(const Geodetic& obs, const MJD& mjd) const override {
         double out{};
         check_status(siderust_target_altitude_at(
                          handle_, obs.to_c(), mjd.value(), &out),
@@ -124,7 +125,7 @@ class Target {
      */
     std::vector<Period> above_threshold(
         const Geodetic& obs, const Period& window,
-        qtty::Degree threshold, const SearchOptions& opts = {}) const {
+        qtty::Degree threshold, const SearchOptions& opts = {}) const override {
         tempoch_period_mjd_t* ptr   = nullptr;
         uintptr_t              count = 0;
         check_status(siderust_target_above_threshold(
@@ -144,11 +145,40 @@ class Target {
     }
 
     /**
+     * @brief Find periods when the target is below a threshold altitude.
+     */
+    std::vector<Period> below_threshold(
+        const Geodetic& obs, const Period& window,
+        qtty::Degree threshold, const SearchOptions& opts = {}) const override {
+        // Target wraps an ICRS direction; use icrs_below_threshold FFI.
+        siderust_spherical_dir_t dir_c{};
+        dir_c.polar_deg  = dec_deg();
+        dir_c.azimuth_deg = ra_deg();
+        dir_c.frame      = SIDERUST_FRAME_T_ICRS;
+        tempoch_period_mjd_t* ptr   = nullptr;
+        uintptr_t             count = 0;
+        check_status(siderust_icrs_below_threshold(
+                         dir_c, obs.to_c(), window.c_inner(),
+                         threshold.value(), opts.to_c(), &ptr, &count),
+                     "Target::below_threshold");
+        return detail_periods_from_c(ptr, count);
+    }
+
+    /**
+     * @brief Backward-compatible [start, end] overload.
+     */
+    std::vector<Period> below_threshold(
+        const Geodetic& obs, const MJD& start, const MJD& end,
+        qtty::Degree threshold, const SearchOptions& opts = {}) const {
+        return below_threshold(obs, Period(start, end), threshold, opts);
+    }
+
+    /**
      * @brief Find threshold-crossing events (rising / setting).
      */
     std::vector<CrossingEvent> crossings(
         const Geodetic& obs, const Period& window,
-        qtty::Degree threshold, const SearchOptions& opts = {}) const {
+        qtty::Degree threshold, const SearchOptions& opts = {}) const override {
         siderust_crossing_event_t* ptr   = nullptr;
         uintptr_t                  count = 0;
         check_status(siderust_target_crossings(
@@ -172,7 +202,7 @@ class Target {
      */
     std::vector<CulminationEvent> culminations(
         const Geodetic& obs, const Period& window,
-        const SearchOptions& opts = {}) const {
+        const SearchOptions& opts = {}) const override {
         siderust_culmination_event_t* ptr   = nullptr;
         uintptr_t                     count = 0;
         check_status(siderust_target_culminations(
@@ -198,7 +228,7 @@ class Target {
     /**
      * @brief Compute azimuth (degrees, N-clockwise) at a given MJD instant.
      */
-    qtty::Degree azimuth_at(const Geodetic& obs, const MJD& mjd) const {
+    qtty::Degree azimuth_at(const Geodetic& obs, const MJD& mjd) const override {
         double out{};
         check_status(siderust_target_azimuth_at(
                          handle_, obs.to_c(), mjd.value(), &out),
@@ -211,7 +241,7 @@ class Target {
      */
     std::vector<AzimuthCrossingEvent> azimuth_crossings(
         const Geodetic& obs, const Period& window,
-        qtty::Degree bearing, const SearchOptions& opts = {}) const {
+        qtty::Degree bearing, const SearchOptions& opts = {}) const override {
         siderust_azimuth_crossing_event_t* ptr   = nullptr;
         uintptr_t                          count = 0;
         check_status(siderust_target_azimuth_crossings(

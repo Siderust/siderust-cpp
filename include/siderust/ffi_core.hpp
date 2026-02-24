@@ -113,6 +113,17 @@ inline void check_tempoch_status(tempoch_status_t status, const char* operation)
 }
 
 // ============================================================================
+// FFI version
+// ============================================================================
+
+/**
+ * @brief Returns the siderust-ffi ABI version (major*10000 + minor*100 + patch).
+ */
+inline uint32_t ffi_version() {
+    return siderust_ffi_version();
+}
+
+// ============================================================================
 // Frame and Center Enums (C++ typed)
 // ============================================================================
 

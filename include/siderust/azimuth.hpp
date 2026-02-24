@@ -348,6 +348,42 @@ inline qtty::Degree azimuth_at(qtty::Degree ra, qtty::Degree dec,
     return azimuth_at(spherical::direction::ICRS(ra, dec), obs, mjd);
 }
 
+/**
+ * @brief Find epochs when an ICRS direction crosses a given azimuth bearing.
+ */
+inline std::vector<AzimuthCrossingEvent> azimuth_crossings(
+    const spherical::direction::ICRS& dir,
+    const Geodetic& obs, const Period& window,
+    qtty::Degree bearing, const SearchOptions& opts = {}) {
+    siderust_azimuth_crossing_event_t* ptr   = nullptr;
+    uintptr_t                          count = 0;
+    check_status(siderust_icrs_azimuth_crossings(
+                     dir.to_c(), obs.to_c(), window.c_inner(),
+                     bearing.value(), opts.to_c(), &ptr, &count),
+                 "icrs_altitude::azimuth_crossings");
+    return detail::az_crossings_from_c(ptr, count);
+}
+
+/**
+ * @brief Backward-compatible RA/Dec overload.
+ */
+inline std::vector<AzimuthCrossingEvent> azimuth_crossings(
+    qtty::Degree ra, qtty::Degree dec,
+    const Geodetic& obs, const Period& window,
+    qtty::Degree bearing, const SearchOptions& opts = {}) {
+    return azimuth_crossings(spherical::direction::ICRS(ra, dec), obs, window, bearing, opts);
+}
+
+/**
+ * @brief Backward-compatible [start, end] overload.
+ */
+inline std::vector<AzimuthCrossingEvent> azimuth_crossings(
+    const spherical::direction::ICRS& dir,
+    const Geodetic& obs, const MJD& start, const MJD& end,
+    qtty::Degree bearing, const SearchOptions& opts = {}) {
+    return azimuth_crossings(dir, obs, Period(start, end), bearing, opts);
+}
+
 } // namespace icrs_altitude
 
 } // namespace siderust
