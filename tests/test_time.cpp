@@ -31,8 +31,8 @@ TEST(Time, JulianDateRoundtripUtc) {
 
 TEST(Time, JulianDateArithmetic) {
     auto jd1 = JulianDate(2451545.0);
-    auto jd2 = jd1 + 365.25;
-    EXPECT_NEAR(jd2 - jd1, 365.25, 1e-10);
+    auto jd2 = jd1 + qtty::Day(365.25);
+    EXPECT_NEAR((jd2 - jd1).value(), 365.25, 1e-10);
 }
 
 TEST(Time, JulianCenturies) {
@@ -62,24 +62,74 @@ TEST(Time, MjdRoundtrip) {
 // ============================================================================
 
 TEST(Time, PeriodDuration) {
-    Period p(60200.0, 60201.0);
-    EXPECT_NEAR(p.duration_days(), 1.0, 1e-10);
+    Period p(MJD(60200.0), MJD(60201.0));
+    EXPECT_NEAR(p.duration().value(), 1.0, 1e-10);
 }
 
 TEST(Time, PeriodIntersection) {
-    Period a(60200.0, 60202.0);
-    Period b(60201.0, 60203.0);
+    Period a(MJD(60200.0), MJD(60202.0));
+    Period b(MJD(60201.0), MJD(60203.0));
     auto   c = a.intersection(b);
-    EXPECT_NEAR(c.start_mjd(), 60201.0, 1e-10);
-    EXPECT_NEAR(c.end_mjd(), 60202.0, 1e-10);
+    EXPECT_NEAR(c.start().value(), 60201.0, 1e-10);
+    EXPECT_NEAR(c.end().value(), 60202.0, 1e-10);
 }
 
 TEST(Time, PeriodNoIntersection) {
-    Period a(60200.0, 60201.0);
-    Period b(60202.0, 60203.0);
+    Period a(MJD(60200.0), MJD(60201.0));
+    Period b(MJD(60202.0), MJD(60203.0));
     EXPECT_THROW(a.intersection(b), tempoch::NoIntersectionError);
 }
 
 TEST(Time, PeriodInvalidThrows) {
-    EXPECT_THROW(Period(60203.0, 60200.0), tempoch::InvalidPeriodError);
+    EXPECT_THROW(Period(MJD(60203.0), MJD(60200.0)), tempoch::InvalidPeriodError);
+}
+
+// ============================================================================
+// Typed-quantity (_qty) methods
+// ============================================================================
+
+TEST(Time, JulianCenturiesQty) {
+    auto jd = JulianDate::J2000();
+    auto jc = jd.julian_centuries_qty();
+    EXPECT_NEAR(jc.value(), 0.0, 1e-10);
+    EXPECT_EQ(jc.unit_id(), UNIT_ID_JULIAN_CENTURY);
+}
+
+TEST(Time, JulianCenturiesQtyNonZero) {
+    // 36525 days ≈ 1 Julian century
+    auto jd = JulianDate(2451545.0 + 36525.0);
+    auto jc = jd.julian_centuries_qty();
+    EXPECT_NEAR(jc.value(), 1.0, 1e-10);
+}
+
+TEST(Time, ArithmeticWithHours) {
+    auto jd1 = JulianDate(2451545.0);
+    auto jd2 = jd1 + qtty::Hour(24.0);
+    EXPECT_NEAR((jd2 - jd1).value(), 1.0, 1e-10);
+}
+
+TEST(Time, ArithmeticWithMinutes) {
+    auto mjd1 = MJD(60200.0);
+    auto mjd2 = mjd1 + qtty::Minute(1440.0);
+    EXPECT_NEAR((mjd2 - mjd1).value(), 1.0, 1e-10);
+}
+
+TEST(Time, SubtractQuantityHours) {
+    auto jd1 = JulianDate(2451546.0);
+    auto jd2 = jd1 - qtty::Hour(12.0);
+    EXPECT_NEAR(jd2.value(), 2451545.5, 1e-10);
+}
+
+TEST(Time, DifferenceConvertible) {
+    auto jd1 = JulianDate(2451545.0);
+    auto jd2 = JulianDate(2451546.0);
+    auto diff = jd2 - jd1;
+    auto hours = diff.to<qtty::Hour>();
+    EXPECT_NEAR(hours.value(), 24.0, 1e-10);
+}
+
+TEST(Time, PeriodDurationInMinutes) {
+    Period p(MJD(60200.0), MJD(60200.5));
+    auto min = p.duration<qtty::Minute>();
+    EXPECT_NEAR(min.value(), 720.0, 1e-6);
 }

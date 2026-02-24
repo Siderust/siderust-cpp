@@ -102,11 +102,11 @@ struct Direction {
     /// @name FFI interop
     /// @{
     siderust_spherical_dir_t to_c() const {
-        return {azimuth_.value(), polar_.value(), frame_id()};
+        return {polar_.value(), azimuth_.value(), frame_id()};
     }
 
     static Direction from_c(const siderust_spherical_dir_t& c) {
-        return Direction(c.lon_deg, c.lat_deg);
+        return Direction(c.azimuth_deg, c.polar_deg);
     }
     /// @}
 
@@ -129,7 +129,7 @@ struct Direction {
             siderust_spherical_dir_t out;
             check_status(
                 siderust_spherical_dir_transform_frame(
-                    azimuth_.value(), polar_.value(),
+                    polar_.value(), azimuth_.value(),
                     frames::FrameTraits<F>::ffi_id,
                     frames::FrameTraits<Target>::ffi_id,
                     jd.value(), &out),
@@ -158,7 +158,7 @@ struct Direction {
         siderust_spherical_dir_t out;
         check_status(
             siderust_spherical_dir_to_horizontal(
-                azimuth_.value(), polar_.value(),
+                polar_.value(), azimuth_.value(),
                 frames::FrameTraits<F>::ffi_id,
                 jd.value(), observer.to_c(), &out),
             "Direction::to_horizontal");

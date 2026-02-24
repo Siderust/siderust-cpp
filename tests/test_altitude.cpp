@@ -16,7 +16,7 @@ class AltitudeTest : public ::testing::Test {
     void SetUp() override {
         obs    = ROQUE_DE_LOS_MUCHACHOS;
         start  = MJD::from_jd(JulianDate::from_utc({2026, 7, 15, 18, 0, 0}));
-        end_   = start + 1.0; // 24 hours
+        end_   = start + qtty::Day(1.0); // 24 hours
         window = Period(start, end_);
     }
 };
@@ -37,7 +37,7 @@ TEST_F(AltitudeTest, SunAboveThreshold) {
     auto periods = sun::above_threshold(obs, window, qtty::Degree(0.0));
     EXPECT_GT(periods.size(), 0u);
     for (auto& p : periods) {
-        EXPECT_GT(p.duration_days(), 0.0);
+        EXPECT_GT(p.duration().value(), 0.0);
     }
 }
 
@@ -47,7 +47,7 @@ TEST_F(AltitudeTest, SunBelowThreshold) {
     // In July at La Palma, astronomical night may be short but should exist
     // (or possibly not if too close to solstice — accept 0+)
     for (auto& p : periods) {
-        EXPECT_GT(p.duration_days(), 0.0);
+        EXPECT_GT(p.duration().value(), 0.0);
     }
 }
 
@@ -67,7 +67,7 @@ TEST_F(AltitudeTest, SunAltitudePeriods) {
     // Find periods when sun is between -6° and 0° (civil twilight)
     auto periods = sun::altitude_periods(obs, window, qtty::Degree(-6.0), qtty::Degree(0.0));
     for (auto& p : periods) {
-        EXPECT_GT(p.duration_days(), 0.0);
+        EXPECT_GT(p.duration().value(), 0.0);
     }
 }
 
@@ -85,7 +85,7 @@ TEST_F(AltitudeTest, MoonAboveThreshold) {
     auto periods = moon::above_threshold(obs, window, qtty::Degree(0.0));
     // Moon may or may not be above horizon for this date; just no crash
     for (auto& p : periods) {
-        EXPECT_GT(p.duration_days(), 0.0);
+        EXPECT_GT(p.duration().value(), 0.0);
     }
 }
 

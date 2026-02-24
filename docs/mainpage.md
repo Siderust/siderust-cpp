@@ -29,7 +29,8 @@ codebase without writing a single line of Rust.
 
 ```cpp
 #include <siderust/siderust.hpp>
-#include <cstdio>
+#include <iostream>
+#include <iomanip>
 
 int main() {
     using namespace siderust;
@@ -41,17 +42,17 @@ int main() {
 
     // Sun altitude at the observatory
     qtty::Radian alt = sun::altitude_at(obs, mjd);
-    std::printf("Sun altitude: %.4f rad\n", alt.value());
+    std::cout << std::fixed << std::setprecision(4) << "Sun altitude: " << alt << " rad\n";
 
     // Star from built-in catalog
     const auto& vega    = VEGA;
     qtty::Radian star_alt = star_altitude::altitude_at(vega, obs, mjd);
-    std::printf("Vega altitude: %.4f rad\n", star_alt.value());
+    std::cout << "Vega altitude: " << star_alt << " rad\n";
 
     // Astronomical night periods (twilight < -18°)
     auto nights = sun::below_threshold(obs, mjd, mjd + 1.0, -18.0_deg);
     for (auto& p : nights)
-        std::printf("Night: MJD %.4f – %.4f\n", p.start_mjd(), p.end_mjd());
+        std::cout << "Night: MJD " << p.start() << " – " << p.end() << "\n";
 
     return 0;
 }
