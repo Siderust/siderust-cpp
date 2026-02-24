@@ -27,11 +27,14 @@
  */
 
 #include "altitude.hpp"
+#include "azimuth.hpp"
 #include "bodies.hpp"
 #include "centers.hpp"
 #include "coordinates.hpp"
 #include "ephemeris.hpp"
 #include "ffi_core.hpp"
 #include "frames.hpp"
+#include "lunar_phase.hpp"
 #include "observatories.hpp"
+#include "target.hpp"
 #include "time.hpp"
