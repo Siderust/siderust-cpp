@@ -10,38 +10,39 @@ Modern, header-only C++17 wrapper for **siderust** — a high-precision astronom
 |--------|-------------|
 | **Time** (`time.hpp`) | `JulianDate`, `MJD`, `UTC`, `Period` — value types with arithmetic and UTC round-trips |
 | **Coordinates** (`coordinates.hpp`) | Modular typed API (`coordinates/{geodetic,spherical,cartesian,types}.hpp`) plus selective alias headers under `coordinates/types/{spherical,cartesian}/...` |
+| **Frames & Centers** (`frames.hpp`, `centers.hpp`) | Compile-time frame/center tags and transform capability traits |
 | **Bodies** (`bodies.hpp`) | `Star` (RAII, catalog + custom), `Planet` (8 planets), `ProperMotion`, `Orbit` |
 | **Observatories** (`observatories.hpp`) | Named sites: Roque de los Muchachos, Paranal, Mauna Kea, La Silla |
 | **Altitude** (`altitude.hpp`) | Sun / Moon / Star / ICRS altitude: instant, above/below threshold, crossings, culminations |
+| **Azimuth** (`azimuth.hpp`) | Sun / Moon / Star / ICRS azimuth: instant, crossings, extrema, range windows |
+| **Targets** (`trackable.hpp`, `target.hpp`, `body_target.hpp`, `star_target.hpp`) | Polymorphic tracking with `Trackable`, `Target`, `BodyTarget`, and `StarTarget` |
+| **Lunar Phase** (`lunar_phase.hpp`) | Phase geometry/labels, principal phase events, illumination window search |
 | **Ephemeris** (`ephemeris.hpp`) | VSOP87 Sun/Earth positions, ELP2000 Moon position |
 
 ## Quick Start
 
 ```cpp
 #include <siderust/siderust.hpp>
-#include <cstdio>
+#include <iostream>
 
 int main() {
     using namespace siderust;
-    using namespace qtty::literals;
 
     auto obs  = ROQUE_DE_LOS_MUCHACHOS;
     auto jd   = JulianDate::from_utc({2026, 7, 15, 22, 0, 0});
     auto mjd  = MJD::from_jd(jd);
+    auto win  = Period(mjd, mjd + qtty::Day(1.0));
 
-    // Sun altitude
-    qtty::Radian alt = sun::altitude_at(obs, mjd);
-    std::printf("Sun altitude: %.4f rad\n", alt.value());
+    qtty::Degree sun_alt = sun::altitude_at(obs, mjd).to<qtty::Degree>();
+    qtty::Degree sun_az  = sun::azimuth_at(obs, mjd);
+    std::cout << "Sun alt=" << sun_alt.value() << " deg"
+              << " az=" << sun_az.value() << " deg\n";
 
-    // Star from catalog
-    const auto& vega = VEGA;
-    qtty::Radian star_alt = star_altitude::altitude_at(vega, obs, mjd);
-    std::printf("Vega altitude: %.4f rad\n", star_alt.value());
+    Target fixed(279.23473, 38.78369); // Vega-like ICRS target
+    std::cout << "Target alt=" << fixed.altitude_at(obs, mjd).value() << " deg\n";
 
-    // Night periods (astronomical twilight)
-    auto nights = sun::below_threshold(obs, mjd, mjd + 1.0, -18.0_deg);
-    for (auto& p : nights)
-        std::printf("Night: MJD %.4f – %.4f\n", p.start_mjd(), p.end_mjd());
+    auto nights = sun::below_threshold(obs, win, qtty::Degree(-18.0));
+    std::cout << "Astronomical-night periods in next 24h: " << nights.size() << "\n";
 
     return 0;
 }
@@ -65,6 +66,8 @@ cmake --build .
 ./coordinate_systems_example
 ./solar_system_bodies_example
 ./altitude_events_example
+./trackable_targets_example
+./azimuth_lunar_phase_example
 
 # Run tests
 ctest --output-on-failure
@@ -153,6 +156,12 @@ siderust-cpp/
 │   ├── bodies.hpp            ← Star, Planet, ProperMotion
 │   ├── observatories.hpp     ← named observatory locations
 │   ├── altitude.hpp          ← sun/moon/star altitude API
+│   ├── azimuth.hpp           ← azimuth queries and events
+│   ├── lunar_phase.hpp       ← moon phase geometry and events
+│   ├── trackable.hpp         ← polymorphic trackable interface
+│   ├── target.hpp            ← fixed ICRS target (RAII)
+│   ├── body_target.hpp       ← body enum trackable adapter
+│   ├── star_target.hpp       ← star trackable adapter
 │   └── ephemeris.hpp         ← VSOP87/ELP2000 positions
 ├── examples/demo.cpp
 ├── tests/
