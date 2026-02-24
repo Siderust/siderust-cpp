@@ -189,6 +189,24 @@ if(DEFINED _siderust_rpath)
     )
 endif()
 
+add_executable(trackable_targets_example examples/trackable_targets_example.cpp)
+target_link_libraries(trackable_targets_example PRIVATE siderust_cpp)
+if(DEFINED _siderust_rpath)
+    set_target_properties(trackable_targets_example PROPERTIES
+        BUILD_RPATH ${_siderust_rpath}
+        INSTALL_RPATH ${_siderust_rpath}
+    )
+endif()
+
+add_executable(azimuth_lunar_phase_example examples/azimuth_lunar_phase_example.cpp)
+target_link_libraries(azimuth_lunar_phase_example PRIVATE siderust_cpp)
+if(DEFINED _siderust_rpath)
+    set_target_properties(azimuth_lunar_phase_example PROPERTIES
+        BUILD_RPATH ${_siderust_rpath}
+        INSTALL_RPATH ${_siderust_rpath}
+    )
+endif()
+
 # ---------------------------------------------------------------------------
 # Tests
 # ---------------------------------------------------------------------------
