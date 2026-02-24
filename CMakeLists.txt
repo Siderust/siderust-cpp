@@ -29,7 +29,7 @@ endif()
 # ---------------------------------------------------------------------------
 # Platform-specific library paths
 # ---------------------------------------------------------------------------
-set(SIDERUST_ARTIFACT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/siderust/target/release)
+set(SIDERUST_ARTIFACT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/siderust/siderust-ffi/target/release)
 
 if(APPLE)
     set(SIDERUST_LIBRARY_PATH ${SIDERUST_ARTIFACT_DIR}/libsiderust_ffi.dylib)
@@ -47,11 +47,14 @@ endif()
 # Build siderust-ffi (depends on tempoch-ffi via tempoch-cpp subdirectory)
 add_custom_target(
     build_siderust_ffi
-    COMMAND ${CARGO_BIN} build --release ${_SIDERUST_FEATURES_ARGS}
+    # Use `cargo rustc --crate-type cdylib` so that the shared library is
+    # produced even though Cargo.toml only lists rlib (which keeps coverage
+    # instrumentation clean during `cargo test`/`cargo llvm-cov`).
+    COMMAND ${CARGO_BIN} rustc --release --crate-type cdylib ${_SIDERUST_FEATURES_ARGS}
     WORKING_DIRECTORY ${SIDERUST_FFI_DIR}
     BYPRODUCTS ${SIDERUST_LIBRARY_PATH}
     DEPENDS build_tempoch_ffi
-    COMMENT "Building siderust-ffi via Cargo"
+    COMMENT "Building siderust-ffi via Cargo (cdylib override)"
     VERBATIM
 )
 
@@ -101,13 +104,17 @@ if(SIDERUST_BUILD_DOCS)
         set(SIDERUST_DOXYFILE_OUT ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile.siderust_cpp)
         configure_file(${SIDERUST_DOXYFILE_IN} ${SIDERUST_DOXYFILE_OUT} @ONLY)
 
-        add_custom_target(docs
-            COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/docs/doxygen
-            COMMAND ${DOXYGEN_EXECUTABLE} ${SIDERUST_DOXYFILE_OUT}
-            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-            COMMENT "Generating API documentation with Doxygen"
-            VERBATIM
-        )
+        if(NOT TARGET docs)
+            add_custom_target(docs
+                COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/docs/doxygen
+                COMMAND ${DOXYGEN_EXECUTABLE} ${SIDERUST_DOXYFILE_OUT}
+                WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                COMMENT "Generating API documentation with Doxygen"
+                VERBATIM
+            )
+        else()
+            message(STATUS "Top-level 'docs' target already exists; skipping creation to avoid conflict with subprojects")
+        endif()
     else()
         message(STATUS "Doxygen not found; 'docs' target will not be available")
     endif()
@@ -115,9 +122,9 @@ endif()
 
 # RPATH for shared library lookup at runtime
 if(APPLE)
-    set(_siderust_rpath "@loader_path/../siderust/target/release;@loader_path/../tempoch-cpp/tempoch/tempoch-ffi/target/release;@loader_path/../qtty-cpp/qtty/target/release")
+    set(_siderust_rpath "@loader_path/../siderust/siderust-ffi/target/release;@loader_path/../tempoch-cpp/tempoch/tempoch-ffi/target/release;@loader_path/../qtty-cpp/qtty/target/release")
 elseif(UNIX)
-    set(_siderust_rpath "$ORIGIN/../siderust/target/release:$ORIGIN/../tempoch-cpp/tempoch/tempoch-ffi/target/release:$ORIGIN/../qtty-cpp/qtty/target/release")
+    set(_siderust_rpath "$ORIGIN/../siderust/siderust-ffi/target/release:$ORIGIN/../tempoch-cpp/tempoch/tempoch-ffi/target/release:$ORIGIN/../qtty-cpp/qtty/target/release")
 endif()
 
 # ---------------------------------------------------------------------------
