@@ -2,30 +2,32 @@
 
 /**
  * @file trackable.hpp
- * @brief Abstract base class for trackable celestial objects.
+ * @brief Abstract base class for all celestial targets.
  *
- * `Trackable` defines a polymorphic interface for any celestial object
- * whose altitude and azimuth can be computed at an observer location.
- * Implementations include:
+ * `Target` is the unified concept for anything in the sky that can be
+ * pointed at from an observer location.  Concrete implementations cover:
  *
- * - **Target** — fixed ICRS direction (RA/Dec)
+ * - **DirectionTarget** — fixed spherical direction in any supported frame
+ *   (ICRS, equatorial, ecliptic).  Aliased as `ICRSTarget`, etc.
  * - **StarTarget** — adapter for `Star` catalog objects
- * - **BodyTarget** — solar-system bodies (Sun, Moon, planets, Pluto)
+ * - **BodyTarget** — solar-system bodies (Sun, Moon, planets)
+ * - *(future)* **SatelliteTarget** — Earth-orbiting satellites (TLE/SGP4)
  *
- * Use `std::unique_ptr<Trackable>` to hold heterogeneous collections of
- * trackable objects.
+ * Every `Target` carries a human-readable `name()`.
+ * Use `std::unique_ptr<Target>` to hold heterogeneous collections.
  *
  * ### Example
  * @code
  * auto sun = std::make_unique<siderust::BodyTarget>(siderust::Body::Sun);
+ * std::cout << sun->name() << "\n";           // "Sun"
  * qtty::Degree alt = sun->altitude_at(obs, now);
  *
  * // Polymorphic usage
- * std::vector<std::unique_ptr<siderust::Trackable>> targets;
+ * std::vector<std::unique_ptr<siderust::Target>> targets;
  * targets.push_back(std::move(sun));
  * targets.push_back(std::make_unique<siderust::StarTarget>(VEGA));
  * for (const auto& t : targets) {
- *     std::cout << t->altitude_at(obs, now).value() << "\n";
+ *     std::cout << t->name() << ": " << t->altitude_at(obs, now) << "\n";
  * }
  * @endcode
  */
@@ -35,33 +37,40 @@
 #include "coordinates.hpp"
 #include "time.hpp"
 #include <memory>
+#include <string>
 #include <vector>
 
 namespace siderust {
 
 /**
- * @brief Abstract interface for any object whose altitude/azimuth can be
- * computed.
+ * @brief Abstract base for any celestial object that can be tracked from an
+ * observer location.
  *
- * This class defines the common API shared by all trackable celestial objects.
- * Implementations must provide altitude_at and azimuth_at at minimum; the
- * remaining methods have default implementations that throw if not overridden.
+ * Subclasses represent concrete target kinds: fixed sky directions, catalog
+ * stars, solar-system bodies, and (in the future) satellites.  All must
+ * implement `name()`, `altitude_at()`, and `azimuth_at()`; the search
+ * helpers also need overrides.
  */
-class Trackable {
+class Target {
 public:
-  virtual ~Trackable() = default;
+  virtual ~Target() = default;
+
+  // ------------------------------------------------------------------
+  // Identity
+  // ------------------------------------------------------------------
+
+  /**
+   * @brief Human-readable name for this target (e.g. "Sun", "Vega",
+   * "ICRS(279.2°, 38.8°)").
+   */
+  virtual std::string name() const = 0;
 
   // ------------------------------------------------------------------
   // Altitude queries
   // ------------------------------------------------------------------
 
   /**
-   * @brief Compute altitude at a given MJD instant.
-   *
-   * The return unit varies by implementation (radians for sun/moon/star,
-   * degrees for Target/BodyTarget). Check the concrete class documentation.
-   *
-   * @note For BodyTarget, returns radians; for Target, returns degrees.
+   * @brief Compute altitude (degrees) at a given MJD instant.
    */
   virtual qtty::Degree altitude_at(const Geodetic &obs,
                                    const MJD &mjd) const = 0;
@@ -114,12 +123,15 @@ public:
                     qtty::Degree bearing,
                     const SearchOptions &opts = {}) const = 0;
 
-  // Non-copyable, non-movable from base
-  Trackable() = default;
-  Trackable(const Trackable &) = delete;
-  Trackable &operator=(const Trackable &) = delete;
-  Trackable(Trackable &&) = default;
-  Trackable &operator=(Trackable &&) = default;
+  // Non-copyable, movable from base
+  Target() = default;
+  Target(const Target &) = delete;
+  Target &operator=(const Target &) = delete;
+  Target(Target &&) = default;
+  Target &operator=(Target &&) = default;
 };
+
+/// @brief Backward-compatible alias.  Prefer `Target` in new code.
+using Trackable = Target;
 
 } // namespace siderust
