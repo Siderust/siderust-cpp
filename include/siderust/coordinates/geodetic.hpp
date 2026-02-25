@@ -12,6 +12,8 @@
 
 #include <qtty/qtty.hpp>
 
+#include <ostream>
+
 namespace siderust {
 namespace cartesian {
 template <typename C, typename F, typename U>
@@ -59,5 +61,16 @@ struct Geodetic {
     template <typename U = qtty::Meter>
     cartesian::Position<centers::Geocentric, frames::ECEF, U> to_cartesian() const;
 };
+
+// ============================================================================
+// Stream operators
+// ============================================================================
+
+/**
+ * @brief Stream operator for Geodetic.
+ */
+inline std::ostream& operator<<(std::ostream& os, const Geodetic& geo) {
+    return os << "lon=" << geo.lon << " lat=" << geo.lat << " h=" << geo.height;
+}
 
 } // namespace siderust
