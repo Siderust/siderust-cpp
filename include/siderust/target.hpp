@@ -2,12 +2,16 @@
 
 /**
  * @file target.hpp
- * @brief Generic strongly-typed RAII wrapper for a siderust Target direction.
+ * @brief Strongly-typed fixed-direction Target for any supported frame.
  *
- * `Target<C>` represents a fixed celestial direction in any supported
- * reference frame and exposes altitude and azimuth computations via the same
- * observer/window API as the sun/moon/star helpers in altitude.hpp and
- * azimuth.hpp.
+ * `DirectionTarget<C>` represents a fixed celestial direction (star, galaxy,
+ * or any user-defined sky coordinate) in any supported reference frame and
+ * exposes altitude/azimuth computations via the same observer/window API as
+ * the body helpers in altitude.hpp and azimuth.hpp.
+ *
+ * It is one concrete implementation of `Target` (the common abstract base).
+ * For moving solar-system bodies use `BodyTarget`; for catalog stars use
+ * `StarTarget`.
  *
  * The template parameter `C` must be an instantiation of
  * `spherical::Direction<F>` for a frame `F` that can be transformed to ICRS
@@ -34,6 +38,8 @@
 #include "ffi_core.hpp"
 #include "time.hpp"
 #include "trackable.hpp"
+#include <sstream>
+#include <string>
 #include <type_traits>
 #include <utility>
 #include <vector>
@@ -78,7 +84,8 @@ using spherical_direction_frame_t = typename spherical_direction_frame<T>::type;
 // ============================================================================
 
 /**
- * @brief Move-only RAII wrapper for a fixed celestial target direction.
+ * @brief Fixed celestial direction target — a `Target` for a specific sky
+ * position.
  *
  * @tparam C  Spherical direction type (e.g. `spherical::direction::ICRS`).
  *
@@ -87,7 +94,15 @@ using spherical_direction_frame_t = typename spherical_direction_frame<T>::type;
  * using namespace siderust;
  * ICRSTarget vega{ spherical::direction::ICRS{ 279.2348_deg, +38.7836_deg } };
  * auto alt = vega.altitude_at(obs, now);   // → qtty::Degree
+ * std::cout << vega.name() << "\n";        // "ICRS(279.23°, 38.78°)"
  * std::cout << vega.ra() << "\n";          // qtty::Degree (equatorial frames)
+ * @endcode
+ *
+ * ### Example — named ICRS target
+ * @code
+ * ICRSTarget vega{ spherical::direction::ICRS{ 279.2348_deg, +38.7836_deg },
+ *                  JulianDate::J2000(), "Vega" };
+ * std::cout << vega.name() << "\n";  // "Vega"
  * @endcode
  *
  * ### Example — Ecliptic target (auto-converted to ICRS internally)
@@ -97,7 +112,7 @@ using spherical_direction_frame_t = typename spherical_direction_frame<T>::type;
  * auto alt = ec.altitude_at(obs, now);
  * @endcode
  */
-template <typename C> class Target : public Trackable {
+template <typename C> class DirectionTarget : public Target {
 
   static_assert(detail::is_spherical_direction_v<C>,
                 "Target<C>: C must be a specialisation of "
@@ -126,9 +141,12 @@ public:
    *
    * @param dir    Spherical direction (any supported frame).
    * @param epoch  Coordinate epoch (default J2000.0).
+   * @param label  Optional human-readable name.  If empty, a default
+   *               "Frame(lon°, lat°)" string is generated from the direction.
    */
-  explicit Target(C dir, JulianDate epoch = JulianDate::J2000())
-      : m_dir_(dir), m_epoch_(epoch) {
+  explicit DirectionTarget(C dir, JulianDate epoch = JulianDate::J2000(),
+                           std::string label = "")
+      : m_dir_(dir), m_epoch_(epoch), label_(std::move(label)) {
     // Convert to ICRS for the FFI; identity transform when already ICRS.
     if constexpr (std::is_same_v<Frame, frames::ICRS>) {
       m_icrs_ = dir;
@@ -143,7 +161,7 @@ public:
     handle_ = h;
   }
 
-  ~Target() {
+  ~DirectionTarget() {
     if (handle_) {
       siderust_target_free(handle_);
       handle_ = nullptr;
@@ -151,14 +169,15 @@ public:
   }
 
   /// Move constructor.
-  Target(Target &&other) noexcept
+  DirectionTarget(DirectionTarget &&other) noexcept
       : m_dir_(std::move(other.m_dir_)), m_epoch_(other.m_epoch_),
-        m_icrs_(other.m_icrs_), handle_(other.handle_) {
+        m_icrs_(other.m_icrs_), label_(std::move(other.label_)),
+        handle_(other.handle_) {
     other.handle_ = nullptr;
   }
 
   /// Move assignment.
-  Target &operator=(Target &&other) noexcept {
+  DirectionTarget &operator=(DirectionTarget &&other) noexcept {
     if (this != &other) {
       if (handle_) {
         siderust_target_free(handle_);
@@ -166,6 +185,7 @@ public:
       m_dir_ = std::move(other.m_dir_);
       m_epoch_ = other.m_epoch_;
       m_icrs_ = other.m_icrs_;
+      label_ = std::move(other.label_);
       handle_ = other.handle_;
       other.handle_ = nullptr;
     }
@@ -173,8 +193,27 @@ public:
   }
 
   // Prevent copying (the handle has unique ownership).
-  Target(const Target &) = delete;
-  Target &operator=(const Target &) = delete;
+  DirectionTarget(const DirectionTarget &) = delete;
+  DirectionTarget &operator=(const DirectionTarget &) = delete;
+
+  // ------------------------------------------------------------------
+  // Identity (implements Target)
+  // ------------------------------------------------------------------
+
+  /**
+   * @brief Human-readable name for this direction target.
+   *
+   * Returns the label passed at construction if one was provided; otherwise
+   * generates a "Frame(lon°, lat°)" string from the ICRS direction.
+   */
+  std::string name() const override {
+    if (!label_.empty())
+      return label_;
+    std::ostringstream ss;
+    ss << "Direction(" << m_icrs_.ra().value() << "\xc2\xb0, "
+       << m_icrs_.dec().value() << "\xc2\xb0)";
+    return ss.str();
+  }
 
   // ------------------------------------------------------------------
   // Coordinate accessors
@@ -362,6 +401,7 @@ private:
   C m_dir_;
   JulianDate m_epoch_;
   spherical::direction::ICRS m_icrs_;
+  std::string label_;
   SiderustTarget *handle_ = nullptr;
 
   /// Build a Period vector from a tempoch_period_mjd_t* array.
@@ -382,25 +422,26 @@ private:
 // ============================================================================
 
 /// Fixed direction in ICRS (most common use-case).
-using ICRSTarget = Target<spherical::direction::ICRS>;
+using ICRSTarget = DirectionTarget<spherical::direction::ICRS>;
 
 /// Fixed direction in ICRF (treated identically to ICRS in Siderust).
-using ICRFTarget = Target<spherical::direction::ICRF>;
+using ICRFTarget = DirectionTarget<spherical::direction::ICRF>;
 
 /// Fixed direction in mean equatorial coordinates of J2000.0 (FK5).
 using EquatorialMeanJ2000Target =
-    Target<spherical::direction::EquatorialMeanJ2000>;
+    DirectionTarget<spherical::direction::EquatorialMeanJ2000>;
 
 /// Fixed direction in mean equatorial coordinates of date (precessed only).
 using EquatorialMeanOfDateTarget =
-    Target<spherical::direction::EquatorialMeanOfDate>;
+    DirectionTarget<spherical::direction::EquatorialMeanOfDate>;
 
 /// Fixed direction in true equatorial coordinates of date (precessed +
 /// nutated).
 using EquatorialTrueOfDateTarget =
-    Target<spherical::direction::EquatorialTrueOfDate>;
+    DirectionTarget<spherical::direction::EquatorialTrueOfDate>;
 
 /// Fixed direction in mean ecliptic coordinates of J2000.0.
-using EclipticMeanJ2000Target = Target<spherical::direction::EclipticMeanJ2000>;
+using EclipticMeanJ2000Target =
+    DirectionTarget<spherical::direction::EclipticMeanJ2000>;
 
 } // namespace siderust

@@ -84,7 +84,7 @@ TEST(Bodies, AllPlanets) {
 }
 
 // ============================================================================
-// BodyTarget — generic solar-system body via Trackable polymorphism
+// BodyTarget — solar-system body via Target polymorphism
 // ============================================================================
 
 TEST(Bodies, BodyTargetSunAltitude) {
@@ -152,7 +152,7 @@ TEST(Bodies, BodyTargetPolymorphic) {
   auto obs = geodetic(2.35, 48.85, 35.0);
   auto mjd = MJD(60000.5);
 
-  std::vector<std::unique_ptr<Trackable>> targets;
+  std::vector<std::unique_ptr<Target>> targets;
   targets.push_back(std::make_unique<BodyTarget>(Body::Sun));
   targets.push_back(std::make_unique<BodyTarget>(Body::Mars));
 
@@ -178,7 +178,7 @@ TEST(Bodies, BodyNamespaceAzimuthAt) {
 }
 
 // ============================================================================
-// StarTarget — Trackable adapter for Star
+// StarTarget — Target implementation for catalog stars
 // ============================================================================
 
 TEST(Bodies, StarTargetAltitude) {
@@ -196,7 +196,7 @@ TEST(Bodies, StarTargetPolymorphicWithBodyTarget) {
   auto obs = geodetic(2.35, 48.85, 35.0);
   auto mjd = MJD(60000.5);
 
-  std::vector<std::unique_ptr<Trackable>> targets;
+  std::vector<std::unique_ptr<Target>> targets;
   targets.push_back(std::make_unique<BodyTarget>(Body::Sun));
   targets.push_back(std::make_unique<StarTarget>(VEGA));
 

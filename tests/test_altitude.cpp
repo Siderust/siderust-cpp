@@ -163,8 +163,8 @@ TEST_F(AltitudeTest, ICRSTargetTypedAccessors) {
 }
 
 TEST_F(AltitudeTest, ICRSTargetPolymorphic) {
-  // Verify Target<C> is usable through the Trackable interface
-  std::unique_ptr<Trackable> t = std::make_unique<ICRSTarget>(
+  // Verify DirectionTarget<C> is usable through the Target interface
+  std::unique_ptr<Target> t = std::make_unique<ICRSTarget>(
       spherical::direction::ICRS{qtty::Degree(279.23), qtty::Degree(38.78)});
   qtty::Degree alt = t->altitude_at(obs, start);
   EXPECT_GT(alt.value(), -90.0);
