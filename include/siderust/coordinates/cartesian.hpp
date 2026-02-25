@@ -13,6 +13,7 @@
 #include <qtty/qtty.hpp>
 
 #include <ostream>
+#include <cmath>
 
 namespace siderust {
 namespace cartesian {
@@ -68,6 +69,22 @@ template <typename C, typename F, typename U = qtty::Meter> struct Position {
   U x() const { return comp_x; }
   U y() const { return comp_y; }
   U z() const { return comp_z; }
+
+  U distance() const {
+    using std::sqrt;
+    const double vx = comp_x.value();
+    const double vy = comp_y.value();
+    const double vz = comp_z.value();
+    return U(sqrt(vx * vx + vy * vy + vz * vz));
+  }
+
+  U distance_to(const Position &other) const {
+    using std::sqrt;
+    const double dx = comp_x.value() - other.comp_x.value();
+    const double dy = comp_y.value() - other.comp_y.value();
+    const double dz = comp_z.value() - other.comp_z.value();
+    return U(sqrt(dx * dx + dy * dy + dz * dz));
+  }
 
   static constexpr siderust_frame_t frame_id() {
     return frames::FrameTraits<F>::ffi_id;
