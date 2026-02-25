@@ -13,10 +13,10 @@
 
 namespace siderust {
 
-using CivilTime  = tempoch::CivilTime;
-using UTC        = tempoch::UTC;          // alias for CivilTime
-using JulianDate = tempoch::JulianDate;   // Time<JDScale>
-using MJD        = tempoch::MJD;          // Time<MJDScale>
-using Period     = tempoch::Period<tempoch::MJD>;
+using CivilTime = tempoch::CivilTime;
+using UTC = tempoch::UTC;               // alias for CivilTime
+using JulianDate = tempoch::JulianDate; // Time<JDScale>
+using MJD = tempoch::MJD;               // Time<MJDScale>
+using Period = tempoch::Period<tempoch::MJD>;
 
 } // namespace siderust
