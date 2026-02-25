@@ -12,6 +12,8 @@
 
 #include <qtty/qtty.hpp>
 
+#include <ostream>
+
 namespace siderust {
 namespace cartesian {
 
@@ -85,6 +87,18 @@ struct Position {
         return Position(c.x, c.y, c.z);
     }
 };
+
+// ============================================================================
+// Stream operators
+// ============================================================================
+
+/**
+ * @brief Stream operator for Position.
+ */
+template <typename C, typename F, typename U>
+inline std::ostream& operator<<(std::ostream& os, const Position<C, F, U>& pos) {
+    return os << pos.x() << ", " << pos.y() << ", " << pos.z();
+}
 
 } // namespace cartesian
 } // namespace siderust
