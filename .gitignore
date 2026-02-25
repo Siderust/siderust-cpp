@@ -5,6 +5,8 @@ out/
 build-make/
 build-verify/
 build-ci-config-check/
+build-coverage/
+coverage_html/
 
 # IDE files
 .vscode/
