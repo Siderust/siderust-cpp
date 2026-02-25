@@ -2,9 +2,9 @@
 
 /**
  * @file body_target.hpp
- * @brief Trackable wrapper for solar-system bodies.
+ * @brief Target implementation for solar-system bodies.
  *
- * `BodyTarget` implements the `Trackable` interface for any solar-system
+ * `BodyTarget` implements the `Target` interface for any solar-system
  * body identified by the `Body` enum.  It dispatches altitude and azimuth
  * computations through the siderust-ffi `siderust_body_*` functions, which
  * in turn use VSOP87 (planets), specialised engines (Sun/Moon), or
@@ -14,14 +14,15 @@
  * @code
  * using namespace siderust;
  * BodyTarget mars(Body::Mars);
+ * std::cout << mars.name() << "\n";       // "Mars"
  * qtty::Degree alt = mars.altitude_at(obs, now);
  *
  * // Polymorphic usage
- * std::vector<std::unique_ptr<Trackable>> targets;
+ * std::vector<std::unique_ptr<Target>> targets;
  * targets.push_back(std::make_unique<BodyTarget>(Body::Sun));
  * targets.push_back(std::make_unique<BodyTarget>(Body::Jupiter));
  * for (const auto& t : targets) {
- *     std::cout << t->altitude_at(obs, now).value() << "\n";
+ *     std::cout << t->name() << ": " << t->altitude_at(obs, now) << "\n";
  * }
  * @endcode
  */
@@ -30,6 +31,7 @@
 #include "azimuth.hpp"
 #include "ffi_core.hpp"
 #include "trackable.hpp"
+#include <string>
 
 namespace siderust {
 
@@ -218,26 +220,48 @@ inline std::vector<Period> in_azimuth_range(Body b, const Geodetic &obs,
 } // namespace body
 
 // ============================================================================
-// BodyTarget — Trackable adapter for solar-system bodies
+// BodyTarget — Target implementation for solar-system bodies
 // ============================================================================
 
 /**
- * @brief Trackable adapter for solar-system bodies.
+ * @brief Target implementation for solar-system bodies.
  *
  * Wraps a `Body` enum value and dispatches all altitude/azimuth queries
  * through the FFI `siderust_body_*` functions.
  *
  * `BodyTarget` is lightweight (holds a single enum value), copyable, and
- * can be used directly or stored as `std::unique_ptr<Trackable>` for
+ * can be used directly or stored as `std::unique_ptr<Target>` for
  * polymorphic dispatch.
  */
-class BodyTarget : public Trackable {
+class BodyTarget : public Target {
 public:
   /**
    * @brief Construct a BodyTarget for a given solar-system body.
    * @param body The body to track.
    */
   explicit BodyTarget(Body body) : body_(body) {}
+
+  // ------------------------------------------------------------------
+  // Identity (implements Target)
+  // ------------------------------------------------------------------
+
+  /**
+   * @brief Returns the body's conventional name ("Sun", "Moon", "Mars", …).
+   */
+  std::string name() const override {
+    switch (body_) {
+    case Body::Sun:     return "Sun";
+    case Body::Moon:    return "Moon";
+    case Body::Mercury: return "Mercury";
+    case Body::Venus:   return "Venus";
+    case Body::Mars:    return "Mars";
+    case Body::Jupiter: return "Jupiter";
+    case Body::Saturn:  return "Saturn";
+    case Body::Uranus:  return "Uranus";
+    case Body::Neptune: return "Neptune";
+    default:            return "Unknown Body";
+    }
+  }
 
   // ------------------------------------------------------------------
   // Altitude queries

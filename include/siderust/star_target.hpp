@@ -2,15 +2,15 @@
 
 /**
  * @file star_target.hpp
- * @brief Trackable adapter for Star objects.
+ * @brief Target implementation for Star catalog objects.
  *
- * `StarTarget` wraps a `const Star&` and implements the `Trackable`
- * interface by delegating to the `star_altitude::` and `star_altitude::`
- * namespace free functions.
+ * `StarTarget` wraps a `const Star&` and implements the `Target`
+ * interface by delegating to the `star_altitude::` namespace free functions.
  *
  * ### Example
  * @code
  * siderust::StarTarget vega_target(siderust::VEGA);
+ * std::cout << vega_target.name() << "\n";  // "Vega"
  * auto alt = vega_target.altitude_at(obs, now);
  * @endcode
  */
@@ -23,19 +23,28 @@
 namespace siderust {
 
 /**
- * @brief Trackable adapter wrapping a `const Star&`.
+ * @brief Target implementation wrapping a `const Star&`.
  *
  * The referenced `Star` must outlive the `StarTarget`. Typically used with
  * the pre-built catalog stars (e.g. `VEGA`, `SIRIUS`) which are `inline const`
  * globals and live for the entire program.
  */
-class StarTarget : public Trackable {
+class StarTarget : public Target {
 public:
   /**
-   * @brief Wrap a Star reference as a Trackable.
+   * @brief Wrap a Star reference as a Target.
    * @param star Reference to a Star. Must outlive this adapter.
    */
   explicit StarTarget(const Star &star) : star_(star) {}
+
+  // ------------------------------------------------------------------
+  // Identity (implements Target)
+  // ------------------------------------------------------------------
+
+  /**
+   * @brief Returns the star's catalog name (delegates to `Star::name()`).
+   */
+  std::string name() const override { return star_.name(); }
 
   // ------------------------------------------------------------------
   // Altitude queries
