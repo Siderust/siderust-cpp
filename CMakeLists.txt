@@ -207,6 +207,24 @@ if(DEFINED _siderust_rpath)
     )
 endif()
 
+add_executable(l2_satellite_mars_example examples/l2_satellite_mars_example.cpp)
+target_link_libraries(l2_satellite_mars_example PRIVATE siderust_cpp)
+if(DEFINED _siderust_rpath)
+    set_target_properties(l2_satellite_mars_example PROPERTIES
+        BUILD_RPATH ${_siderust_rpath}
+        INSTALL_RPATH ${_siderust_rpath}
+    )
+endif()
+
+add_executable(bodycentric_coordinates_example examples/bodycentric_coordinates.cpp)
+target_link_libraries(bodycentric_coordinates_example PRIVATE siderust_cpp)
+if(DEFINED _siderust_rpath)
+    set_target_properties(bodycentric_coordinates_example PROPERTIES
+        BUILD_RPATH ${_siderust_rpath}
+        INSTALL_RPATH ${_siderust_rpath}
+    )
+endif()
+
 # ---------------------------------------------------------------------------
 # Tests
 # ---------------------------------------------------------------------------
@@ -218,6 +236,7 @@ set(TEST_SOURCES
     tests/test_bodies.cpp
     tests/test_altitude.cpp
     tests/test_ephemeris.cpp
+    tests/test_bodycentric.cpp
 )
 
 add_executable(test_siderust ${TEST_SOURCES})

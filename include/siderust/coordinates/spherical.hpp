@@ -15,6 +15,7 @@
 
 #include <ostream>
 #include <type_traits>
+#include <cmath>
 
 namespace siderust {
 namespace spherical {
@@ -270,6 +271,30 @@ public:
   }
 
   U distance() const { return dist_; }
+
+  U distance_to(const Position &other) const {
+    using std::sqrt;
+    // Values in underlying unit (e.g. meters)
+    const double r = dist_.value();
+    const double s = other.dist_.value();
+
+    // convert degrees to radians
+    constexpr double DEG2RAD = M_PI / 180.0;
+    const double a1 = azimuth_.value() * DEG2RAD;
+    const double p1 = polar_.value() * DEG2RAD;
+    const double a2 = other.azimuth_.value() * DEG2RAD;
+    const double p2 = other.polar_.value() * DEG2RAD;
+
+    // dot product of unit direction vectors (spherical -> cartesian)
+    double cos_p1 = std::cos(p1);
+    double cos_p2 = std::cos(p2);
+    double dot = cos_p1 * cos_p2 * std::cos(a1 - a2) + std::sin(p1) * std::sin(p2);
+    if (dot > 1.0) dot = 1.0;
+    if (dot < -1.0) dot = -1.0;
+
+    double d = std::sqrt(r * r + s * s - 2.0 * r * s * dot);
+    return U(d);
+  }
 };
 
 // ============================================================================
