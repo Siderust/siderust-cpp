@@ -162,6 +162,15 @@ if(DEFINED _siderust_rpath)
     )
 endif()
 
+add_executable(basic_coordinates_example examples/01_basic_coordinates.cpp)
+target_link_libraries(basic_coordinates_example PRIVATE siderust_cpp)
+if(DEFINED _siderust_rpath)
+    set_target_properties(basic_coordinates_example PROPERTIES
+        BUILD_RPATH ${_siderust_rpath}
+        INSTALL_RPATH ${_siderust_rpath}
+    )
+endif()
+
 add_executable(coordinate_systems_example examples/coordinate_systems_example.cpp)
 target_link_libraries(coordinate_systems_example PRIVATE siderust_cpp)
 if(DEFINED _siderust_rpath)
