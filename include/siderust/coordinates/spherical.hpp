@@ -13,6 +13,7 @@
 
 #include <qtty/qtty.hpp>
 
+#include <ostream>
 #include <type_traits>
 
 namespace siderust {
@@ -24,7 +25,8 @@ namespace spherical {
  * Mirrors Rust's `affn::spherical::Direction<F>`.
  *
  * @ingroup coordinates_spherical
- * @tparam F  Reference frame tag (e.g. `frames::ICRS`).
+ * @tparam F  Reference frame chapter content removed. Restore the original from \texttt{archived\_worktree/tex/chapters/12-logging-audit.tex} if needed.
+tag (e.g. `frames::ICRS`).
  *
  * @par Accessors
  * Access values through frame-appropriate getters:
@@ -45,10 +47,6 @@ struct Direction {
 
     Direction(qtty::Degree azimuth, qtty::Degree polar)
         : azimuth_(azimuth), polar_(polar) {}
-
-    /// Raw-double convenience (degrees).
-    Direction(double azimuth_deg, double polar_deg)
-        : azimuth_(qtty::Degree(azimuth_deg)), polar_(qtty::Degree(polar_deg)) {}
 
     /// @name Frame info
     /// @{
@@ -106,7 +104,7 @@ struct Direction {
     }
 
     static Direction from_c(const siderust_spherical_dir_t& c) {
-        return Direction(c.azimuth_deg, c.polar_deg);
+        return Direction(qtty::Degree(c.azimuth_deg), qtty::Degree(c.polar_deg));
     }
     /// @}
 
@@ -124,7 +122,7 @@ struct Direction {
         Direction<Target>>
     to_frame(const JulianDate& jd) const {
         if constexpr (std::is_same_v<F, Target>) {
-            return Direction<Target>(azimuth_.value(), polar_.value());
+            return Direction<Target>(azimuth_, polar_);
         } else {
             siderust_spherical_dir_t out;
             check_status(
@@ -193,11 +191,6 @@ struct Position {
     Position(qtty::Degree azimuth, qtty::Degree polar, U dist)
         : azimuth_(azimuth), polar_(polar), dist_(dist) {}
 
-    Position(double azimuth_deg, double polar_deg, double dist_val)
-        : azimuth_(qtty::Degree(azimuth_deg)),
-          polar_(qtty::Degree(polar_deg)),
-          dist_(U(dist_val)) {}
-
     /// Extract the direction component.
     Direction<F> direction() const {
         return Direction<F>(azimuth_, polar_);
@@ -232,6 +225,34 @@ struct Position {
 
     U distance() const { return dist_; }
 };
+
+// ============================================================================
+// Stream operators
+// ============================================================================
+
+/**
+ * @brief Stream operator for Direction with RA/Dec frames.
+ */
+template <typename F, std::enable_if_t<frames::has_ra_dec_v<F>, int> = 0>
+inline std::ostream& operator<<(std::ostream& os, const Direction<F>& dir) {
+    return os << dir.ra() << ", " << dir.dec();
+}
+
+/**
+ * @brief Stream operator for Direction with Az/Alt frame.
+ */
+template <typename F, std::enable_if_t<frames::has_az_alt_v<F>, int> = 0>
+inline std::ostream& operator<<(std::ostream& os, const Direction<F>& dir) {
+    return os << dir.az() << ", " << dir.alt();
+}
+
+/**
+ * @brief Stream operator for Direction with Lon/Lat frames.
+ */
+template <typename F, std::enable_if_t<frames::has_lon_lat_v<F>, int> = 0>
+inline std::ostream& operator<<(std::ostream& os, const Direction<F>& dir) {
+    return os << dir.lon() << ", " << dir.lat();
+}
 
 } // namespace spherical
 } // namespace siderust

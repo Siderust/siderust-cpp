@@ -15,6 +15,7 @@
 #include "coordinates.hpp"
 #include "ffi_core.hpp"
 #include "time.hpp"
+#include <ostream>
 #include <vector>
 
 namespace siderust {
@@ -299,6 +300,52 @@ inline bool is_waning(MoonPhaseLabel label) {
     default:
         return false;
     }
+}
+
+// ============================================================================
+// Stream operators
+// ============================================================================
+
+/**
+ * @brief Stream operator for PhaseKind.
+ */
+inline std::ostream& operator<<(std::ostream& os, PhaseKind kind) {
+    switch (kind) {
+    case PhaseKind::NewMoon:
+        return os << "new moon";
+    case PhaseKind::FirstQuarter:
+        return os << "first quarter";
+    case PhaseKind::FullMoon:
+        return os << "full moon";
+    case PhaseKind::LastQuarter:
+        return os << "last quarter";
+    }
+    return os << "unknown";
+}
+
+/**
+ * @brief Stream operator for MoonPhaseLabel.
+ */
+inline std::ostream& operator<<(std::ostream& os, MoonPhaseLabel label) {
+    switch (label) {
+    case MoonPhaseLabel::NewMoon:
+        return os << "new moon";
+    case MoonPhaseLabel::WaxingCrescent:
+        return os << "waxing crescent";
+    case MoonPhaseLabel::FirstQuarter:
+        return os << "first quarter";
+    case MoonPhaseLabel::WaxingGibbous:
+        return os << "waxing gibbous";
+    case MoonPhaseLabel::FullMoon:
+        return os << "full moon";
+    case MoonPhaseLabel::WaningGibbous:
+        return os << "waning gibbous";
+    case MoonPhaseLabel::LastQuarter:
+        return os << "last quarter";
+    case MoonPhaseLabel::WaningCrescent:
+        return os << "waning crescent";
+    }
+    return os << "unknown";
 }
 
 } // namespace siderust

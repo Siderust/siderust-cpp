@@ -28,6 +28,7 @@ void print_periods(const std::vector<siderust::Period>& periods, std::size_t lim
 
 int main() {
     using namespace siderust;
+    using namespace qtty::literals;
 
     const Geodetic obs = MAUNA_KEA;
     const MJD start = MJD::from_utc({2026, 7, 15, 0, 0, 0});
@@ -40,11 +41,11 @@ int main() {
     std::cout << "=== altitude_events_example ===\n";
     std::cout << "Window: " << start.to_utc() << " -> " << end.to_utc() << "\n\n";
 
-    auto sun_nights = sun::below_threshold(obs, window, qtty::Degree(-18.0), opts);
+    auto sun_nights = sun::below_threshold(obs, window, -18.0_deg, opts);
     std::cout << "Sun below -18 deg (astronomical night): " << sun_nights.size() << " period(s)\n";
     print_periods(sun_nights, 3);
 
-    auto sun_cross = sun::crossings(obs, window, qtty::Degree(0.0), opts);
+    auto sun_cross = sun::crossings(obs, window, 0.0_deg, opts);
     std::cout << "\nSun horizon crossings: " << sun_cross.size() << "\n";
     if (!sun_cross.empty()) {
         const auto& c = sun_cross.front();
@@ -58,20 +59,21 @@ int main() {
         const auto& c = moon_culm.front();
         std::cout << "  First culmination: " << c.time.to_utc()
                   << " kind=" << c.kind
-                  << " alt=" << c.altitude.value() << " deg\n";
+                  << " alt=" << c.altitude
+                  << std::endl;
     }
 
-    auto vega_periods = star_altitude::above_threshold(VEGA, obs, window, qtty::Degree(30.0), opts);
+    auto vega_periods = star_altitude::above_threshold(VEGA, obs, window, 30.0_deg, opts);
     std::cout << "\nVega above 30 deg: " << vega_periods.size() << " period(s)\n";
     print_periods(vega_periods, 2);
 
-    spherical::direction::ICRS target_dir(279.23473, 38.78369);
-    auto dir_visible = icrs_altitude::above_threshold(target_dir, obs, window, qtty::Degree(0.0), opts);
+    spherical::direction::ICRS target_dir(279.23473_deg, 38.78369_deg);
+    auto dir_visible = icrs_altitude::above_threshold(target_dir, obs, window, 0.0_deg, opts);
     std::cout << "\nFixed ICRS direction above horizon: " << dir_visible.size() << " period(s)\n";
 
-    Target fixed_target(279.23473, 38.78369);
-    auto fixed_target_periods = fixed_target.above_threshold(obs, window, qtty::Degree(45.0), opts);
-    std::cout << "Target::above_threshold(45 deg): " << fixed_target_periods.size() << " period(s)\n";
+    ICRSTarget fixed_target{ spherical::direction::ICRS{279.23473_deg, 38.78369_deg } };
+    auto fixed_target_periods = fixed_target.above_threshold(obs, window, 45.0_deg, opts);
+    std::cout << "ICRSTarget::above_threshold(45 deg): " << fixed_target_periods.size() << " period(s)\n";
 
     return 0;
 }

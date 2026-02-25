@@ -120,7 +120,73 @@ TEST_F(AltitudeTest, IcrsAltitudeAt) {
 
 TEST_F(AltitudeTest, IcrsAboveThreshold) {
     const spherical::direction::ICRS vega_icrs(qtty::Degree(279.23), qtty::Degree(38.78));
-    auto                             periods = icrs_altitude::above_threshold(
-                                    vega_icrs, obs, window, qtty::Degree(30.0));
+    auto periods = icrs_altitude::above_threshold(
+        vega_icrs, obs, window, qtty::Degree(30.0));
     EXPECT_GT(periods.size(), 0u);
+}
+
+// ============================================================================
+// Target<C> — generic strongly-typed target
+// ============================================================================
+
+// Vega ICRS coordinates (J2000): RA=279.2348°, Dec=+38.7836°
+TEST_F(AltitudeTest, ICRSTargetAltitudeAt) {
+    ICRSTarget vega{ spherical::direction::ICRS{
+        qtty::Degree(279.23), qtty::Degree(38.78) } };
+    // altitude_at returns qtty::Degree (radian/degree bug-fix verification)
+    qtty::Degree alt = vega.altitude_at(obs, start);
+    EXPECT_GT(alt.value(), -90.0);
+    EXPECT_LT(alt.value(),  90.0);
+}
+
+TEST_F(AltitudeTest, ICRSTargetAboveThreshold) {
+    ICRSTarget vega{ spherical::direction::ICRS{
+        qtty::Degree(279.23), qtty::Degree(38.78) } };
+    auto periods = vega.above_threshold(obs, window, qtty::Degree(30.0));
+    // Vega should rise above 30° from La Palma in July
+    EXPECT_GT(periods.size(), 0u);
+}
+
+TEST_F(AltitudeTest, ICRSTargetTypedAccessors) {
+    ICRSTarget vega{ spherical::direction::ICRS{
+        qtty::Degree(279.23), qtty::Degree(38.78) } };
+    EXPECT_NEAR(vega.ra().value(),  279.23, 1e-9);
+    EXPECT_NEAR(vega.dec().value(),  38.78, 1e-9);
+    // epoch defaults to J2000
+    EXPECT_NEAR(vega.epoch().value(), 2451545.0, 1e-3);
+    // icrs_direction is the same for an ICRS Target
+    EXPECT_NEAR(vega.icrs_direction().ra().value(),  279.23, 1e-9);
+}
+
+TEST_F(AltitudeTest, ICRSTargetPolymorphic) {
+    // Verify Target<C> is usable through the Trackable interface
+    std::unique_ptr<Trackable> t = std::make_unique<ICRSTarget>(
+        spherical::direction::ICRS{ qtty::Degree(279.23), qtty::Degree(38.78) });
+    qtty::Degree alt = t->altitude_at(obs, start);
+    EXPECT_GT(alt.value(), -90.0);
+    EXPECT_LT(alt.value(),  90.0);
+}
+
+TEST_F(AltitudeTest, EclipticTargetAltitudeAt) {
+    // Vega in ecliptic J2000 coordinates (approx): lon≈279.6°, lat≈+61.8°
+    EclipticMeanJ2000Target ec{ spherical::direction::EclipticMeanJ2000{
+        qtty::Degree(279.6), qtty::Degree(61.8) } };
+    // ecl direction retained on the C++ side
+    EXPECT_NEAR(ec.direction().lon().value(), 279.6, 1e-9);
+    EXPECT_NEAR(ec.direction().lat().value(),  61.8, 1e-9);
+    // ICRS ra/dec computed at construction and accessible
+    EXPECT_GT(ec.icrs_direction().ra().value(),    0.0);
+    EXPECT_LT(ec.icrs_direction().ra().value(),  360.0);
+    // altitude should be a valid degree value
+    qtty::Degree alt = ec.altitude_at(obs, start);
+    EXPECT_GT(alt.value(), -90.0);
+    EXPECT_LT(alt.value(),  90.0);
+}
+
+TEST_F(AltitudeTest, EquatorialMeanJ2000TargetAltitudeAt) {
+    EquatorialMeanJ2000Target vega{ spherical::direction::EquatorialMeanJ2000{
+        qtty::Degree(279.23), qtty::Degree(38.78) } };
+    qtty::Degree alt = vega.altitude_at(obs, start);
+    EXPECT_GT(alt.value(), -90.0);
+    EXPECT_LT(alt.value(),  90.0);
 }

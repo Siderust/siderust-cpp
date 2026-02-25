@@ -15,40 +15,6 @@
 
 namespace {
 
-const char* crossing_direction_name(siderust::CrossingDirection dir) {
-    using siderust::CrossingDirection;
-    switch (dir) {
-    case CrossingDirection::Rising:
-        return "rising";
-    case CrossingDirection::Setting:
-        return "setting";
-    }
-    return "unknown";
-}
-
-const char* moon_phase_label_name(siderust::MoonPhaseLabel label) {
-    using siderust::MoonPhaseLabel;
-    switch (label) {
-    case MoonPhaseLabel::NewMoon:
-        return "new moon";
-    case MoonPhaseLabel::WaxingCrescent:
-        return "waxing crescent";
-    case MoonPhaseLabel::FirstQuarter:
-        return "first quarter";
-    case MoonPhaseLabel::WaxingGibbous:
-        return "waxing gibbous";
-    case MoonPhaseLabel::FullMoon:
-        return "full moon";
-    case MoonPhaseLabel::WaningGibbous:
-        return "waning gibbous";
-    case MoonPhaseLabel::LastQuarter:
-        return "last quarter";
-    case MoonPhaseLabel::WaningCrescent:
-        return "waning crescent";
-    }
-    return "unknown";
-}
-
 } // namespace
 
 int main() {
@@ -60,22 +26,17 @@ int main() {
     const Period next_day(now, now + qtty::Day(1.0));
 
     std::cout << "=== siderust-cpp extended demo ===\n";
-    std::cout << "Observer: lon=" << site.lon.value()
-              << " deg lat=" << site.lat.value()
-              << " deg h=" << site.height.value() << " m\n";
+    std::cout << "Observer: " << site << "\n";
     std::cout << "Epoch: JD " << std::fixed << std::setprecision(6) << jd.value()
               << "  UTC " << jd.to_utc() << "\n\n";
 
-    spherical::direction::ICRS vega_icrs(279.23473, 38.78369);
+    spherical::direction::ICRS vega_icrs(qtty::Degree(279.23473), qtty::Degree(38.78369));
     auto vega_ecl = vega_icrs.to_frame<frames::EclipticMeanJ2000>(jd);
     auto vega_hor = vega_icrs.to_horizontal(jd, site);
     std::cout << "Typed coordinates\n";
-    std::cout << "  Vega ICRS   RA=" << vega_icrs.ra().value()
-              << " deg  Dec=" << vega_icrs.dec().value() << " deg\n";
-    std::cout << "  Vega Ecliptic lon=" << vega_ecl.lon().value()
-              << " deg  lat=" << vega_ecl.lat().value() << " deg\n";
-    std::cout << "  Vega Horizontal az=" << vega_hor.az().value()
-              << " deg  alt=" << vega_hor.alt().value() << " deg\n\n";
+    std::cout << "  Vega ICRS   RA/Dec=" << vega_icrs << " deg\n";
+    std::cout << "  Vega Ecliptic lon/lat=" << vega_ecl << " deg\n";
+    std::cout << "  Vega Horizontal az/alt=" << vega_hor << " deg\n\n";
 
     qtty::Degree sun_alt = sun::altitude_at(site, now).to<qtty::Degree>();
     qtty::Degree sun_az  = sun::azimuth_at(site, now);
@@ -87,18 +48,20 @@ int main() {
     if (!sun_crossings.empty()) {
         std::cout << "  Next horizon crossing: "
                   << sun_crossings.front().time.to_utc() << " ("
-                  << crossing_direction_name(sun_crossings.front().direction)
+                  << sun_crossings.front().direction
                   << ")\n";
     }
     std::cout << "\n";
 
     BodyTarget mars(Body::Mars);
-    Target fixed_target(279.23473, 38.78369); // Vega-like fixed ICRS pointing
+    ICRSTarget fixed_target{ spherical::direction::ICRS{
+        qtty::Degree(279.23473), qtty::Degree(38.78369) } }; // Vega-like
 
     std::vector<std::pair<const char*, std::unique_ptr<Trackable>>> targets;
     targets.push_back({"Sun", std::make_unique<BodyTarget>(Body::Sun)});
     targets.push_back({"Vega", std::make_unique<StarTarget>(VEGA)});
-    targets.push_back({"Fixed target", std::make_unique<Target>(279.23473, 38.78369)});
+    targets.push_back({"Fixed target", std::make_unique<ICRSTarget>(
+        spherical::direction::ICRS{ qtty::Degree(279.23473), qtty::Degree(38.78369) })});
 
     std::cout << "Trackable polymorphism\n";
     for (const auto& entry : targets) {
@@ -107,8 +70,8 @@ int main() {
         auto alt = obj->altitude_at(site, now);
         auto az  = obj->azimuth_at(site, now);
         std::cout << "  " << std::setw(12) << std::left << name
-                  << " alt=" << std::setw(8) << alt.value()
-                  << " deg  az=" << az.value() << " deg\n";
+                  << " alt=" << std::setw(8) << alt
+                  << " az=" << az << std::endl;
     }
     std::cout << "  Mars altitude via BodyTarget: "
               << mars.altitude_at(site, now).value() << " deg\n";
@@ -123,8 +86,7 @@ int main() {
         moon_geo.z().value() * moon_geo.z().value());
 
     std::cout << "Ephemeris\n";
-    std::cout << "  Earth heliocentric x=" << earth_helio.x().value()
-              << " AU y=" << earth_helio.y().value() << " AU\n";
+    std::cout << "  Earth heliocentric " << earth_helio << " AU\n";
     std::cout << "  Moon geocentric distance=" << moon_dist_km << " km\n\n";
 
     auto phase = moon::phase_topocentric(jd, site);
@@ -134,7 +96,7 @@ int main() {
 
     std::cout << "Lunar phase\n";
     std::cout << "  Illuminated fraction=" << phase.illuminated_fraction
-              << "  label=" << moon_phase_label_name(label) << "\n";
+              << "  label=" << label << "\n";
     std::cout << "  Bright-moon periods (next 7 days, k>=0.8): "
               << bright_periods.size() << "\n";
 

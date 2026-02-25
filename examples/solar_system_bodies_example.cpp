@@ -66,8 +66,8 @@ int main() {
         auto alt = body::altitude_at(b, site, now).to<qtty::Degree>();
         auto az  = body::azimuth_at(b, site, now).to<qtty::Degree>();
         std::cout << "  body=" << static_cast<int>(b)
-                  << " alt=" << alt.value() << " deg"
-                  << " az=" << az.value() << " deg\n";
+                  << " alt=" << alt
+                  << " az=" << az << std::endl;
     }
 
     auto moon_extrema = body::azimuth_extrema(Body::Moon, site, window);
@@ -76,7 +76,7 @@ int main() {
         std::cout << "\nMoon azimuth extrema\n";
         std::cout << "  first " << az_kind_name(e.kind)
                   << " at " << e.time.to_utc()
-                  << " az=" << e.azimuth.value() << " deg\n";
+                  << " az=" << e.azimuth << std::endl;
     }
 
     return 0;

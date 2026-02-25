@@ -23,7 +23,7 @@ TEST(TypedCoordinates, AliasNamespaces) {
 TEST(TypedCoordinates, IcrsDirToEcliptic) {
     using namespace siderust::frames;
 
-    spherical::direction::ICRS vega(279.23473, 38.78369);
+    spherical::direction::ICRS vega(qtty::Degree(279.23473), qtty::Degree(38.78369));
     auto                       jd = JulianDate::J2000();
 
     // Compile-time typed transform: ICRS -> EclipticMeanJ2000
@@ -39,7 +39,7 @@ TEST(TypedCoordinates, IcrsDirToEcliptic) {
 TEST(TypedCoordinates, IcrsDirRoundtrip) {
     using namespace siderust::frames;
 
-    spherical::direction::ICRS icrs(100.0, 30.0);
+    spherical::direction::ICRS icrs(qtty::Degree(100.0), qtty::Degree(30.0));
     auto                       jd = JulianDate::J2000();
 
     auto ecl  = icrs.to_frame<EclipticMeanJ2000>(jd);
@@ -53,7 +53,7 @@ TEST(TypedCoordinates, IcrsDirRoundtrip) {
 TEST(TypedCoordinates, ToShorthand) {
     using namespace siderust::frames;
 
-    spherical::direction::ICRS icrs(100.0, 30.0);
+    spherical::direction::ICRS icrs(qtty::Degree(100.0), qtty::Degree(30.0));
     auto                       jd = JulianDate::J2000();
 
     // .to<Target>(jd) is a shorthand for .to_frame<Target>(jd)
@@ -65,7 +65,7 @@ TEST(TypedCoordinates, ToShorthand) {
 TEST(TypedCoordinates, IcrsDirToHorizontal) {
     using namespace siderust::frames;
 
-    spherical::direction::ICRS vega(279.23473, 38.78369);
+    spherical::direction::ICRS vega(qtty::Degree(279.23473), qtty::Degree(38.78369));
     auto                       jd  = JulianDate::from_utc({2026, 7, 15, 22, 0, 0});
     auto                       obs = ROQUE_DE_LOS_MUCHACHOS;
 
@@ -79,7 +79,7 @@ TEST(TypedCoordinates, IcrsDirToHorizontal) {
 TEST(TypedCoordinates, EquatorialToIcrs) {
     using namespace siderust::frames;
 
-    spherical::direction::EquatorialMeanJ2000 eq(100.0, 30.0);
+    spherical::direction::EquatorialMeanJ2000 eq(qtty::Degree(100.0), qtty::Degree(30.0));
     auto                                      jd = JulianDate::J2000();
 
     auto icrs = eq.to_frame<ICRS>(jd);
@@ -94,7 +94,7 @@ TEST(TypedCoordinates, MultiHopTransform) {
     using namespace siderust::frames;
 
     // EquatorialMeanOfDate -> EquatorialTrueOfDate (through hub)
-    spherical::Direction<EquatorialMeanOfDate> mean_od(100.0, 30.0);
+    spherical::Direction<EquatorialMeanOfDate> mean_od(qtty::Degree(100.0), qtty::Degree(30.0));
     auto                                       jd = JulianDate::J2000();
 
     auto true_od = mean_od.to_frame<EquatorialTrueOfDate>(jd);
@@ -108,7 +108,7 @@ TEST(TypedCoordinates, MultiHopTransform) {
 TEST(TypedCoordinates, SameFrameIdentity) {
     using namespace siderust::frames;
 
-    spherical::direction::ICRS icrs(123.456, -45.678);
+    spherical::direction::ICRS icrs(qtty::Degree(123.456), qtty::Degree(-45.678));
     auto                       jd = JulianDate::J2000();
 
     auto same = icrs.to_frame<ICRS>(jd);
@@ -117,7 +117,7 @@ TEST(TypedCoordinates, SameFrameIdentity) {
 }
 
 TEST(TypedCoordinates, QttyDegreeAccessors) {
-    spherical::direction::ICRS d(123.456, -45.678);
+    spherical::direction::ICRS d(qtty::Degree(123.456), qtty::Degree(-45.678));
 
     // Frame-specific getters for ICRS.
     qtty::Degree ra  = d.ra();
