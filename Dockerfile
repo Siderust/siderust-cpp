@@ -17,6 +17,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     pkg-config \
     libssl-dev \
     graphviz \
+    rsync \
+    clang-format \
+    clang-tidy \
+    gcovr \
     && rm -rf /var/lib/apt/lists/*
 
 RUN curl -fsSL "https://github.com/doxygen/doxygen/releases/download/Release_1_16_1/doxygen-${DOXYGEN_VERSION}.linux.bin.tar.gz" -o /tmp/doxygen.tar.gz && \
