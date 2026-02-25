@@ -57,6 +57,30 @@ earth_heliocentric(const JulianDate &jd) {
 }
 
 /**
+ * @brief Mars's heliocentric position (EclipticMeanJ2000, AU) via VSOP87.
+ */
+inline cartesian::position::EclipticMeanJ2000<qtty::AstronomicalUnit>
+mars_heliocentric(const JulianDate &jd) {
+  siderust_cartesian_pos_t out;
+  check_status(siderust_vsop87_mars_heliocentric(jd.value(), &out),
+               "ephemeris::mars_heliocentric");
+  return cartesian::position::EclipticMeanJ2000<qtty::AstronomicalUnit>::from_c(
+      out);
+}
+
+/**
+ * @brief Venus's heliocentric position (EclipticMeanJ2000, AU) via VSOP87.
+ */
+inline cartesian::position::EclipticMeanJ2000<qtty::AstronomicalUnit>
+venus_heliocentric(const JulianDate &jd) {
+  siderust_cartesian_pos_t out;
+  check_status(siderust_vsop87_venus_heliocentric(jd.value(), &out),
+               "ephemeris::venus_heliocentric");
+  return cartesian::position::EclipticMeanJ2000<qtty::AstronomicalUnit>::from_c(
+      out);
+}
+
+/**
  * @brief Moon's geocentric position (EclipticMeanJ2000, km) via ELP2000.
  */
 inline cartesian::position::MoonGeocentric<qtty::Kilometer>

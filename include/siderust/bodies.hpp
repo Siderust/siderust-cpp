@@ -60,6 +60,13 @@ struct Orbit {
             c.mean_anomaly_deg,
             c.epoch_jd};
   }
+
+  /// Convert to C FFI struct.
+  siderust_orbit_t to_c() const {
+    return {semi_major_axis_au, eccentricity, inclination_deg,
+            lon_ascending_node_deg, arg_perihelion_deg, mean_anomaly_deg,
+            epoch_jd};
+  }
 };
 
 // ============================================================================

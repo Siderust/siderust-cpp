@@ -2,11 +2,9 @@
 build/
 cmake-build-*/
 out/
-build-make/
-build-verify/
-build-ci-config-check/
-build-coverage/
+build-*
 coverage_html/
+coverage.xml
 
 # IDE files
 .vscode/
