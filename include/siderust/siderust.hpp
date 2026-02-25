@@ -13,16 +13,19 @@
  * using namespace siderust::frames;
  *
  * // Typed coordinates with compile-time frame/center
- * spherical::direction::ICRS vega_icrs(qtty::Degree(279.23473), qtty::Degree(38.78369));
- * auto jd = JulianDate::from_utc({2026, 7, 15, 22, 0, 0});
+ * spherical::direction::ICRS vega_icrs(qtty::Degree(279.23473),
+ * qtty::Degree(38.78369)); auto jd = JulianDate::from_utc({2026, 7, 15, 22, 0,
+ * 0});
  *
  * // Template-targeted transform  — invalid pairs won't compile
- * auto ecl = vega_icrs.to_frame<EclipticMeanJ2000>(jd);   // Direction<EclipticMeanJ2000>
- * auto hor = vega_icrs.to_horizontal(jd, ROQUE_DE_LOS_MUCHACHOS);
+ * auto ecl = vega_icrs.to_frame<EclipticMeanJ2000>(jd);   //
+ * Direction<EclipticMeanJ2000> auto hor = vega_icrs.to_horizontal(jd,
+ * ROQUE_DE_LOS_MUCHACHOS);
  *
  * // Typed ephemeris — unit-safe AU/km positions
- * auto earth = ephemeris::earth_heliocentric(jd);   // cartesian::Position<Heliocentric, EclipticMeanJ2000, AU>
- * auto dist  = earth.comp_x.to<qtty::Kilometer>();   // unit conversion
+ * auto earth = ephemeris::earth_heliocentric(jd);   //
+ * cartesian::Position<Heliocentric, EclipticMeanJ2000, AU> auto dist  =
+ * earth.comp_x.to<qtty::Kilometer>();   // unit conversion
  * @endcode
  */
 
