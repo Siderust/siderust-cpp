@@ -21,6 +21,7 @@
 #include "coordinates.hpp"
 #include "ffi_core.hpp"
 #include "time.hpp"
+#include <ostream>
 #include <vector>
 
 namespace siderust {
@@ -385,5 +386,22 @@ inline std::vector<AzimuthCrossingEvent> azimuth_crossings(
 }
 
 } // namespace icrs_altitude
+
+// ============================================================================
+// Stream operators
+// ============================================================================
+
+/**
+ * @brief Stream operator for AzimuthExtremumKind.
+ */
+inline std::ostream& operator<<(std::ostream& os, AzimuthExtremumKind kind) {
+    switch (kind) {
+    case AzimuthExtremumKind::Max:
+        return os << "max";
+    case AzimuthExtremumKind::Min:
+        return os << "min";
+    }
+    return os << "unknown";
+}
 
 } // namespace siderust

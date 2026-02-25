@@ -13,7 +13,7 @@
  * using namespace siderust::frames;
  *
  * // Typed coordinates with compile-time frame/center
- * spherical::direction::ICRS vega_icrs(279.23473, 38.78369); // Direction<ICRS>
+ * spherical::direction::ICRS vega_icrs(qtty::Degree(279.23473), qtty::Degree(38.78369));
  * auto jd = JulianDate::from_utc({2026, 7, 15, 22, 0, 0});
  *
  * // Template-targeted transform  — invalid pairs won't compile
