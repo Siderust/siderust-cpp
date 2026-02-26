@@ -15,7 +15,7 @@ int main() {
   std::cout << "=== 01_basic_coordinates (C++) ===\n";
 
   // Time
-  const JulianDate jd = JulianDate::J2000;
+  const JulianDate jd = JulianDate::J2000();
 
   // ==========================================================================
   // Cartesian coordinates (heliocentric example)

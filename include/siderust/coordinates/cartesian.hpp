@@ -15,6 +15,9 @@
 #include <ostream>
 #include <cmath>
 
+// Forward-declare spherical Position to avoid circular include.
+namespace siderust { namespace spherical { template <typename C, typename F, typename U> struct Position; } }
+
 namespace siderust {
 namespace cartesian {
 
@@ -77,6 +80,11 @@ template <typename C, typename F, typename U = qtty::Meter> struct Position {
     const double vz = comp_z.value();
     return U(sqrt(vx * vx + vy * vy + vz * vz));
   }
+
+  /**
+   * @brief Convert this cartesian position to a spherical Position<C,F,U>.
+   */
+  spherical::Position<C, F, U> to_spherical() const;
 
   U distance_to(const Position &other) const {
     using std::sqrt;
