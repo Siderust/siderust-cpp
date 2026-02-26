@@ -31,23 +31,15 @@ int main() {
   std::cout << "  Y = " << pos_ecl.y() << "\n";
   std::cout << "  Z = " << pos_ecl.z() << "\n\n";
 
-  // to Equatorial (same heliocentric center)
-  auto sph_ecl = pos_ecl.to_spherical();
-  auto dir_equ = sph_ecl.direction().to_frame<frames::EquatorialMeanJ2000>(jd);
-  spherical::Position<centers::Heliocentric, frames::EquatorialMeanJ2000, AU>
-      sph_equ(dir_equ, sph_ecl.distance());
-  auto pos_equ = sph_equ.to_cartesian();
-
+  // to Equatorial (same heliocentric center
+  auto pos_equ = pos_ecl.to_frame<frames::EquatorialMeanJ2000>(jd);
   std::cout << "Transformed to EquatorialMeanJ2000 frame:\n";
   std::cout << "  X = " << pos_equ.x() << "\n";
   std::cout << "  Y = " << pos_equ.y() << "\n";
   std::cout << "  Z = " << pos_equ.z() << "\n\n";
 
-  // to ICRS (via equatorial hub)
-  auto dir_icrs = sph_equ.direction().to_frame<frames::ICRS>(jd);
-    spherical::Position<centers::Heliocentric, frames::ICRS, AU> sph_icrs(dir_icrs,
-                                                                                                                                                sph_equ.distance());
-    auto pos_icrs = sph_icrs.to_cartesian();
+  // to ICRS — direct to_frame on cartesian::Position (no intermediate spherical)
+  auto pos_icrs = pos_equ.to_frame<frames::ICRS>(jd);
   std::cout << "Transformed to ICRS frame:\n";
   std::cout << "  X = " << pos_icrs.x() << "\n";
   std::cout << "  Y = " << pos_icrs.y() << "\n";
@@ -97,20 +89,12 @@ int main() {
   std::cout << "Mars transformation chain:\n";
   std::cout << "  Start: Heliocentric EclipticMeanJ2000\n";
 
-  // Step 1: convert Mars heliocentric ecl -> heliocentric equatorial
-    auto sph_mars_helio = mars_helio.to_spherical();
-  auto dir_mars_helio_equ = sph_mars_helio.direction().to_frame<frames::EquatorialMeanJ2000>(jd);
-  spherical::Position<centers::Heliocentric, frames::EquatorialMeanJ2000, AU>
-      sph_mars_helio_equ(dir_mars_helio_equ, sph_mars_helio.distance());
-  auto mars_helio_equ = sph_mars_helio_equ.to_cartesian();
+  // Step 1: transform Mars frame directly (cartesian::Position::to_frame)
+  auto mars_helio_equ = mars_helio.to_frame<frames::EquatorialMeanJ2000>(jd);
   std::cout << "  Step 1: Transform frame → Heliocentric EquatorialMeanJ2000\n";
 
-  // Step 2: convert center heliocentric -> geocentric by subtracting Earth's heliocentric equ
-    auto sph_earth_helio = earth_helio.to_spherical();
-  auto dir_earth_helio_equ = sph_earth_helio.direction().to_frame<frames::EquatorialMeanJ2000>(jd);
-  spherical::Position<centers::Heliocentric, frames::EquatorialMeanJ2000, AU>
-      sph_earth_helio_equ(dir_earth_helio_equ, sph_earth_helio.distance());
-  auto earth_helio_equ = sph_earth_helio_equ.to_cartesian();
+  // Step 2: convert center heliocentric -> geocentric by subtracting Earth's pos in the same frame
+  auto earth_helio_equ = earth_helio.to_frame<frames::EquatorialMeanJ2000>(jd);
 
   cartesian::Position<centers::Geocentric, frames::EquatorialMeanJ2000, AU>
       mars_geo_equ(mars_helio_equ.x() - earth_helio_equ.x(),
@@ -123,15 +107,11 @@ int main() {
   std::cout << "    Y = " << mars_geo_equ.y() << " AU\n";
   std::cout << "    Z = " << mars_geo_equ.z() << " AU\n\n";
 
-  // Method 2: do the same in one direct chain (frame then center)
-  auto dir_direct = sph_mars_helio.direction().to_frame<frames::EquatorialMeanJ2000>(jd);
-  spherical::Position<centers::Heliocentric, frames::EquatorialMeanJ2000, AU>
-      sph_direct(dir_direct, sph_mars_helio.distance());
-  auto sph_direct_cart = sph_direct.to_cartesian();
+  // Method 2: same in one chain — now trivial with direct to_frame
   auto Mars_geo_equ_direct = cartesian::Position<centers::Geocentric, frames::EquatorialMeanJ2000, AU>(
-      sph_direct_cart.x() - earth_helio_equ.x(),
-      sph_direct_cart.y() - earth_helio_equ.y(),
-      sph_direct_cart.z() - earth_helio_equ.z());
+      mars_helio_equ.x() - earth_helio_equ.x(),
+      mars_helio_equ.y() - earth_helio_equ.y(),
+      mars_helio_equ.z() - earth_helio_equ.z());
 
   std::cout << "  Or using direct chain (same result):\n";
   std::cout << "    X = " << Mars_geo_equ_direct.x() << "\n";
@@ -177,12 +157,8 @@ int main() {
   std::cout << "  Y = " << star_icrs.y() << "\n";
   std::cout << "  Z = " << star_icrs.z() << "\n\n";
 
-  // Convert Earth's barycentric from ecliptic -> ICRS frame, then subtract
-    auto sph_earth_bary = earth_bary.to_spherical();
-  auto dir_earth_bary_icrs = sph_earth_bary.direction().to_frame<frames::ICRS>(jd);
-  spherical::Position<centers::Barycentric, frames::ICRS, AU> sph_earth_bary_icrs(
-      dir_earth_bary_icrs, sph_earth_bary.distance());
-  auto earth_bary_icrs = sph_earth_bary_icrs.to_cartesian();
+  // Convert Earth's barycentric position from EclipticMeanJ2000 -> ICRS directly
+  auto earth_bary_icrs = earth_bary.to_frame<frames::ICRS>(jd);
 
   // Star geocentric ICRS (GCRS-equivalent for this demo)
   auto star_gcrs = cartesian::Position<centers::Geocentric, frames::ICRS, AU>(
@@ -212,12 +188,8 @@ int main() {
   auto recovered_helio_equ = cartesian::Position<centers::Heliocentric, frames::EquatorialMeanJ2000, AU>(
       temp.x() + earth_helio_equ.x(), temp.y() + earth_helio_equ.y(), temp.z() + earth_helio_equ.z());
 
-  // Convert recovered heliocentric equ back to heliocentric ecliptic
-  auto sph_recovered_equ = recovered_helio_equ.to_spherical();
-  auto dir_recovered_ecl = sph_recovered_equ.direction().to_frame<frames::EclipticMeanJ2000>(jd);
-  spherical::Position<centers::Heliocentric, frames::EclipticMeanJ2000, AU>
-      sph_recovered_ecl(dir_recovered_ecl, sph_recovered_equ.distance());
-  auto recovered = sph_recovered_ecl.to_cartesian();
+  // Convert recovered heliocentric equ back to heliocentric ecliptic (direct to_frame)
+  auto recovered = recovered_helio_equ.to_frame<frames::EclipticMeanJ2000>(jd);
 
   std::cout << "After round-trip transformation:\n";
   std::cout << "  X = " << recovered.x() << "\n";
