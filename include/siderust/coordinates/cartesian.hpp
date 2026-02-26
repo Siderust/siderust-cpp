@@ -9,11 +9,13 @@
 #include "../centers.hpp"
 #include "../ffi_core.hpp"
 #include "../frames.hpp"
+#include "../time.hpp"
 
 #include <qtty/qtty.hpp>
 
 #include <ostream>
 #include <cmath>
+#include <type_traits>
 
 // Forward-declare spherical Position to avoid circular include.
 namespace siderust { namespace spherical { template <typename C, typename F, typename U> struct Position; } }
@@ -41,6 +43,43 @@ template <typename F> struct Direction {
 
   static constexpr siderust_frame_t frame_id() {
     return frames::FrameTraits<F>::ffi_id;
+  }
+
+  /**
+   * @brief Transform this direction to a different reference frame.
+   *
+   * Only enabled when a `FrameRotationProvider` exists for the pair (F, Target).
+   * For time-independent (fixed-epoch) transforms, `jd` is still required but
+   * its value is ignored.
+   *
+   * @tparam Target  Destination frame tag.
+   * @param  jd      Julian Date (TT) for time-dependent rotations.
+   */
+  template <typename Target>
+  std::enable_if_t<frames::has_frame_transform_v<F, Target>, Direction<Target>>
+  to_frame(const JulianDate &jd) const {
+    if constexpr (std::is_same_v<F, Target>) {
+      return Direction<Target>(x, y, z);
+    } else {
+      siderust_cartesian_pos_t out{};
+      check_status(
+          siderust_cartesian_dir_transform_frame(
+              x, y, z,
+              frames::FrameTraits<F>::ffi_id,
+              frames::FrameTraits<Target>::ffi_id,
+              jd.value(), &out),
+          "cartesian::Direction::to_frame");
+      return Direction<Target>(out.x, out.y, out.z);
+    }
+  }
+
+  /**
+   * @brief Shorthand: `.to<Target>(jd)` (calls `to_frame`).
+   */
+  template <typename Target>
+  auto to(const JulianDate &jd) const
+      -> decltype(this->template to_frame<Target>(jd)) {
+    return to_frame<Target>(jd);
   }
 };
 
@@ -110,6 +149,41 @@ template <typename C, typename F, typename U> struct Position {
   /// Create from C FFI struct (ignoring runtime frame/center - trust the type).
   static Position from_c(const siderust_cartesian_pos_t &c) {
     return Position(c.x, c.y, c.z);
+  }
+
+  /**
+   * @brief Transform this position to a different reference frame (same center).
+   *
+   * Only a pure rotation is applied; the reference center is unchanged.
+   * Only enabled when a `FrameRotationProvider` exists for the pair (F, Target).
+   *
+   * @tparam Target  Destination frame tag.
+   * @param  jd      Julian Date (TT) for time-dependent rotations.
+   */
+  template <typename Target>
+  std::enable_if_t<frames::has_frame_transform_v<F, Target>, Position<C, Target, U>>
+  to_frame(const JulianDate &jd) const {
+    if constexpr (std::is_same_v<F, Target>) {
+      return *this;
+    } else {
+      siderust_cartesian_pos_t out{};
+      check_status(
+          siderust_cartesian_pos_transform_frame(
+              to_c(),
+              frames::FrameTraits<Target>::ffi_id,
+              jd.value(), &out),
+          "cartesian::Position::to_frame");
+      return Position<C, Target, U>(out.x, out.y, out.z);
+    }
+  }
+
+  /**
+   * @brief Shorthand: `.to<Target>(jd)` (calls `to_frame`).
+   */
+  template <typename Target>
+  auto to(const JulianDate &jd) const
+      -> decltype(this->template to_frame<Target>(jd)) {
+    return to_frame<Target>(jd);
   }
 };
 
