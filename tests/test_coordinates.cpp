@@ -198,3 +198,144 @@ TEST(TypedCoordinates, GeodeticToCartesianMember) {
   EXPECT_NEAR(ecef_m.x().value(), 6378137.0, 1.0);
   EXPECT_NEAR(ecef_km.x().value(), 6378.137, 1e-3);
 }
+
+// ============================================================================
+// cartesian::Direction::to_frame — new method
+// ============================================================================
+
+TEST(TypedCoordinates, CartesianDirToFrameRoundtrip) {
+  using namespace siderust::frames;
+
+  // Unit vector along X in ICRS
+  cartesian::Direction<ICRS> dir_icrs(1.0, 0.0, 0.0);
+  auto jd = JulianDate::J2000();
+
+  auto dir_ecl = dir_icrs.to_frame<EclipticMeanJ2000>(jd);
+  static_assert(std::is_same_v<decltype(dir_ecl),
+                               cartesian::Direction<EclipticMeanJ2000>>);
+
+  // Round-trip
+  auto dir_back = dir_ecl.to_frame<ICRS>(jd);
+  EXPECT_NEAR(dir_back.x, 1.0, 1e-8);
+  EXPECT_NEAR(dir_back.y, 0.0, 1e-8);
+  EXPECT_NEAR(dir_back.z, 0.0, 1e-8);
+}
+
+TEST(TypedCoordinates, CartesianDirToFrameIdentity) {
+  using namespace siderust::frames;
+
+  cartesian::Direction<ICRS> dir(0.6, 0.8, 0.0);
+  auto jd = JulianDate::J2000();
+
+  auto same = dir.to_frame<ICRS>(jd);
+  static_assert(std::is_same_v<decltype(same), cartesian::Direction<ICRS>>);
+  EXPECT_DOUBLE_EQ(same.x, 0.6);
+  EXPECT_DOUBLE_EQ(same.y, 0.8);
+  EXPECT_DOUBLE_EQ(same.z, 0.0);
+}
+
+TEST(TypedCoordinates, CartesianDirToFramePreservesLength) {
+  using namespace siderust::frames;
+
+  // The rotation must preserve vector length
+  cartesian::Direction<ICRS> dir(0.6, 0.8, 0.0);
+  auto jd = JulianDate::J2000();
+
+  auto ecl = dir.to_frame<EclipticMeanJ2000>(jd);
+  double len = std::sqrt(ecl.x * ecl.x + ecl.y * ecl.y + ecl.z * ecl.z);
+  EXPECT_NEAR(len, 1.0, 1e-10);
+}
+
+// ============================================================================
+// cartesian::Position::to_frame — new method
+// ============================================================================
+
+TEST(TypedCoordinates, CartesianPosToFrameRoundtrip) {
+  using namespace siderust::frames;
+  using AU = qtty::AstronomicalUnit;
+
+  cartesian::Position<centers::Heliocentric, EclipticMeanJ2000, AU> pos(1.0, 0.5, 0.2);
+  auto jd = JulianDate::J2000();
+
+  auto pos_icrs = pos.to_frame<ICRS>(jd);
+  static_assert(std::is_same_v<decltype(pos_icrs),
+                               cartesian::Position<centers::Heliocentric, ICRS, AU>>);
+
+  // Round-trip back to EclipticMeanJ2000
+  auto pos_back = pos_icrs.to_frame<EclipticMeanJ2000>(jd);
+  EXPECT_NEAR(pos_back.x().value(), 1.0, 1e-8);
+  EXPECT_NEAR(pos_back.y().value(), 0.5, 1e-8);
+  EXPECT_NEAR(pos_back.z().value(), 0.2, 1e-8);
+}
+
+TEST(TypedCoordinates, CartesianPosToFrameSameCenterPreserved) {
+  using namespace siderust::frames;
+  using AU = qtty::AstronomicalUnit;
+
+  // Frame-only transform preserves center
+  cartesian::Position<centers::Barycentric, EclipticMeanJ2000, AU> pos(1.0, 0.0, 0.0);
+  auto jd = JulianDate::J2000();
+
+  auto transformed = pos.to_frame<EquatorialMeanJ2000>(jd);
+  static_assert(
+      std::is_same_v<decltype(transformed),
+                     cartesian::Position<centers::Barycentric, EquatorialMeanJ2000, AU>>);
+
+  // Distance must be preserved (rotation)
+  double r0 = pos.distance().value();
+  double r1 = transformed.distance().value();
+  EXPECT_NEAR(r0, r1, 1e-10);
+}
+
+// ============================================================================
+// spherical::Position::to_frame — new method
+// ============================================================================
+
+TEST(TypedCoordinates, SphericalPosToFrameRoundtrip) {
+  using namespace siderust::frames;
+  using AU = qtty::AstronomicalUnit;
+
+  spherical::Position<centers::Heliocentric, EclipticMeanJ2000, AU> sph(
+      qtty::Degree(30.0), qtty::Degree(10.0), AU(1.5));
+  auto jd = JulianDate::J2000();
+
+  auto sph_icrs = sph.to_frame<ICRS>(jd);
+  static_assert(
+      std::is_same_v<decltype(sph_icrs),
+                     spherical::Position<centers::Heliocentric, ICRS, AU>>);
+
+  // Round-trip back
+  auto sph_back = sph_icrs.to_frame<EclipticMeanJ2000>(jd);
+  EXPECT_NEAR(sph_back.lon().value(), 30.0, 1e-6);
+  EXPECT_NEAR(sph_back.lat().value(), 10.0, 1e-6);
+  EXPECT_NEAR(sph_back.distance().value(), 1.5, 1e-10);
+}
+
+TEST(TypedCoordinates, SphericalPosToFramePreservesDistance) {
+  using namespace siderust::frames;
+  using AU = qtty::AstronomicalUnit;
+
+  spherical::Position<centers::Barycentric, ICRS, AU> sph(
+      qtty::Degree(100.0), qtty::Degree(45.0), AU(2.3));
+  auto jd = JulianDate::J2000();
+
+  auto ecl = sph.to_frame<EclipticMeanJ2000>(jd);
+  // Distance must be unchanged by a frame rotation
+  EXPECT_NEAR(ecl.distance().value(), 2.3, 1e-10);
+}
+
+TEST(TypedCoordinates, SphericalPosToFrameShorthand) {
+  using namespace siderust::frames;
+  using AU = qtty::AstronomicalUnit;
+
+  spherical::Position<centers::Heliocentric, ICRS, AU> sph(
+      qtty::Degree(50.0), qtty::Degree(20.0), AU(1.0));
+  auto jd = JulianDate::J2000();
+
+  // .to<Target>(jd) shorthand
+  auto ecl = sph.to<EclipticMeanJ2000>(jd);
+  static_assert(
+      std::is_same_v<decltype(ecl),
+                     spherical::Position<centers::Heliocentric, EclipticMeanJ2000, AU>>);
+  EXPECT_NEAR(ecl.distance().value(), 1.0, 1e-10);
+}

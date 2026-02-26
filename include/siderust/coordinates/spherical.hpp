@@ -280,6 +280,29 @@ public:
    */
   cartesian::Position<C, F, U> to_cartesian() const;
 
+  /**
+   * @brief Transform this position to a different reference frame (same center).
+   *
+   * Internally converts to Cartesian, applies the frame rotation, then converts
+   * back to spherical. Only enabled when a `FrameRotationProvider` exists for
+   * the pair (F, Target).
+   *
+   * @tparam Target  Destination frame tag.
+   * @param  jd      Julian Date (TT) for time-dependent rotations.
+   */
+  template <typename Target>
+  std::enable_if_t<frames::has_frame_transform_v<F, Target>, Position<C, Target, U>>
+  to_frame(const JulianDate &jd) const;
+
+  /**
+   * @brief Shorthand: `.to<Target>(jd)` (calls `to_frame`).
+   */
+  template <typename Target>
+  auto to(const JulianDate &jd) const
+      -> decltype(this->template to_frame<Target>(jd)) {
+    return to_frame<Target>(jd);
+  }
+
   U distance_to(const Position &other) const {
     using std::sqrt;
     // Values in underlying unit (e.g. meters)
