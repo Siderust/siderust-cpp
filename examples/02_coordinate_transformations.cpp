@@ -19,8 +19,7 @@ int main() {
   std::cout << "=== Coordinate Transformations (C++) ===\n\n";
 
   const JulianDate jd = JulianDate::J2000();
-  std::cout << "Reference time: J2000.0 (JD " << std::fixed << std::setprecision(1)
-            << jd.value() << ")\n\n";
+  std::cout << "Reference time: J2000.0 (JD " << jd << ")\n\n";
 
   // 1. Frame transformations (same center)
   std::cout << "1. FRAME TRANSFORMATIONS\n";
@@ -28,21 +27,21 @@ int main() {
 
   cartesian::position::EclipticMeanJ2000<AU> pos_ecl(1.0, 0.0, 0.0);
   std::cout << "Original (Heliocentric EclipticMeanJ2000):\n";
-  std::cout << "  X = " << pos_ecl.x() << " AU\n";
-  std::cout << "  Y = " << pos_ecl.y() << " AU\n";
-  std::cout << "  Z = " << pos_ecl.z() << " AU\n\n";
+  std::cout << "  X = " << pos_ecl.x() << "\n";
+  std::cout << "  Y = " << pos_ecl.y() << "\n";
+  std::cout << "  Z = " << pos_ecl.z() << "\n\n";
 
   // to Equatorial (same heliocentric center)
-    auto sph_ecl = pos_ecl.to_spherical();
+  auto sph_ecl = pos_ecl.to_spherical();
   auto dir_equ = sph_ecl.direction().to_frame<frames::EquatorialMeanJ2000>(jd);
   spherical::Position<centers::Heliocentric, frames::EquatorialMeanJ2000, AU>
       sph_equ(dir_equ, sph_ecl.distance());
   auto pos_equ = sph_equ.to_cartesian();
 
   std::cout << "Transformed to EquatorialMeanJ2000 frame:\n";
-  std::cout << "  X = " << pos_equ.x() << " AU\n";
-  std::cout << "  Y = " << pos_equ.y() << " AU\n";
-  std::cout << "  Z = " << pos_equ.z() << " AU\n\n";
+  std::cout << "  X = " << pos_equ.x() << "\n";
+  std::cout << "  Y = " << pos_equ.y() << "\n";
+  std::cout << "  Z = " << pos_equ.z() << "\n\n";
 
   // to ICRS (via equatorial hub)
   auto dir_icrs = sph_equ.direction().to_frame<frames::ICRS>(jd);
@@ -50,9 +49,9 @@ int main() {
                                                                                                                                                 sph_equ.distance());
     auto pos_icrs = sph_icrs.to_cartesian();
   std::cout << "Transformed to ICRS frame:\n";
-  std::cout << "  X = " << pos_icrs.x() << " AU\n";
-  std::cout << "  Y = " << pos_icrs.y() << " AU\n";
-  std::cout << "  Z = " << pos_icrs.z() << " AU\n\n";
+  std::cout << "  X = " << pos_icrs.x() << "\n";
+  std::cout << "  Y = " << pos_icrs.y() << "\n";
+  std::cout << "  Z = " << pos_icrs.z() << "\n\n";
 
   // 2. Center transformations (same frame)
   std::cout << "2. CENTER TRANSFORMATIONS\n";
@@ -60,36 +59,36 @@ int main() {
 
   auto earth_helio = ephemeris::earth_heliocentric(jd);
   std::cout << "Earth (Heliocentric EclipticMeanJ2000):\n";
-  std::cout << "  X = " << earth_helio.x() << " AU\n";
-  std::cout << "  Y = " << earth_helio.y() << " AU\n";
-  std::cout << "  Z = " << earth_helio.z() << " AU\n";
-  std::cout << "  Distance = " << earth_helio.distance() << " AU\n\n";
+  std::cout << "  X = " << earth_helio.x() << "\n";
+  std::cout << "  Y = " << earth_helio.y() << "\n";
+  std::cout << "  Z = " << earth_helio.z() << "\n";
+  std::cout << "  Distance = " << earth_helio.distance() << "\n\n";
 
   // Earth in geocentric (origin) — heliocentric minus itself -> zero
   cartesian::Position<centers::Geocentric, frames::EclipticMeanJ2000, AU>
       earth_geo(AU(0.0), AU(0.0), AU(0.0));
   std::cout << "Earth (Geocentric EclipticMeanJ2000) - at origin:\n";
-  std::cout << "  X = " << earth_geo.x() << " AU\n";
-  std::cout << "  Y = " << earth_geo.y() << " AU\n";
-  std::cout << "  Z = " << earth_geo.z() << " AU\n\n";
+  std::cout << "  X = " << earth_geo.x() << "\n";
+  std::cout << "  Y = " << earth_geo.y() << "\n";
+  std::cout << "  Z = " << earth_geo.z() << "\n\n";
   std::cout << "  Distance = " << earth_geo.distance() << " AU (should be ~0)\n\n";
 
   auto mars_helio = ephemeris::mars_heliocentric(jd);
   std::cout << "Mars (Heliocentric EclipticMeanJ2000):\n";
-  std::cout << "  X = " << mars_helio.x() << " AU\n";
-  std::cout << "  Y = " << mars_helio.y() << " AU\n";
-  std::cout << "  Z = " << mars_helio.z() << " AU\n";
-  std::cout << "  Distance = " << mars_helio.distance() << " AU\n\n";
+  std::cout << "  X = " << mars_helio.x() << "\n";
+  std::cout << "  Y = " << mars_helio.y() << "\n";
+  std::cout << "  Z = " << mars_helio.z() << "\n";
+  std::cout << "  Distance = " << mars_helio.distance() << "\n\n";
 
   // Mars geocentric = Mars_helio - Earth_helio (component-wise)
   cartesian::Position<centers::Geocentric, frames::EclipticMeanJ2000, AU>
       mars_geo(mars_helio.x() - earth_helio.x(), mars_helio.y() - earth_helio.y(),
                mars_helio.z() - earth_helio.z());
   std::cout << "Mars (Geocentric EclipticMeanJ2000) - as seen from Earth:\n";
-  std::cout << "  X = " << mars_geo.x() << " AU\n";
-  std::cout << "  Y = " << mars_geo.y() << " AU\n";
-  std::cout << "  Z = " << mars_geo.z() << " AU\n";
-  std::cout << "  Distance = " << mars_geo.distance() << " AU\n\n";
+  std::cout << "  X = " << mars_geo.x() << "\n";
+  std::cout << "  Y = " << mars_geo.y() << "\n";
+  std::cout << "  Z = " << mars_geo.z() << "\n";
+  std::cout << "  Distance = " << mars_geo.distance() << "\n\n";
 
   // 3. Combined transformations (center + frame)
   std::cout << "3. COMBINED TRANSFORMATIONS\n";
@@ -135,9 +134,9 @@ int main() {
       sph_direct_cart.z() - earth_helio_equ.z());
 
   std::cout << "  Or using direct chain (same result):\n";
-  std::cout << "    X = " << Mars_geo_equ_direct.x() << " AU\n";
-  std::cout << "    Y = " << Mars_geo_equ_direct.y() << " AU\n";
-  std::cout << "    Z = " << Mars_geo_equ_direct.z() << " AU\n\n";
+  std::cout << "    X = " << Mars_geo_equ_direct.x() << "\n";
+  std::cout << "    Y = " << Mars_geo_equ_direct.y() << "\n";
+  std::cout << "    Z = " << Mars_geo_equ_direct.z() << "\n\n";
 
   // 4. Barycentric coordinates
   std::cout << "4. BARYCENTRIC COORDINATES\n";
@@ -145,10 +144,10 @@ int main() {
 
   auto earth_bary = ephemeris::earth_barycentric(jd);
   std::cout << "Earth (Barycentric EclipticMeanJ2000):\n";
-  std::cout << "  X = " << earth_bary.x() << " AU\n";
-  std::cout << "  Y = " << earth_bary.y() << " AU\n";
-  std::cout << "  Z = " << earth_bary.z() << " AU\n";
-  std::cout << "  Distance from SSB = " << earth_bary.distance() << " AU\n\n";
+  std::cout << "  X = " << earth_bary.x() << "\n";
+  std::cout << "  Y = " << earth_bary.y() << "\n";
+  std::cout << "  Z = " << earth_bary.z() << "\n";
+  std::cout << "  Distance from SSB = " << earth_bary.distance() << "\n\n";
 
   // Mars barycentric = sun_barycentric + mars_helio
   auto sun_bary = ephemeris::sun_barycentric(jd);
@@ -162,10 +161,10 @@ int main() {
       mars_bary.z() - earth_bary.z());
 
   std::cout << "Mars (Geocentric, from Barycentric):\n";
-  std::cout << "  X = " << mars_geo_from_bary.x() << " AU\n";
-  std::cout << "  Y = " << mars_geo_from_bary.y() << " AU\n";
-  std::cout << "  Z = " << mars_geo_from_bary.z() << " AU\n";
-  std::cout << "  Distance = " << mars_geo_from_bary.distance() << " AU\n\n";
+  std::cout << "  X = " << mars_geo_from_bary.x() << "\n";
+  std::cout << "  Y = " << mars_geo_from_bary.y() << "\n";
+  std::cout << "  Z = " << mars_geo_from_bary.z() << "\n";
+  std::cout << "  Distance = " << mars_geo_from_bary.distance() << "\n\n";
 
   // 5. ICRS frame transformations (barycentric -> geocentric)
   std::cout << "5. ICRS FRAME TRANSFORMATIONS\n";
@@ -174,9 +173,9 @@ int main() {
   // Create a sample star in barycentric ICRS cartesian coords
   cartesian::Position<centers::Barycentric, frames::ICRS, AU> star_icrs(AU(100.0), AU(50.0), AU(1000.0));
   std::cout << "Star (Barycentric ICRS):\n";
-  std::cout << "  X = " << star_icrs.x() << " AU\n";
-  std::cout << "  Y = " << star_icrs.y() << " AU\n";
-  std::cout << "  Z = " << star_icrs.z() << " AU\n\n";
+  std::cout << "  X = " << star_icrs.x() << "\n";
+  std::cout << "  Y = " << star_icrs.y() << "\n";
+  std::cout << "  Z = " << star_icrs.z() << "\n\n";
 
   // Convert Earth's barycentric from ecliptic -> ICRS frame, then subtract
     auto sph_earth_bary = earth_bary.to_spherical();
@@ -191,9 +190,9 @@ int main() {
       star_icrs.z() - earth_bary_icrs.z());
 
   std::cout << "Star (Geocentric ICRS/GCRS):\n";
-  std::cout << "  X = " << star_gcrs.x() << " AU\n";
-  std::cout << "  Y = " << star_gcrs.y() << " AU\n";
-  std::cout << "  Z = " << star_gcrs.z() << " AU\n\n";
+  std::cout << "  X = " << star_gcrs.x() << "\n";
+  std::cout << "  Y = " << star_gcrs.y() << "\n";
+  std::cout << "  Z = " << star_gcrs.z() << "\n\n";
 
   // 6. Round-trip transformation
   std::cout << "6. ROUND-TRIP TRANSFORMATION\n";
@@ -201,9 +200,9 @@ int main() {
 
   auto original = mars_helio;
   std::cout << "Original Mars (Heliocentric EclipticMeanJ2000):\n";
-  std::cout << "  X = " << original.x() << " AU\n";
-  std::cout << "  Y = " << original.y() << " AU\n";
-  std::cout << "  Z = " << original.z() << " AU\n\n";
+  std::cout << "  X = " << original.x() << "\n";
+  std::cout << "  Y = " << original.y() << "\n";
+  std::cout << "  Z = " << original.z() << "\n\n";
 
   // Helio Ecl -> Geo Equ -> back to Helio Ecl
   // (we reuse previously computed earth_helio_equ)
@@ -221,9 +220,9 @@ int main() {
   auto recovered = sph_recovered_ecl.to_cartesian();
 
   std::cout << "After round-trip transformation:\n";
-  std::cout << "  X = " << recovered.x() << " AU\n";
-  std::cout << "  Y = " << recovered.y() << " AU\n";
-  std::cout << "  Z = " << recovered.z() << " AU\n\n";
+  std::cout << "  X = " << recovered.x() << "\n";
+  std::cout << "  Y = " << recovered.y() << "\n";
+  std::cout << "  Z = " << recovered.z() << "\n\n";
 
   const double diff_x = std::abs(original.x().value() - recovered.x().value());
   const double diff_y = std::abs(original.y().value() - recovered.y().value());
