@@ -54,7 +54,7 @@ template <typename F> struct Direction {
  * @tparam F Reference frame tag (e.g. `frames::ECEF`).
  * @tparam U Length unit (default: `qtty::Meter`).
  */
-template <typename C, typename F, typename U = qtty::Meter> struct Position {
+template <typename C, typename F, typename U> struct Position {
   static_assert(frames::is_frame_v<F>, "F must be a valid frame tag");
   static_assert(centers::is_center_v<C>, "C must be a valid center tag");
 

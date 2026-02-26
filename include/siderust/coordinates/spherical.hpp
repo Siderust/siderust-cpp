@@ -212,11 +212,12 @@ private:
   U dist_;
 
 public:
-  Position()
-      : azimuth_(qtty::Degree(0)), polar_(qtty::Degree(0)), dist_(U(0)) {}
 
-  Position(qtty::Degree azimuth, qtty::Degree polar, U dist)
-      : azimuth_(azimuth), polar_(polar), dist_(dist) {}
+  Position(qtty::Degree azimuth, qtty::Degree polar, U distance)
+      : azimuth_(azimuth), polar_(polar), dist_(distance) {}
+
+  Position(const Direction<F> &dir, U distance)
+      : azimuth_(dir.azimuth()), polar_(dir.polar()), dist_(distance) {}
 
   /// Extract the direction component.
   Direction<F> direction() const { return Direction<F>(azimuth_, polar_); }
