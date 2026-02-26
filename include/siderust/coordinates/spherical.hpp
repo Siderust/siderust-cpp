@@ -17,6 +17,9 @@
 #include <type_traits>
 #include <cmath>
 
+// Forward-declare cartesian Position to avoid circular include.
+namespace siderust { namespace cartesian { template <typename C, typename F, typename U> struct Position; } }
+
 namespace siderust {
 namespace spherical {
 
@@ -271,6 +274,10 @@ public:
   }
 
   U distance() const { return dist_; }
+  /**
+   * @brief Convert this spherical position to a cartesian Position<C,F,U>.
+   */
+  cartesian::Position<C, F, U> to_cartesian() const;
 
   U distance_to(const Position &other) const {
     using std::sqrt;

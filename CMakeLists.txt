@@ -180,6 +180,15 @@ if(DEFINED _siderust_rpath)
     )
 endif()
 
+add_executable(coordinate_transformations_example examples/02_coordinate_transformations.cpp)
+target_link_libraries(coordinate_transformations_example PRIVATE siderust_cpp)
+if(DEFINED _siderust_rpath)
+    set_target_properties(coordinate_transformations_example PROPERTIES
+        BUILD_RPATH ${_siderust_rpath}
+        INSTALL_RPATH ${_siderust_rpath}
+    )
+endif()
+
 add_executable(solar_system_bodies_example examples/solar_system_bodies_example.cpp)
 target_link_libraries(solar_system_bodies_example PRIVATE siderust_cpp)
 if(DEFINED _siderust_rpath)
@@ -229,6 +238,181 @@ add_executable(bodycentric_coordinates_example examples/bodycentric_coordinates.
 target_link_libraries(bodycentric_coordinates_example PRIVATE siderust_cpp)
 if(DEFINED _siderust_rpath)
     set_target_properties(bodycentric_coordinates_example PROPERTIES
+        BUILD_RPATH ${_siderust_rpath}
+        INSTALL_RPATH ${_siderust_rpath}
+    )
+endif()
+
+# ---------------------------------------------------------------------------
+# Numbered mirror examples (03–21, mirroring siderust Rust examples)
+# ---------------------------------------------------------------------------
+
+add_executable(03_all_frame_conversions_example examples/03_all_frame_conversions.cpp)
+target_link_libraries(03_all_frame_conversions_example PRIVATE siderust_cpp)
+if(DEFINED _siderust_rpath)
+    set_target_properties(03_all_frame_conversions_example PROPERTIES
+        BUILD_RPATH ${_siderust_rpath}
+        INSTALL_RPATH ${_siderust_rpath}
+    )
+endif()
+
+add_executable(04_all_center_conversions_example examples/04_all_center_conversions.cpp)
+target_link_libraries(04_all_center_conversions_example PRIVATE siderust_cpp)
+if(DEFINED _siderust_rpath)
+    set_target_properties(04_all_center_conversions_example PROPERTIES
+        BUILD_RPATH ${_siderust_rpath}
+        INSTALL_RPATH ${_siderust_rpath}
+    )
+endif()
+
+add_executable(05_time_periods_example examples/05_time_periods.cpp)
+target_link_libraries(05_time_periods_example PRIVATE siderust_cpp)
+if(DEFINED _siderust_rpath)
+    set_target_properties(05_time_periods_example PROPERTIES
+        BUILD_RPATH ${_siderust_rpath}
+        INSTALL_RPATH ${_siderust_rpath}
+    )
+endif()
+
+add_executable(06_astronomical_night_example examples/06_astronomical_night.cpp)
+target_link_libraries(06_astronomical_night_example PRIVATE siderust_cpp)
+if(DEFINED _siderust_rpath)
+    set_target_properties(06_astronomical_night_example PROPERTIES
+        BUILD_RPATH ${_siderust_rpath}
+        INSTALL_RPATH ${_siderust_rpath}
+    )
+endif()
+
+add_executable(07_find_night_periods_365day_example examples/07_find_night_periods_365day.cpp)
+target_link_libraries(07_find_night_periods_365day_example PRIVATE siderust_cpp)
+if(DEFINED _siderust_rpath)
+    set_target_properties(07_find_night_periods_365day_example PROPERTIES
+        BUILD_RPATH ${_siderust_rpath}
+        INSTALL_RPATH ${_siderust_rpath}
+    )
+endif()
+
+add_executable(08_night_quality_scoring_example examples/08_night_quality_scoring.cpp)
+target_link_libraries(08_night_quality_scoring_example PRIVATE siderust_cpp)
+if(DEFINED _siderust_rpath)
+    set_target_properties(08_night_quality_scoring_example PROPERTIES
+        BUILD_RPATH ${_siderust_rpath}
+        INSTALL_RPATH ${_siderust_rpath}
+    )
+endif()
+
+add_executable(09_star_observability_example examples/09_star_observability.cpp)
+target_link_libraries(09_star_observability_example PRIVATE siderust_cpp)
+if(DEFINED _siderust_rpath)
+    set_target_properties(09_star_observability_example PROPERTIES
+        BUILD_RPATH ${_siderust_rpath}
+        INSTALL_RPATH ${_siderust_rpath}
+    )
+endif()
+
+add_executable(10_altitude_periods_trait_example examples/10_altitude_periods_trait.cpp)
+target_link_libraries(10_altitude_periods_trait_example PRIVATE siderust_cpp)
+if(DEFINED _siderust_rpath)
+    set_target_properties(10_altitude_periods_trait_example PROPERTIES
+        BUILD_RPATH ${_siderust_rpath}
+        INSTALL_RPATH ${_siderust_rpath}
+    )
+endif()
+
+add_executable(11_compare_sun_moon_star_example examples/11_compare_sun_moon_star.cpp)
+target_link_libraries(11_compare_sun_moon_star_example PRIVATE siderust_cpp)
+if(DEFINED _siderust_rpath)
+    set_target_properties(11_compare_sun_moon_star_example PROPERTIES
+        BUILD_RPATH ${_siderust_rpath}
+        INSTALL_RPATH ${_siderust_rpath}
+    )
+endif()
+
+add_executable(12_solar_system_example examples/12_solar_system_example.cpp)
+target_link_libraries(12_solar_system_example PRIVATE siderust_cpp)
+if(DEFINED _siderust_rpath)
+    set_target_properties(12_solar_system_example PROPERTIES
+        BUILD_RPATH ${_siderust_rpath}
+        INSTALL_RPATH ${_siderust_rpath}
+    )
+endif()
+
+add_executable(13_observer_coordinates_example examples/13_observer_coordinates.cpp)
+target_link_libraries(13_observer_coordinates_example PRIVATE siderust_cpp)
+if(DEFINED _siderust_rpath)
+    set_target_properties(13_observer_coordinates_example PROPERTIES
+        BUILD_RPATH ${_siderust_rpath}
+        INSTALL_RPATH ${_siderust_rpath}
+    )
+endif()
+
+add_executable(14_bodycentric_coordinates_example examples/14_bodycentric_coordinates.cpp)
+target_link_libraries(14_bodycentric_coordinates_example PRIVATE siderust_cpp)
+if(DEFINED _siderust_rpath)
+    set_target_properties(14_bodycentric_coordinates_example PROPERTIES
+        BUILD_RPATH ${_siderust_rpath}
+        INSTALL_RPATH ${_siderust_rpath}
+    )
+endif()
+
+add_executable(15_targets_proper_motion_example examples/15_targets_proper_motion.cpp)
+target_link_libraries(15_targets_proper_motion_example PRIVATE siderust_cpp)
+if(DEFINED _siderust_rpath)
+    set_target_properties(15_targets_proper_motion_example PROPERTIES
+        BUILD_RPATH ${_siderust_rpath}
+        INSTALL_RPATH ${_siderust_rpath}
+    )
+endif()
+
+add_executable(16_jpl_precise_ephemeris_example examples/16_jpl_precise_ephemeris.cpp)
+target_link_libraries(16_jpl_precise_ephemeris_example PRIVATE siderust_cpp)
+if(DEFINED _siderust_rpath)
+    set_target_properties(16_jpl_precise_ephemeris_example PROPERTIES
+        BUILD_RPATH ${_siderust_rpath}
+        INSTALL_RPATH ${_siderust_rpath}
+    )
+endif()
+
+add_executable(17_serde_serialization_example examples/17_serde_serialization.cpp)
+target_link_libraries(17_serde_serialization_example PRIVATE siderust_cpp)
+if(DEFINED _siderust_rpath)
+    set_target_properties(17_serde_serialization_example PROPERTIES
+        BUILD_RPATH ${_siderust_rpath}
+        INSTALL_RPATH ${_siderust_rpath}
+    )
+endif()
+
+add_executable(18_kepler_orbit_example examples/18_kepler_orbit.cpp)
+target_link_libraries(18_kepler_orbit_example PRIVATE siderust_cpp)
+if(DEFINED _siderust_rpath)
+    set_target_properties(18_kepler_orbit_example PROPERTIES
+        BUILD_RPATH ${_siderust_rpath}
+        INSTALL_RPATH ${_siderust_rpath}
+    )
+endif()
+
+add_executable(19_brent_root_finding_example examples/19_brent_root_finding.cpp)
+target_link_libraries(19_brent_root_finding_example PRIVATE siderust_cpp)
+if(DEFINED _siderust_rpath)
+    set_target_properties(19_brent_root_finding_example PROPERTIES
+        BUILD_RPATH ${_siderust_rpath}
+        INSTALL_RPATH ${_siderust_rpath}
+    )
+endif()
+
+add_executable(20_moon_phase_example examples/20_moon_phase.cpp)
+target_link_libraries(20_moon_phase_example PRIVATE siderust_cpp)
+if(DEFINED _siderust_rpath)
+    set_target_properties(20_moon_phase_example PROPERTIES
+        BUILD_RPATH ${_siderust_rpath}
+        INSTALL_RPATH ${_siderust_rpath}
+    )
+endif()
+
+add_executable(21_trackable_demo_example examples/21_trackable_demo.cpp)
+target_link_libraries(21_trackable_demo_example PRIVATE siderust_cpp)
+if(DEFINED _siderust_rpath)
+    set_target_properties(21_trackable_demo_example PROPERTIES
         BUILD_RPATH ${_siderust_rpath}
         INSTALL_RPATH ${_siderust_rpath}
     )
