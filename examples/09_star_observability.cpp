@@ -14,6 +14,7 @@
 #include <iostream>
 
 using namespace siderust;
+using namespace qtty::literals;
 
 /// Intersect two sorted vectors of periods.
 /// Returns every non-empty overlap between a period in `a` and a period in `b`.
@@ -41,18 +42,18 @@ int main() {
 
     // One-night search window (MJD TT).
     MJD t0(60000.0);
-    Period window(t0, t0 + qtty::Day(1.0));
+    Period window(t0, t0 + 1.0_d);
 
     // Constraint 1: altitude between 25° and 65°.
-    auto min_alt = qtty::Degree(25.0);
-    auto max_alt = qtty::Degree(65.0);
+    auto min_alt = 25.0_deg;
+    auto max_alt = 65.0_deg;
     auto above_min = star_altitude::above_threshold(target, observer, window, min_alt);
     auto below_max = star_altitude::below_threshold(target, observer, window, max_alt);
     auto altitude_periods = intersect_periods(above_min, below_max);
 
     // Constraint 2: azimuth between 110° and 220° (ESE -> SW sector).
-    auto min_az = qtty::Degree(110.0);
-    auto max_az = qtty::Degree(220.0);
+    auto min_az = 110.0_deg;
+    auto max_az = 220.0_deg;
     auto azimuth_periods = star_altitude::in_azimuth_range(
         target, observer, window, min_az, max_az);
 

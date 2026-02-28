@@ -60,27 +60,27 @@ TEST(Bodies, StarCreateWithProperMotion) {
 
 TEST(Bodies, PlanetEarth) {
   auto e = EARTH;
-  EXPECT_NEAR(e.mass_kg, 5.972e24, 0.01e24);
-  EXPECT_NEAR(e.radius_km, 6371.0, 10.0);
-  EXPECT_NEAR(e.orbit.semi_major_axis_au, 1.0, 0.01);
+  EXPECT_NEAR(e.mass.value(), 5.972e24, 0.01e24);
+  EXPECT_NEAR(e.radius.value(), 6371.0, 10.0);
+  EXPECT_NEAR(e.orbit.semi_major_axis.value(), 1.0, 0.01);
 }
 
 TEST(Bodies, PlanetMars) {
   auto m = MARS;
-  EXPECT_GT(m.mass_kg, 0);
-  EXPECT_NEAR(m.orbit.semi_major_axis_au, 1.524, 0.01);
+  EXPECT_GT(m.mass.value(), 0);
+  EXPECT_NEAR(m.orbit.semi_major_axis.value(), 1.524, 0.01);
 }
 
 TEST(Bodies, AllPlanets) {
   // Ensure all static constants are populated.
-  EXPECT_GT(MERCURY.mass_kg, 0.0);
-  EXPECT_GT(VENUS.mass_kg, 0.0);
-  EXPECT_GT(EARTH.mass_kg, 0.0);
-  EXPECT_GT(MARS.mass_kg, 0.0);
-  EXPECT_GT(JUPITER.mass_kg, 0.0);
-  EXPECT_GT(SATURN.mass_kg, 0.0);
-  EXPECT_GT(URANUS.mass_kg, 0.0);
-  EXPECT_GT(NEPTUNE.mass_kg, 0.0);
+  EXPECT_GT(MERCURY.mass.value(), 0.0);
+  EXPECT_GT(VENUS.mass.value(), 0.0);
+  EXPECT_GT(EARTH.mass.value(), 0.0);
+  EXPECT_GT(MARS.mass.value(), 0.0);
+  EXPECT_GT(JUPITER.mass.value(), 0.0);
+  EXPECT_GT(SATURN.mass.value(), 0.0);
+  EXPECT_GT(URANUS.mass.value(), 0.0);
+  EXPECT_GT(NEPTUNE.mass.value(), 0.0);
 }
 
 // ============================================================================

@@ -29,8 +29,7 @@
 
 using namespace siderust;
 using namespace siderust::frames;
-using namespace siderust::centers;
-
+using namespace siderust::centers;using namespace qtty::literals;
 // ─── JSON formatting helpers ────────────────────────────────────────────────
 
 inline std::string json_number(double v, int prec = 6) {
@@ -81,8 +80,8 @@ void section_coordinates() {
 
     // Heliocentric ecliptic spherical (AU)
     spherical::Position<Heliocentric, EclipticMeanJ2000, qtty::AstronomicalUnit>
-        helio_ecl_sph(qtty::Degree(120.0), qtty::Degree(5.0),
-                      qtty::AstronomicalUnit(1.2));
+        helio_ecl_sph(120.0_deg, 5.0_deg,
+                      1.2_au);
 
     // Observer site (geodetic)
     Geodetic observer_site(-17.8947, 28.7636, 2396.0);
@@ -122,12 +121,12 @@ struct BodySnapshotJSON {
            << pad << "\"name\": " << json_string(name) << ",\n"
            << pad << "\"epoch\": " << json_number(epoch.value(), 1) << ",\n"
            << pad << "\"orbit\": {\n"
-           << pad << "  \"semi_major_axis_au\": " << json_number(orbit.semi_major_axis_au) << ",\n"
+           << pad << "  \"semi_major_axis_au\": " << json_number(orbit.semi_major_axis.value()) << ",\n"
            << pad << "  \"eccentricity\": " << json_number(orbit.eccentricity) << ",\n"
-           << pad << "  \"inclination_deg\": " << json_number(orbit.inclination_deg) << ",\n"
-           << pad << "  \"lon_ascending_node_deg\": " << json_number(orbit.lon_ascending_node_deg) << ",\n"
-           << pad << "  \"arg_perihelion_deg\": " << json_number(orbit.arg_perihelion_deg) << ",\n"
-           << pad << "  \"mean_anomaly_deg\": " << json_number(orbit.mean_anomaly_deg) << ",\n"
+           << pad << "  \"inclination_deg\": " << json_number(orbit.inclination.value()) << ",\n"
+           << pad << "  \"lon_ascending_node_deg\": " << json_number(orbit.lon_ascending_node.value()) << ",\n"
+           << pad << "  \"arg_perihelion_deg\": " << json_number(orbit.arg_perihelion.value()) << ",\n"
+           << pad << "  \"mean_anomaly_deg\": " << json_number(orbit.mean_anomaly.value()) << ",\n"
            << pad << "  \"epoch_jd\": " << json_number(orbit.epoch_jd, 1) << "\n"
            << pad << "},\n"
            << pad << "\"heliocentric_ecliptic\": {\n"
@@ -148,7 +147,9 @@ void section_body_objects(const JulianDate &jd) {
         "Earth", jd, EARTH.orbit, ephemeris::earth_heliocentric(jd)};
 
     // Halley's comet
-    Orbit halley_orb{17.834, 0.96714, 162.26, 58.42, 111.33, 38.38, 2446467.4};
+    Orbit halley_orb{17.834_au, 0.96714,
+                     162.26_deg, 58.42_deg,
+                     111.33_deg, 38.38_deg, 2446467.4};
     auto halley_pos = kepler_position(halley_orb, jd);
     BodySnapshotJSON halley_snap{"Halley", jd, halley_orb, halley_pos};
 

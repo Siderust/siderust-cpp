@@ -9,6 +9,7 @@ using namespace siderust;
 using namespace siderust::frames;
 using namespace siderust::centers;
 using qtty::AstronomicalUnit;
+using namespace qtty::literals;
 
 namespace {
 
@@ -17,12 +18,14 @@ constexpr double KM_PER_AU = 149597870.7;
 
 // Satellite orbit at 0.0001 AU (~14 960 km) geocentric
 Orbit satellite_orbit() {
-  return {0.0001, 0.0, 0.0, 0.0, 0.0, 0.0, J2000};
+  return {0.0001_au, 0.0, 0.0_deg,
+          0.0_deg, 0.0_deg, 0.0_deg, J2000};
 }
 
 // Approximate Mars heliocentric orbit
 Orbit mars_orbit() {
-  return {1.524, 0.0934, 1.85, 49.56, 286.5, 19.41, J2000};
+  return {1.524_au, 0.0934, 1.85_deg,
+          49.56_deg, 286.5_deg, 19.41_deg, J2000};
 }
 
 double vec_magnitude(double x, double y, double z) {
@@ -83,7 +86,7 @@ TEST(BodycentricTransforms, GeocentricToBodycentricGeoOrbit) {
   EXPECT_TRUE(std::isfinite(result.z().value()));
 
   // center_params round-trips correctly
-  EXPECT_NEAR(result.center_params().orbit.semi_major_axis_au, 0.0001, 1e-10);
+  EXPECT_NEAR(result.center_params().orbit.semi_major_axis.value(), 0.0001, 1e-10);
 }
 
 // ============================================================================

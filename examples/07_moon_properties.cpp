@@ -12,13 +12,13 @@
 
 #include <siderust/siderust.hpp>
 
-#include <cmath>
 #include <iomanip>
 #include <iostream>
 #include <string>
 #include <vector>
 
 using namespace siderust;
+using namespace qtty::literals;
 
 /// Helper: print a list of MJD periods with their durations.
 void print_periods(const std::string &label,
@@ -54,8 +54,6 @@ int main() {
     auto geo = moon::phase_geocentric(jd);
     auto topo = moon::phase_topocentric(jd, site);
 
-    constexpr double RAD_TO_DEG = 180.0 / M_PI;
-
     std::cout << std::fixed;
     std::cout << "Moon phase at 2026-03-01 00:00 UTC" << std::endl;
     std::cout << "==================================" << std::endl;
@@ -71,9 +69,9 @@ int main() {
     std::cout << "  illuminated percent   : " << illuminated_percent(geo) << " %"
               << std::endl;
     std::cout << "  phase angle           : "
-              << geo.phase_angle_rad * RAD_TO_DEG << " deg" << std::endl;
+              << geo.phase_angle.to<qtty::Degree>() << std::endl;
     std::cout << "  elongation            : "
-              << geo.elongation_rad * RAD_TO_DEG << " deg" << std::endl;
+              << geo.elongation.to<qtty::Degree>() << std::endl;
     std::cout << "  waxing                : " << std::boolalpha << geo.waxing
               << std::endl;
 
@@ -88,7 +86,7 @@ int main() {
               << (topo.illuminated_fraction - geo.illuminated_fraction) * 100.0
               << std::noshowpos << " %" << std::endl;
     std::cout << "  elongation            : "
-              << topo.elongation_rad * RAD_TO_DEG << " deg" << std::endl;
+              << topo.elongation.to<qtty::Degree>() << std::endl;
 
     // =========================================================================
     // 2) Principal phase events
