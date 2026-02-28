@@ -27,6 +27,7 @@
 using namespace siderust;
 using namespace siderust::frames;
 using namespace siderust::centers;
+using namespace qtty::literals;
 
 // ─── Kepler's 3rd law: compute orbital period from semi-major axis ──────────
 
@@ -35,7 +36,7 @@ static constexpr double GM_SUN_AU3_DAY2 = 0.01720209895 * 0.01720209895;
 
 /// Sidereal period via Kepler's 3rd law: T = 2π √(a³/μ) [days].
 inline qtty::Day orbit_period(const Orbit &orb) {
-    double a = orb.semi_major_axis_au;
+    double a = orb.semi_major_axis.value();
     double T = 2.0 * M_PI * std::sqrt(a * a * a / GM_SUN_AU3_DAY2);
     return qtty::Day(T);
 }
@@ -73,7 +74,7 @@ void section_planet_constants_and_periods() {
     for (auto &[name, p] : planets) {
         auto period = orbit_period(p->orbit);
         std::printf("%-8s %10.6f %10.6f ", name,
-                    p->orbit.semi_major_axis_au, p->orbit.eccentricity);
+                    p->orbit.semi_major_axis.value(), p->orbit.eccentricity);
         std::cout << std::fixed << std::setprecision(2) << period << std::endl;
     }
     std::puts("");
@@ -174,17 +175,22 @@ void section_custom_planet() {
     std::puts("---------------------------------");
 
     Planet demo_world{
-        5.972e24 * 2.0, // mass_kg: double the Earth
-        6371.0 * 1.3,   // radius_km: 30% bigger
-        Orbit{1.4, 0.07, 4.0, 120.0, 80.0, 10.0, JulianDate::J2000().value()}
+        qtty::Kilogram(5.972e24 * 2.0), // mass: double the Earth
+        qtty::Kilometer(6371.0 * 1.3),  // radius: 30% bigger
+        Orbit{1.4_au, 0.07, 4.0_deg,
+              120.0_deg, 80.0_deg, 10.0_deg,
+              JulianDate::J2000().value()}
     };
 
     auto period = orbit_period(demo_world.orbit);
 
     std::puts("Custom planet built at runtime:");
-    std::printf("  mass   = %.3e kg\n", demo_world.mass_kg);
-    std::printf("  radius = %.1f km\n", demo_world.radius_km);
-    std::printf("  a      = %.6f AU\n", demo_world.orbit.semi_major_axis_au);
+    std::cout << "  mass   = " << std::scientific << std::setprecision(3)
+              << demo_world.mass << std::endl;
+    std::cout << "  radius = " << std::fixed << std::setprecision(1)
+              << demo_world.radius << std::endl;
+    std::cout << "  a      = " << std::setprecision(6)
+              << demo_world.orbit.semi_major_axis << std::endl;
     std::cout << "  sidereal period = " << std::fixed << std::setprecision(2)
               << period << "\n" << std::endl;
 }

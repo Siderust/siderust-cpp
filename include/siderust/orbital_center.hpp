@@ -144,7 +144,9 @@ struct BodycentricParams {
 
   /// Default: circular 1 AU heliocentric orbit (placeholder).
   BodycentricParams()
-      : orbit{1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 2451545.0},
+      : orbit{qtty::AstronomicalUnit(1.0), 0.0, qtty::Degree(0.0),
+              qtty::Degree(0.0), qtty::Degree(0.0), qtty::Degree(0.0),
+              2451545.0},
         orbit_center(OrbitReferenceCenter::Heliocentric) {}
 
   /// Convert to C FFI struct for passing to siderust_to_bodycentric /
