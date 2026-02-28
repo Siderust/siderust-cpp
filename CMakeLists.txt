@@ -47,11 +47,14 @@ endif()
 # Build siderust-ffi (depends on tempoch-ffi via tempoch-cpp subdirectory)
 add_custom_target(
     build_siderust_ffi
-    COMMAND ${CARGO_BIN} build --release ${_SIDERUST_FEATURES_ARGS}
+    # Use `cargo rustc --crate-type cdylib` so that the shared library is
+    # produced even though Cargo.toml only lists rlib (which keeps coverage
+    # instrumentation clean during `cargo test`/`cargo llvm-cov`).
+    COMMAND ${CARGO_BIN} rustc --release --crate-type cdylib ${_SIDERUST_FEATURES_ARGS}
     WORKING_DIRECTORY ${SIDERUST_FFI_DIR}
     BYPRODUCTS ${SIDERUST_LIBRARY_PATH}
     DEPENDS build_tempoch_ffi
-    COMMENT "Building siderust-ffi via Cargo"
+    COMMENT "Building siderust-ffi via Cargo (cdylib override)"
     VERBATIM
 )
 
@@ -101,13 +104,17 @@ if(SIDERUST_BUILD_DOCS)
         set(SIDERUST_DOXYFILE_OUT ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile.siderust_cpp)
         configure_file(${SIDERUST_DOXYFILE_IN} ${SIDERUST_DOXYFILE_OUT} @ONLY)
 
-        add_custom_target(docs
-            COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/docs/doxygen
-            COMMAND ${DOXYGEN_EXECUTABLE} ${SIDERUST_DOXYFILE_OUT}
-            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-            COMMENT "Generating API documentation with Doxygen"
-            VERBATIM
-        )
+        if(NOT TARGET docs)
+            add_custom_target(docs
+                COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/docs/doxygen
+                COMMAND ${DOXYGEN_EXECUTABLE} ${SIDERUST_DOXYFILE_OUT}
+                WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                COMMENT "Generating API documentation with Doxygen"
+                VERBATIM
+            )
+        else()
+            message(STATUS "Top-level 'docs' target already exists; skipping creation to avoid conflict with subprojects")
+        endif()
     else()
         message(STATUS "Doxygen not found; 'docs' target will not be available")
     endif()
@@ -115,9 +122,9 @@ endif()
 
 # RPATH for shared library lookup at runtime
 if(APPLE)
-    set(_siderust_rpath "@loader_path/../siderust/target/release;@loader_path/../tempoch-cpp/tempoch/tempoch-ffi/target/release;@loader_path/../qtty-cpp/qtty/target/release")
+    set(_siderust_rpath "@loader_path/../siderust/siderust-ffi/target/release;@loader_path/../tempoch-cpp/tempoch/tempoch-ffi/target/release;@loader_path/../qtty-cpp/qtty/target/release")
 elseif(UNIX)
-    set(_siderust_rpath "$ORIGIN/../siderust/target/release:$ORIGIN/../tempoch-cpp/tempoch/tempoch-ffi/target/release:$ORIGIN/../qtty-cpp/qtty/target/release")
+    set(_siderust_rpath "$ORIGIN/../siderust/siderust-ffi/target/release:$ORIGIN/../tempoch-cpp/tempoch/tempoch-ffi/target/release:$ORIGIN/../qtty-cpp/qtty/target/release")
 endif()
 
 # ---------------------------------------------------------------------------
@@ -135,52 +142,35 @@ FetchContent_MakeAvailable(googletest)
 enable_testing()
 
 # ---------------------------------------------------------------------------
-# Example
+# Example helper: add an example only if its source file exists.
 # ---------------------------------------------------------------------------
-add_executable(siderust_demo examples/demo.cpp)
-target_link_libraries(siderust_demo PRIVATE siderust_cpp)
-if(DEFINED _siderust_rpath)
-    set_target_properties(siderust_demo PROPERTIES
-        BUILD_RPATH ${_siderust_rpath}
-        INSTALL_RPATH ${_siderust_rpath}
-    )
-endif()
+macro(siderust_add_example target_name source_file)
+    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${source_file}")
+        add_executable(${target_name} ${source_file})
+        target_link_libraries(${target_name} PRIVATE siderust_cpp)
+        if(DEFINED _siderust_rpath)
+            set_target_properties(${target_name} PROPERTIES
+                BUILD_RPATH ${_siderust_rpath}
+                INSTALL_RPATH ${_siderust_rpath}
+            )
+        endif()
+    endif()
+endmacro()
 
-add_executable(coordinates_examples examples/coordinates_examples.cpp)
-target_link_libraries(coordinates_examples PRIVATE siderust_cpp)
-if(DEFINED _siderust_rpath)
-    set_target_properties(coordinates_examples PROPERTIES
-        BUILD_RPATH ${_siderust_rpath}
-        INSTALL_RPATH ${_siderust_rpath}
-    )
-endif()
+# ---------------------------------------------------------------------------
+# Examples
+# ---------------------------------------------------------------------------
 
-add_executable(coordinate_systems_example examples/coordinate_systems_example.cpp)
-target_link_libraries(coordinate_systems_example PRIVATE siderust_cpp)
-if(DEFINED _siderust_rpath)
-    set_target_properties(coordinate_systems_example PROPERTIES
-        BUILD_RPATH ${_siderust_rpath}
-        INSTALL_RPATH ${_siderust_rpath}
-    )
-endif()
-
-add_executable(solar_system_bodies_example examples/solar_system_bodies_example.cpp)
-target_link_libraries(solar_system_bodies_example PRIVATE siderust_cpp)
-if(DEFINED _siderust_rpath)
-    set_target_properties(solar_system_bodies_example PROPERTIES
-        BUILD_RPATH ${_siderust_rpath}
-        INSTALL_RPATH ${_siderust_rpath}
-    )
-endif()
-
-add_executable(altitude_events_example examples/altitude_events_example.cpp)
-target_link_libraries(altitude_events_example PRIVATE siderust_cpp)
-if(DEFINED _siderust_rpath)
-    set_target_properties(altitude_events_example PROPERTIES
-        BUILD_RPATH ${_siderust_rpath}
-        INSTALL_RPATH ${_siderust_rpath}
-    )
-endif()
+# Numbered mirror examples (03–21, mirroring siderust Rust examples)
+siderust_add_example(03_all_frame_conversions_example   examples/03_all_frames_conversions.cpp)
+siderust_add_example(04_all_center_conversions_example  examples/04_all_center_conversions.cpp)
+siderust_add_example(05_target_tracking_example         examples/05_target_tracking.cpp)
+siderust_add_example(06_night_events_example            examples/06_night_events.cpp)
+siderust_add_example(07_moon_properties_example         examples/07_moon_properties.cpp)
+siderust_add_example(08_solar_system_example            examples/08_solar_system.cpp)
+siderust_add_example(09_star_observability_example      examples/09_star_observability.cpp)
+siderust_add_example(10_time_periods_example            examples/10_time_periods.cpp)
+siderust_add_example(11_serde_serialization_example     examples/11_serde_serialization.cpp)
 
 # ---------------------------------------------------------------------------
 # Tests
@@ -193,6 +183,8 @@ set(TEST_SOURCES
     tests/test_bodies.cpp
     tests/test_altitude.cpp
     tests/test_ephemeris.cpp
+    tests/test_bodycentric.cpp
+    tests/test_subject.cpp
 )
 
 add_executable(test_siderust ${TEST_SOURCES})

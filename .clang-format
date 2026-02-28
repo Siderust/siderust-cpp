@@ -1,10 +1,13 @@
 ---
+Language: Cpp
 BasedOnStyle: LLVM
-IndentWidth: 4
-ContinuationIndentWidth: 4
-ColumnLimit: 0
-PointerAlignment: Left
-ReferenceAlignment: Left
-AlignConsecutiveAssignments: Consecutive
-AlignConsecutiveDeclarations: Consecutive
-...
+IndentWidth: 2
+ColumnLimit: 80
+AllowShortBlocksOnASingleLine: Never
+AllowShortFunctionsOnASingleLine: All
+AllowShortEnumsOnASingleLine: true
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: false
+AllowShortLambdasOnASingleLine: All
+AlwaysBreakTemplateDeclarations: MultiLine
+
