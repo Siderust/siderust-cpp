@@ -23,7 +23,7 @@ int main() {
 
     auto jd = JulianDate::J2000();
     std::cout << std::fixed << std::setprecision(1);
-    std::cout << "Reference time: J2000.0 (JD " << jd.value() << ")\n" << std::endl;
+    std::cout << "Reference time: J2000.0 (JD " << jd << ")\n" << std::endl;
 
     // =========================================================================
     // 1. Frame Transformations (same center)
