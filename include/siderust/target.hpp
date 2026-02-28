@@ -290,15 +290,10 @@ public:
   below_threshold(const Geodetic &obs, const Period &window,
                   qtty::Degree threshold,
                   const SearchOptions &opts = {}) const override {
-    // Always pass ICRS direction to the FFI layer.
-    siderust_spherical_dir_t dir_c{};
-    dir_c.polar_deg = m_icrs_.dec().value();
-    dir_c.azimuth_deg = m_icrs_.ra().value();
-    dir_c.frame = SIDERUST_FRAME_T_ICRS;
     tempoch_period_mjd_t *ptr = nullptr;
     uintptr_t count = 0;
-    check_status(siderust_icrs_below_threshold(
-                     dir_c, obs.to_c(), window.c_inner(), threshold.value(),
+    check_status(siderust_target_below_threshold(
+                     handle_, obs.to_c(), window.c_inner(), threshold.value(),
                      opts.to_c(), &ptr, &count),
                  "Target::below_threshold");
     return detail_periods_from_c(ptr, count);
