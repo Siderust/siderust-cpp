@@ -69,6 +69,18 @@ mars_heliocentric(const JulianDate &jd) {
 }
 
 /**
+ * @brief Mars's barycentric position (EclipticMeanJ2000, AU) via VSOP87.
+ */
+inline cartesian::position::HelioBarycentric<qtty::AstronomicalUnit>
+mars_barycentric(const JulianDate &jd) {
+  siderust_cartesian_pos_t out;
+  check_status(siderust_vsop87_mars_barycentric(jd.value(), &out),
+               "ephemeris::mars_barycentric");
+  return cartesian::position::HelioBarycentric<qtty::AstronomicalUnit>::from_c(
+      out);
+}
+
+/**
  * @brief Venus's heliocentric position (EclipticMeanJ2000, AU) via VSOP87.
  */
 inline cartesian::position::EclipticMeanJ2000<qtty::AstronomicalUnit>
