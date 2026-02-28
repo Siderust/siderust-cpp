@@ -14,8 +14,6 @@
 
 #include <iomanip>
 #include <iostream>
-#include <sstream>
-#include <string>
 #include <vector>
 
 using namespace siderust;
@@ -29,18 +27,6 @@ constexpr auto NAUTICAL          = qtty::Degree(-12.0);
 constexpr auto ASTRONOMICAL      = qtty::Degree(-18.0);
 } // namespace twilight
 
-/// Format a CivilTime as YYYY-MM-DDTHH:MM:SS.
-static std::string fmt_utc(const tempoch::CivilTime &ct) {
-    std::ostringstream os;
-    os << ct.year << '-'
-       << std::setfill('0') << std::setw(2) << int(ct.month) << '-'
-       << std::setw(2) << int(ct.day) << 'T'
-       << std::setw(2) << int(ct.hour) << ':'
-       << std::setw(2) << int(ct.minute) << ':'
-       << std::setw(2) << int(ct.second);
-    return os.str();
-}
-
 static Period week_from_mjd(const MJD &start) {
     MJD end = start + qtty::Day(7.0);
     return Period(start, end);
@@ -52,8 +38,8 @@ static void print_events_for_type(const Geodetic &site, const Period &week,
     int downs = 0, raises = 0;
 
     std::cout << std::left << std::setw(18) << name << " threshold "
-              << std::right << std::setw(8) << std::fixed << std::setprecision(3)
-              << threshold.value() << " deg -> " << events.size()
+              << std::right << std::fixed << std::setprecision(3)
+              << threshold << " -> " << events.size()
               << " crossing(s)" << std::endl;
 
     for (auto &ev : events) {
@@ -66,7 +52,7 @@ static void print_events_for_type(const Geodetic &site, const Period &week,
             label = "night-type raise (Sun rising above threshold)";
         }
         auto utc = ev.time.to_utc();
-        std::cout << "  - " << label << " at " << fmt_utc(utc) << std::endl;
+        std::cout << "  - " << label << " at " << utc << std::endl;
     }
     std::cout << "  summary: down=" << downs << " raise=" << raises << std::endl;
 }
@@ -76,15 +62,14 @@ static void print_periods_for_type(const Geodetic &site, const Period &week,
     auto periods = sun::below_threshold(site, week, threshold);
     std::cout << std::left << std::setw(18) << name
               << " night periods (Sun < " << std::fixed << std::setprecision(3)
-              << threshold.value() << " deg): " << periods.size() << std::endl;
+              << threshold << "): " << periods.size() << std::endl;
 
     for (auto &p : periods) {
         auto s = p.start().to_utc();
         auto e = p.end().to_utc();
         auto hours = p.duration<qtty::Hour>();
-        std::cout << "  - " << fmt_utc(s) << " -> " << fmt_utc(e)
-                  << " (" << std::fixed << std::setprecision(1)
-                  << hours.value() << " h)" << std::endl;
+        std::cout << "  - " << s << " -> " << e
+                  << " (" << std::setprecision(1) << hours << ")" << std::endl;
     }
 }
 
