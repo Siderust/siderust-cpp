@@ -62,7 +62,7 @@ int main() {
     std::cout << "Observer: Roque de los Muchachos" << std::endl;
     std::cout << "Target: Sirius" << std::endl;
     std::cout << "Window: MJD " << std::fixed << std::setprecision(1)
-              << window.start().value() << " -> " << window.end().value()
+              << window.start() << " -> " << window.end()
               << "\n" << std::endl;
 
     std::cout << "Altitude range: " << min_alt << " .. " << max_alt << std::endl;
@@ -75,8 +75,8 @@ int main() {
         total_hours += hours.value();
         std::cout << "  " << (i + 1) << ". MJD "
                   << std::fixed << std::setprecision(6)
-                  << observable[i].start().value() << " -> "
-                  << observable[i].end().value()
+                  << observable[i].start() << " -> "
+                  << observable[i].end()
                   << "  (" << std::setprecision(4) << hours << ")"
                   << std::endl;
     }

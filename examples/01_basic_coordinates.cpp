@@ -67,7 +67,7 @@ int main() {
               << std::endl;
 
     // Create a position with distance (Betelgeuse at ~500 light-years)
-    double betelgeuse_distance = qtty::LightYears(500.0).to<qtty::AstronomicalUnit>(); // Convert 500 ly to AU
+    auto betelgeuse_distance = qtty::LightYear(500.0).to<qtty::AstronomicalUnit>(); // Convert 500 ly to AU
     spherical::position::ICRS<qtty::AstronomicalUnit> betelgeuse(88.79_deg, 7.41_deg, betelgeuse_distance);
     std::cout << "Betelgeuse (Barycentric ICRS Position):" << std::endl;
     std::cout << "  Right Ascension = " << betelgeuse.ra() << std::endl;
@@ -90,8 +90,8 @@ int main() {
         qtty::Degree(90.0)  // Altitude (straight up)
     );
     std::cout << "Zenith direction (Horizontal frame):" << std::endl;
-    std::cout << "  Altitude = " << zenith.alt().value() << "°" << std::endl;
-    std::cout << "  Azimuth = " << zenith.az().value() << "°" << std::endl
+    std::cout << "  Altitude = " << zenith.alt() << std::endl;
+    std::cout << "  Azimuth  = " << zenith.az() << std::endl
               << std::endl;
 
     // Convert direction to position at a specific distance
@@ -100,7 +100,7 @@ int main() {
     spherical::Position<Geocentric, Horizontal, qtty::Kilometer> cloud(
         zenith.az(), zenith.alt(), cloud_distance);
     std::cout << "Cloud at zenith, 5 km altitude (relative to geocenter):" << std::endl;
-    std::cout << "  Distance = " << cloud.distance().value() << " km" << std::endl
+    std::cout << "  Distance = " << cloud.distance() << std::endl
               << std::endl;
 
     // =========================================================================
@@ -115,26 +115,26 @@ int main() {
         cart_pos(0.5, 0.5, 0.707);
     std::cout << "Cartesian position:" << std::endl;
     std::cout << std::setprecision(3);
-    std::cout << "  X = " << cart_pos.x().value() << " AU" << std::endl;
-    std::cout << "  Y = " << cart_pos.y().value() << " AU" << std::endl;
-    std::cout << "  Z = " << cart_pos.z().value() << " AU" << std::endl
+    std::cout << "  X = " << cart_pos.x() << std::endl;
+    std::cout << "  Y = " << cart_pos.y() << std::endl;
+    std::cout << "  Z = " << cart_pos.z() << std::endl
               << std::endl;
 
     // Convert to spherical
     auto sph_pos = cart_pos.to_spherical();
     std::cout << "Converted to Spherical:" << std::endl;
     std::cout << std::setprecision(2);
-    std::cout << "  RA = " << sph_pos.ra().value() << "°" << std::endl;
-    std::cout << "  Dec = " << sph_pos.dec().value() << "°" << std::endl;
+    std::cout << "  RA  = " << sph_pos.ra() << std::endl;
+    std::cout << "  Dec = " << sph_pos.dec() << std::endl;
     std::cout << std::setprecision(3);
-    std::cout << "  Distance = " << sph_pos.distance().value() << " AU" << std::endl;
+    std::cout << "  Distance = " << sph_pos.distance() << std::endl;
 
     // Convert back to cartesian
     auto cart_pos_back = sph_pos.to_cartesian();
     std::cout << std::endl << "Converted back to Cartesian:" << std::endl;
-    std::cout << "  X = " << cart_pos_back.x().value() << " AU" << std::endl;
-    std::cout << "  Y = " << cart_pos_back.y().value() << " AU" << std::endl;
-    std::cout << "  Z = " << cart_pos_back.z().value() << " AU" << std::endl
+    std::cout << "  X = " << cart_pos_back.x() << std::endl;
+    std::cout << "  Y = " << cart_pos_back.y() << std::endl;
+    std::cout << "  Z = " << cart_pos_back.z() << std::endl
               << std::endl;
 
     // =========================================================================
