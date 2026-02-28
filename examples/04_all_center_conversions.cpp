@@ -22,6 +22,7 @@
 using namespace siderust;
 using namespace siderust::frames;
 using namespace siderust::centers;
+using namespace qtty::literals;
 
 using F = EclipticMeanJ2000;
 using U = qtty::AstronomicalUnit;
@@ -101,12 +102,12 @@ int main() {
     // ── Bodycentric: Mars-like orbit (heliocentric reference) ──────────────────
     std::puts("\n── Bodycentric – Mars-like orbit (heliocentric ref) ───────────────────");
     Orbit mars_orbit{
-        1.524,   // semi_major_axis_au
-        0.0934,  // eccentricity
-        1.85,    // inclination_deg
-        49.56,   // lon_ascending_node_deg
-        286.5,   // arg_perihelion_deg
-        19.41,   // mean_anomaly_deg
+        1.524_au,                        // semi_major_axis
+        0.0934,                          // eccentricity
+        1.85_deg,                        // inclination
+        49.56_deg,                       // lon_ascending_node
+        286.5_deg,                       // arg_perihelion
+        19.41_deg,                       // mean_anomaly
         jd.value()
     };
     auto mars_params = BodycentricParams::heliocentric(mars_orbit);
@@ -118,12 +119,12 @@ int main() {
     // ── Bodycentric: ISS-like orbit (geocentric reference) ────────────────────
     std::puts("\n── Bodycentric – ISS-like orbit (geocentric ref) ──────────────────────");
     Orbit iss_orbit{
-        0.0000426, // ~6 378 km in AU
-        0.001,     // eccentricity
-        51.6,      // inclination_deg
-        0.0,       // lon_ascending_node_deg
-        0.0,       // arg_perihelion_deg
-        0.0,       // mean_anomaly_deg
+        0.0000426_au,                      // ~6 378 km in AU
+        0.001,                             // eccentricity
+        51.6_deg,                          // inclination
+        0.0_deg,                           // lon_ascending_node
+        0.0_deg,                           // arg_perihelion
+        0.0_deg,                           // mean_anomaly
         jd.value()
     };
     auto iss_params = BodycentricParams::geocentric(iss_orbit);

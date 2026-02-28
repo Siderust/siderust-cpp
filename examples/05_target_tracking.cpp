@@ -26,6 +26,7 @@
 using namespace siderust;
 using namespace siderust::frames;
 using namespace siderust::centers;
+using namespace qtty::literals;
 
 // ─── Helper: simple coordinate snapshot (mirrors Rust's Target<T>) ──────────
 
@@ -46,7 +47,9 @@ struct Snapshot {
 inline Orbit halley_orbit() {
     // a = 17.834 AU, e = 0.96714, i = 162.26°, Ω = 58.42°, ω = 111.33°,
     // M = 38.38° at epoch JD 2446467.4 (≈1986 Feb 9).
-    return {17.834, 0.96714, 162.26, 58.42, 111.33, 38.38, 2446467.4};
+    return {17.834_au, 0.96714, 162.26_deg,
+            58.42_deg, 111.33_deg, 38.38_deg,
+            2446467.4};
 }
 
 // ─── Section 1: Trackable objects ───────────────────────────────────────────
@@ -55,7 +58,7 @@ void section_trackable_objects(const JulianDate &jd, const JulianDate &jd_next) 
     std::puts("1) Trackable objects (ICRS, star, Sun, planet, Moon)");
 
     // ICRS direction — time-invariant target
-    spherical::direction::ICRS fixed_icrs(qtty::Degree(120.0), qtty::Degree(22.5));
+    spherical::direction::ICRS fixed_icrs(120.0_deg, 22.5_deg);
     ICRSTarget icrs_target(fixed_icrs, jd, "FixedICRS");
 
     // Verify time-invariance: the ICRS direction coordinates are constant.
@@ -117,7 +120,9 @@ void section_target_snapshots(const JulianDate &jd, const JulianDate &jd_next) {
               << halley_snap.position.distance() << std::endl;
 
     // DemoSat — satellite-like custom object with a geocentric orbit
-    Orbit demosat_orbit{1.0002, 0.001, 0.1, 35.0, 80.0, 10.0, jd.value()};
+    Orbit demosat_orbit{1.0002_au, 0.001,
+                         0.1_deg, 35.0_deg,
+                         80.0_deg, 10.0_deg, jd.value()};
     auto demosat_pos = kepler_position(demosat_orbit, jd);
     Snapshot<cartesian::position::EclipticMeanJ2000<qtty::AstronomicalUnit>> demosat_snap{
         demosat_pos, jd};
@@ -161,7 +166,7 @@ void section_target_with_proper_motion(const JulianDate &jd) {
     // Betelgeuse approximate ICRS coordinates at J2000
     // (RA ≈ 88.7929°, Dec ≈ +7.4071°)
     spherical::direction::ICRS betelgeuse_pos(
-        qtty::Degree(88.7929), qtty::Degree(7.4071));
+        88.7929_deg, 7.4071_deg);
 
     // Proper motion: µα* = 27.54 mas/yr, µδ = 10.86 mas/yr
     // Convert mas/yr → deg/yr

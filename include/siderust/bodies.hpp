@@ -43,29 +43,29 @@ struct ProperMotion {
  * @brief Keplerian orbital elements.
  */
 struct Orbit {
-  double semi_major_axis_au;
-  double eccentricity;
-  double inclination_deg;
-  double lon_ascending_node_deg;
-  double arg_perihelion_deg;
-  double mean_anomaly_deg;
-  double epoch_jd;
+  qtty::AstronomicalUnit semi_major_axis; ///< Semi-major axis.
+  double eccentricity;                    ///< Orbital eccentricity [0, 1).
+  qtty::Degree inclination;              ///< Orbital inclination.
+  qtty::Degree lon_ascending_node;       ///< Longitude of ascending node.
+  qtty::Degree arg_perihelion;           ///< Argument of perihelion.
+  qtty::Degree mean_anomaly;             ///< Mean anomaly at epoch.
+  double epoch_jd;                        ///< Reference epoch (Julian Date).
 
   static Orbit from_c(const siderust_orbit_t &c) {
-    return {c.semi_major_axis_au,
+    return {qtty::AstronomicalUnit(c.semi_major_axis_au),
             c.eccentricity,
-            c.inclination_deg,
-            c.lon_ascending_node_deg,
-            c.arg_perihelion_deg,
-            c.mean_anomaly_deg,
+            qtty::Degree(c.inclination_deg),
+            qtty::Degree(c.lon_ascending_node_deg),
+            qtty::Degree(c.arg_perihelion_deg),
+            qtty::Degree(c.mean_anomaly_deg),
             c.epoch_jd};
   }
 
   /// Convert to C FFI struct.
   siderust_orbit_t to_c() const {
-    return {semi_major_axis_au, eccentricity, inclination_deg,
-            lon_ascending_node_deg, arg_perihelion_deg, mean_anomaly_deg,
-            epoch_jd};
+    return {semi_major_axis.value(), eccentricity, inclination.value(),
+            lon_ascending_node.value(), arg_perihelion.value(),
+            mean_anomaly.value(), epoch_jd};
   }
 };
 
@@ -77,12 +77,13 @@ struct Orbit {
  * @brief Planet data (value type, copyable).
  */
 struct Planet {
-  double mass_kg;
-  double radius_km;
+  qtty::Kilogram mass;    ///< Planet mass.
+  qtty::Kilometer radius; ///< Mean equatorial radius.
   Orbit orbit;
 
   static Planet from_c(const siderust_planet_t &c) {
-    return {c.mass_kg, c.radius_km, Orbit::from_c(c.orbit)};
+    return {qtty::Kilogram(c.mass_kg), qtty::Kilometer(c.radius_km),
+            Orbit::from_c(c.orbit)};
   }
 };
 

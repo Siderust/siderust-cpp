@@ -56,14 +56,14 @@ enum class MoonPhaseLabel : int32_t {
  * @brief Geometric description of the Moon's phase at a point in time.
  */
 struct MoonPhaseGeometry {
-  double phase_angle_rad;      ///< Phase angle in [0, π], radians.
+  qtty::Radian phase_angle;    ///< Phase angle in [0, π].
   double illuminated_fraction; ///< Illuminated disc fraction in [0, 1].
-  double elongation_rad;       ///< Sun–Moon elongation, radians.
+  qtty::Radian elongation;     ///< Sun–Moon elongation.
   bool waxing;                 ///< True when the Moon is waxing.
 
   static MoonPhaseGeometry from_c(const siderust_moon_phase_geometry_t &c) {
-    return {c.phase_angle_rad, c.illuminated_fraction, c.elongation_rad,
-            static_cast<bool>(c.waxing)};
+    return {qtty::Radian(c.phase_angle_rad), c.illuminated_fraction,
+            qtty::Radian(c.elongation_rad), static_cast<bool>(c.waxing)};
   }
 };
 
@@ -150,8 +150,8 @@ inline MoonPhaseGeometry phase_topocentric(const JulianDate &jd,
  */
 inline MoonPhaseLabel phase_label(const MoonPhaseGeometry &geom) {
   siderust_moon_phase_geometry_t c{
-      geom.phase_angle_rad, geom.illuminated_fraction, geom.elongation_rad,
-      static_cast<uint8_t>(geom.waxing)};
+      geom.phase_angle.value(), geom.illuminated_fraction,
+      geom.elongation.value(), static_cast<uint8_t>(geom.waxing)};
   siderust_moon_phase_label_t out{};
   check_status(siderust_moon_phase_label(c, &out), "moon::phase_label");
   return static_cast<MoonPhaseLabel>(out);
