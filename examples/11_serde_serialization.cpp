@@ -144,7 +144,7 @@ void section_body_objects(const JulianDate &jd) {
     std::puts("-----------------------");
 
     BodySnapshotJSON earth_snap{
-        "Earth", jd, EARTH.orbit, ephemeris::earth_heliocentric(jd)};
+        "Earth", jd, EARTH().orbit, ephemeris::earth_heliocentric(jd)};
 
     // Halley's comet
     Orbit halley_orb{17.834_au, 0.96714,
