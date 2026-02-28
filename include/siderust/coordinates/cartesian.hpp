@@ -185,6 +185,87 @@ template <typename C, typename F, typename U> struct Position {
       -> decltype(this->template to_frame<Target>(jd)) {
     return to_frame<Target>(jd);
   }
+
+  /**
+   * @brief Transform this position to a different reference center (same frame).
+   *
+   * The FFI center-shift uses VSOP87 ephemeris vectors expressed in
+   * EclipticMeanJ2000.  When the position is already in that frame the FFI
+   * call is made directly; otherwise the position is first rotated to
+   * ecliptic, shifted, and rotated back so the result is frame-correct.
+   *
+   * @tparam TargetC  Destination center tag.
+   * @param  jd       Julian Date (TT) for the ephemeris evaluation.
+   */
+  template <typename TargetC>
+  std::enable_if_t<centers::has_center_transform_v<C, TargetC>, Position<TargetC, F, U>>
+  to_center(const JulianDate &jd) const {
+    if constexpr (std::is_same_v<C, TargetC>) {
+      return *this;
+    } else if constexpr (std::is_same_v<F, frames::EclipticMeanJ2000>) {
+      // Direct FFI call — shift vectors and position are both in ecliptic.
+      siderust_cartesian_pos_t out{};
+      check_status(
+          siderust_cartesian_pos_transform_center(
+              to_c(),
+              centers::CenterTraits<TargetC>::ffi_id,
+              jd.value(), &out),
+          "cartesian::Position::to_center");
+      return Position<TargetC, F, U>(out.x, out.y, out.z);
+    } else {
+      // Route through ecliptic so the shift vectors match the frame.
+      auto ecl     = to_frame<frames::EclipticMeanJ2000>(jd);
+      auto shifted = ecl.template to_center<TargetC>(jd);
+      return shifted.template to_frame<F>(jd);
+    }
+  }
+
+  /**
+   * @brief Combined frame + center transform in one call.
+   *
+   * Routes through EclipticMeanJ2000 for the center shift so that
+   * VSOP87 ephemeris vectors are applied in the correct frame:
+   *   1. rotate to EclipticMeanJ2000
+   *   2. shift center
+   *   3. rotate to target frame
+   *
+   * @tparam TargetC  Destination center tag.
+   * @tparam TargetF  Destination frame tag.
+   * @param  jd       Julian Date (TT).
+   */
+  template <typename TargetC, typename TargetF>
+  std::enable_if_t<
+      frames::has_frame_transform_v<F, TargetF> &&
+      centers::has_center_transform_v<C, TargetC>,
+      Position<TargetC, TargetF, U>>
+  transform(const JulianDate &jd) const {
+    auto ecl     = to_frame<frames::EclipticMeanJ2000>(jd);
+    auto shifted = ecl.template to_center<TargetC>(jd);
+    return shifted.template to_frame<TargetF>(jd);
+  }
+
+  /**
+   * @brief Subtract two positions in the same center/frame/unit (vector difference).
+   */
+  Position operator-(const Position &other) const {
+    return Position(U(comp_x.value() - other.comp_x.value()),
+                    U(comp_y.value() - other.comp_y.value()),
+                    U(comp_z.value() - other.comp_z.value()));
+  }
+
+  /**
+   * @brief Add two positions in the same center/frame/unit (vector sum).
+   */
+  Position operator+(const Position &other) const {
+    return Position(U(comp_x.value() + other.comp_x.value()),
+                    U(comp_y.value() + other.comp_y.value()),
+                    U(comp_z.value() + other.comp_z.value()));
+  }
+
+  /**
+   * @brief Magnitude of the position vector (alias for distance()).
+   */
+  U magnitude() const { return distance(); }
 };
 
 // ============================================================================
