@@ -32,7 +32,7 @@ void show_frame_conversion(const JulianDate &jd,
               << " -> " << std::setw(24) << FrameTraits<F2>::name()
               << " out=(" << std::showpos << std::setprecision(9) << out
               << std::noshowpos << ")  roundtrip=" << std::scientific
-              << std::setprecision(3) << err.value() << std::fixed
+              << std::setprecision(3) << err << std::fixed
               << std::endl;
 }
 
@@ -40,7 +40,7 @@ int main() {
     JulianDate jd(2460000.5);
     std::cout << std::fixed;
     std::cout << "Frame conversion demo at JD(TT) = " << std::setprecision(1)
-              << jd.value() << std::endl;
+              << jd << std::endl;
 
     cartesian::Position<C, ICRS, U> p_icrs(0.30, -0.70, 0.64);
     auto p_icrf     = p_icrs.to_frame<ICRF>(jd);
