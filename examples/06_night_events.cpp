@@ -17,10 +17,11 @@
 #include <vector>
 
 using namespace siderust;
+using namespace qtty::literals;
 
 // Twilight threshold constants (same values as siderust::calculus::solar::night_types)
 namespace twilight {
-constexpr auto HORIZON           = qtty::Degree(0.0);
+constexpr auto HORIZON           = 0.0_deg;
 constexpr auto APPARENT_HORIZON  = qtty::Degree(-0.833);
 constexpr auto CIVIL             = qtty::Degree(-6.0);
 constexpr auto NAUTICAL          = qtty::Degree(-12.0);

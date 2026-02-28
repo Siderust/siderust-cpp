@@ -57,8 +57,8 @@ int main() {
 
     // Create a star direction (Polaris approximately)
     spherical::direction::EquatorialMeanJ2000 polaris(
-        qtty::Degree(37.95), // Right Ascension (converted to degrees)
-        qtty::Degree(89.26)  // Declination
+        37.95_deg, // Right Ascension (converted to degrees)
+        89.26_deg  // Declination
     );
     std::cout << "Polaris (Geocentric EquatorialMeanJ2000 Direction):" << std::endl;
     std::cout << std::setprecision(2);
@@ -86,8 +86,8 @@ int main() {
     // Directions are unitless (implicit radius = 1) and frame-only (no center)
     // Note: Directions don't carry observer site — they're pure directions
     spherical::direction::Horizontal zenith(
-        qtty::Degree(0.0),  // Azimuth (North — doesn't matter for zenith)
-        qtty::Degree(90.0)  // Altitude (straight up)
+        0.0_deg,  // Azimuth (North — doesn't matter for zenith)
+        90.0_deg  // Altitude (straight up)
     );
     std::cout << "Zenith direction (Horizontal frame):" << std::endl;
     std::cout << "  Altitude = " << zenith.alt() << std::endl;
@@ -96,7 +96,7 @@ int main() {
 
     // Convert direction to position at a specific distance
     // Build a spherical Position from the direction + distance (pure geometry)
-    auto cloud_distance = qtty::Kilometer(5000.0);
+    auto cloud_distance = 5000.0_km;
     spherical::Position<Geocentric, Horizontal, qtty::Kilometer> cloud(
         zenith.az(), zenith.alt(), cloud_distance);
     std::cout << "Cloud at zenith, 5 km altitude (relative to geocenter):" << std::endl;
