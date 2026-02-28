@@ -64,9 +64,9 @@ void section_planet_constants_and_periods() {
         const Planet *planet;
     };
     const PlanetInfo planets[] = {
-        {"Mercury", &MERCURY}, {"Venus", &VENUS},   {"Earth", &EARTH},
-        {"Mars", &MARS},       {"Jupiter", &JUPITER}, {"Saturn", &SATURN},
-        {"Uranus", &URANUS},   {"Neptune", &NEPTUNE},
+        {"Mercury", &MERCURY()}, {"Venus", &VENUS()},   {"Earth", &EARTH()},
+        {"Mars", &MARS()},       {"Jupiter", &JUPITER()}, {"Saturn", &SATURN()},
+        {"Uranus", &URANUS()},   {"Neptune", &NEPTUNE()},
     };
 
     std::printf("%-8s %10s %10s %10s\n", "Planet", "a [AU]", "e", "Period");

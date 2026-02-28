@@ -81,6 +81,12 @@ public:
       : SiderustException(msg) {}
 };
 
+class InternalPanicError : public SiderustException {
+public:
+  explicit InternalPanicError(const std::string &msg)
+      : SiderustException(msg) {}
+};
+
 // ============================================================================
 // Error Translation
 // ============================================================================
@@ -109,6 +115,8 @@ inline void check_status(siderust_status_t status, const char *operation) {
     throw AllocationFailedError(msg + "memory allocation failed");
   case SIDERUST_STATUS_T_INVALID_ARGUMENT:
     throw InvalidArgumentError(msg + "invalid argument");
+  case SIDERUST_STATUS_T_INTERNAL_PANIC:
+    throw InternalPanicError(msg + "internal panic in Rust FFI");
   default:
     throw SiderustException(msg + "unknown error (" + std::to_string(status) +
                             ")");

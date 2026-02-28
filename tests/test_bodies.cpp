@@ -8,14 +8,14 @@ using namespace siderust;
 // ============================================================================
 
 TEST(Bodies, StarCatalogVega) {
-  const auto &vega = VEGA;
+  const auto &vega = VEGA();
   EXPECT_EQ(vega.name(), "Vega");
   EXPECT_NEAR(vega.distance_ly(), 25.0, 1.0);
   EXPECT_GT(vega.luminosity_solar(), 1.0);
 }
 
 TEST(Bodies, StarCatalogSirius) {
-  const auto &sirius = SIRIUS;
+  const auto &sirius = SIRIUS();
   EXPECT_EQ(sirius.name(), "Sirius");
   EXPECT_NEAR(sirius.distance_ly(), 8.6, 0.5);
 }
@@ -59,28 +59,28 @@ TEST(Bodies, StarCreateWithProperMotion) {
 // ============================================================================
 
 TEST(Bodies, PlanetEarth) {
-  auto e = EARTH;
+  auto e = EARTH();
   EXPECT_NEAR(e.mass.value(), 5.972e24, 0.01e24);
   EXPECT_NEAR(e.radius.value(), 6371.0, 10.0);
   EXPECT_NEAR(e.orbit.semi_major_axis.value(), 1.0, 0.01);
 }
 
 TEST(Bodies, PlanetMars) {
-  auto m = MARS;
+  auto m = MARS();
   EXPECT_GT(m.mass.value(), 0);
   EXPECT_NEAR(m.orbit.semi_major_axis.value(), 1.524, 0.01);
 }
 
 TEST(Bodies, AllPlanets) {
   // Ensure all static constants are populated.
-  EXPECT_GT(MERCURY.mass.value(), 0.0);
-  EXPECT_GT(VENUS.mass.value(), 0.0);
-  EXPECT_GT(EARTH.mass.value(), 0.0);
-  EXPECT_GT(MARS.mass.value(), 0.0);
-  EXPECT_GT(JUPITER.mass.value(), 0.0);
-  EXPECT_GT(SATURN.mass.value(), 0.0);
-  EXPECT_GT(URANUS.mass.value(), 0.0);
-  EXPECT_GT(NEPTUNE.mass.value(), 0.0);
+  EXPECT_GT(MERCURY().mass.value(), 0.0);
+  EXPECT_GT(VENUS().mass.value(), 0.0);
+  EXPECT_GT(EARTH().mass.value(), 0.0);
+  EXPECT_GT(MARS().mass.value(), 0.0);
+  EXPECT_GT(JUPITER().mass.value(), 0.0);
+  EXPECT_GT(SATURN().mass.value(), 0.0);
+  EXPECT_GT(URANUS().mass.value(), 0.0);
+  EXPECT_GT(NEPTUNE().mass.value(), 0.0);
 }
 
 // ============================================================================
@@ -182,7 +182,7 @@ TEST(Bodies, BodyNamespaceAzimuthAt) {
 // ============================================================================
 
 TEST(Bodies, StarTargetAltitude) {
-  const auto &vega = VEGA;
+  const auto &vega = VEGA();
   StarTarget st(vega);
   auto obs = geodetic(2.35, 48.85, 35.0);
   auto mjd = MJD(60000.5);
@@ -198,7 +198,7 @@ TEST(Bodies, StarTargetPolymorphicWithBodyTarget) {
 
   std::vector<std::unique_ptr<Target>> targets;
   targets.push_back(std::make_unique<BodyTarget>(Body::Sun));
-  targets.push_back(std::make_unique<StarTarget>(VEGA));
+  targets.push_back(std::make_unique<StarTarget>(VEGA()));
 
   for (const auto &t : targets) {
     auto alt = t->altitude_at(obs, mjd);

@@ -184,6 +184,7 @@ set(TEST_SOURCES
     tests/test_altitude.cpp
     tests/test_ephemeris.cpp
     tests/test_bodycentric.cpp
+    tests/test_subject.cpp
 )
 
 add_executable(test_siderust ${TEST_SOURCES})

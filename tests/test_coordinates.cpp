@@ -76,7 +76,7 @@ TEST(TypedCoordinates, IcrsDirToHorizontal) {
   spherical::direction::ICRS vega(qtty::Degree(279.23473),
                                   qtty::Degree(38.78369));
   auto jd = JulianDate::from_utc({2026, 7, 15, 22, 0, 0});
-  auto obs = ROQUE_DE_LOS_MUCHACHOS;
+  auto obs = ROQUE_DE_LOS_MUCHACHOS();
 
   auto hor = vega.to_horizontal(jd, obs);
 
@@ -148,7 +148,7 @@ TEST(TypedCoordinates, QttyDegreeAccessors) {
 // ============================================================================
 
 TEST(TypedCoordinates, GeodeticQttyFields) {
-  auto obs = ROQUE_DE_LOS_MUCHACHOS;
+  auto obs = ROQUE_DE_LOS_MUCHACHOS();
 
   // Exercise the qtty::Degree / qtty::Meter fields
   qtty::Degree lon = obs.lon;
