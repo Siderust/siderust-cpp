@@ -17,6 +17,16 @@ using CivilTime = tempoch::CivilTime;
 using UTC = tempoch::UTC;               // alias for CivilTime
 using JulianDate = tempoch::JulianDate; // Time<JDScale>
 using MJD = tempoch::MJD;               // Time<MJDScale>
+using TDB = tempoch::TDB;               // Time<TDBScale>
+using TT = tempoch::TT;                 // Time<TTScale>
+using TAI = tempoch::TAI;               // Time<TAIScale>
+using TCG = tempoch::TCG;               // Time<TCGScale>
+using TCB = tempoch::TCB;               // Time<TCBScale>
+using GPS = tempoch::GPS;               // Time<GPSScale>
+using UT = tempoch::UT;                 // Time<UTScale>
+using UniversalTime = tempoch::UniversalTime; // alias for UT
+using JDE = tempoch::JDE;               // Time<JDEScale>
+using UnixTime = tempoch::UnixTime;     // Time<UnixTimeScale>
 using Period = tempoch::Period<tempoch::MJD>;
 
 } // namespace siderust

@@ -160,17 +160,6 @@ endmacro()
 # ---------------------------------------------------------------------------
 # Examples
 # ---------------------------------------------------------------------------
-siderust_add_example(siderust_demo                    examples/demo.cpp)
-siderust_add_example(coordinates_examples              examples/coordinates_examples.cpp)
-siderust_add_example(basic_coordinates_example         examples/01_basic_coordinates.cpp)
-siderust_add_example(coordinate_systems_example        examples/coordinate_systems_example.cpp)
-siderust_add_example(coordinate_transformations_example examples/02_coordinate_transformations.cpp)
-siderust_add_example(solar_system_bodies_example       examples/solar_system_bodies_example.cpp)
-siderust_add_example(altitude_events_example           examples/altitude_events_example.cpp)
-siderust_add_example(trackable_targets_example         examples/trackable_targets_example.cpp)
-siderust_add_example(azimuth_lunar_phase_example       examples/azimuth_lunar_phase_example.cpp)
-siderust_add_example(l2_satellite_mars_example         examples/l2_satellite_mars_example.cpp)
-siderust_add_example(bodycentric_coordinates_example   examples/bodycentric_coordinates.cpp)
 
 # Numbered mirror examples (03–21, mirroring siderust Rust examples)
 siderust_add_example(03_all_frame_conversions_example   examples/03_all_frames_conversions.cpp)
