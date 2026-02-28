@@ -43,5 +43,6 @@
 #include "orbital_center.hpp"
 #include "observatories.hpp"
 #include "star_target.hpp"
+#include "subject.hpp"
 #include "target.hpp"
 #include "time.hpp"

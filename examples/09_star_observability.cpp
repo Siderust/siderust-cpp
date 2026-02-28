@@ -37,8 +37,8 @@ static std::vector<Period> intersect_periods(const std::vector<Period> &a,
 int main() {
     std::cout << "Star observability: altitude + azimuth constraints\n" << std::endl;
 
-    const auto &observer = ROQUE_DE_LOS_MUCHACHOS;
-    const auto &target   = SIRIUS;
+    const auto &observer = ROQUE_DE_LOS_MUCHACHOS();
+    const auto &target   = SIRIUS();
 
     // One-night search window (MJD TT).
     MJD t0(60000.0);

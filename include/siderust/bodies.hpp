@@ -139,24 +139,48 @@ inline Planet make_planet_neptune() {
 
 } // namespace detail
 
-inline const Planet MERCURY = detail::make_planet_mercury();
-inline const Planet VENUS = detail::make_planet_venus();
-inline const Planet EARTH = detail::make_planet_earth();
-inline const Planet MARS = detail::make_planet_mars();
-inline const Planet JUPITER = detail::make_planet_jupiter();
-inline const Planet SATURN = detail::make_planet_saturn();
-inline const Planet URANUS = detail::make_planet_uranus();
-inline const Planet NEPTUNE = detail::make_planet_neptune();
+inline const Planet &MERCURY() {
+  static const Planet s = detail::make_planet_mercury();
+  return s;
+}
+inline const Planet &VENUS() {
+  static const Planet s = detail::make_planet_venus();
+  return s;
+}
+inline const Planet &EARTH() {
+  static const Planet s = detail::make_planet_earth();
+  return s;
+}
+inline const Planet &MARS() {
+  static const Planet s = detail::make_planet_mars();
+  return s;
+}
+inline const Planet &JUPITER() {
+  static const Planet s = detail::make_planet_jupiter();
+  return s;
+}
+inline const Planet &SATURN() {
+  static const Planet s = detail::make_planet_saturn();
+  return s;
+}
+inline const Planet &URANUS() {
+  static const Planet s = detail::make_planet_uranus();
+  return s;
+}
+inline const Planet &NEPTUNE() {
+  static const Planet s = detail::make_planet_neptune();
+  return s;
+}
 
 // Backward-compatible function aliases.
-inline Planet mercury() { return MERCURY; }
-inline Planet venus() { return VENUS; }
-inline Planet earth() { return EARTH; }
-inline Planet mars() { return MARS; }
-inline Planet jupiter() { return JUPITER; }
-inline Planet saturn() { return SATURN; }
-inline Planet uranus() { return URANUS; }
-inline Planet neptune() { return NEPTUNE; }
+inline Planet mercury() { return MERCURY(); }
+inline Planet venus() { return VENUS(); }
+inline Planet earth() { return EARTH(); }
+inline Planet mars() { return MARS(); }
+inline Planet jupiter() { return JUPITER(); }
+inline Planet saturn() { return SATURN(); }
+inline Planet uranus() { return URANUS(); }
+inline Planet neptune() { return NEPTUNE(); }
 
 // ============================================================================
 // Star (RAII)
@@ -263,15 +287,45 @@ public:
   }
 };
 
-inline const Star VEGA = Star::catalog("VEGA");
-inline const Star SIRIUS = Star::catalog("SIRIUS");
-inline const Star POLARIS = Star::catalog("POLARIS");
-inline const Star CANOPUS = Star::catalog("CANOPUS");
-inline const Star ARCTURUS = Star::catalog("ARCTURUS");
-inline const Star RIGEL = Star::catalog("RIGEL");
-inline const Star BETELGEUSE = Star::catalog("BETELGEUSE");
-inline const Star PROCYON = Star::catalog("PROCYON");
-inline const Star ALDEBARAN = Star::catalog("ALDEBARAN");
-inline const Star ALTAIR = Star::catalog("ALTAIR");
+inline const Star &VEGA() {
+  static const Star s = Star::catalog("VEGA");
+  return s;
+}
+inline const Star &SIRIUS() {
+  static const Star s = Star::catalog("SIRIUS");
+  return s;
+}
+inline const Star &POLARIS() {
+  static const Star s = Star::catalog("POLARIS");
+  return s;
+}
+inline const Star &CANOPUS() {
+  static const Star s = Star::catalog("CANOPUS");
+  return s;
+}
+inline const Star &ARCTURUS() {
+  static const Star s = Star::catalog("ARCTURUS");
+  return s;
+}
+inline const Star &RIGEL() {
+  static const Star s = Star::catalog("RIGEL");
+  return s;
+}
+inline const Star &BETELGEUSE() {
+  static const Star s = Star::catalog("BETELGEUSE");
+  return s;
+}
+inline const Star &PROCYON() {
+  static const Star s = Star::catalog("PROCYON");
+  return s;
+}
+inline const Star &ALDEBARAN() {
+  static const Star s = Star::catalog("ALDEBARAN");
+  return s;
+}
+inline const Star &ALTAIR() {
+  static const Star s = Star::catalog("ALTAIR");
+  return s;
+}
 
 } // namespace siderust

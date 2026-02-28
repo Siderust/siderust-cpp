@@ -15,7 +15,7 @@ protected:
   Period window{MJD(0.0), MJD(1.0)};
 
   void SetUp() override {
-    obs = ROQUE_DE_LOS_MUCHACHOS;
+    obs = ROQUE_DE_LOS_MUCHACHOS();
     start = MJD::from_jd(JulianDate::from_utc({2026, 7, 15, 18, 0, 0}));
     end_ = start + 1.0_d; // 24 hours
     window = Period(start, end_);
@@ -96,14 +96,14 @@ TEST_F(AltitudeTest, MoonAboveThreshold) {
 // ============================================================================
 
 TEST_F(AltitudeTest, StarAltitudeAt) {
-  const auto &vega = VEGA;
+  const auto &vega = VEGA();
   qtty::Radian alt = star_altitude::altitude_at(vega, obs, start);
   EXPECT_GT(alt.value(), -PI / 2.0);
   EXPECT_LT(alt.value(), PI / 2.0);
 }
 
 TEST_F(AltitudeTest, StarAboveThreshold) {
-  const auto &vega = VEGA;
+  const auto &vega = VEGA();
   auto periods =
       star_altitude::above_threshold(vega, obs, window, 30.0_deg);
   // Vega should be well above 30° from La Palma in July

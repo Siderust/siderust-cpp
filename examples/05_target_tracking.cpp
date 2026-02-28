@@ -66,7 +66,7 @@ void section_trackable_objects(const JulianDate &jd, const JulianDate &jd_next) 
               << std::setprecision(3) << fixed_icrs << std::endl;
 
     // Sirius via the catalog StarTarget
-    StarTarget sirius_target(SIRIUS);
+    StarTarget sirius_target(SIRIUS());
     std::printf("  Sirius via StarTarget: name = %s\n",
                 sirius_target.name().c_str());
 

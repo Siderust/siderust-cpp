@@ -9,7 +9,7 @@
  *
  * ### Example
  * @code
- * siderust::StarTarget vega_target(siderust::VEGA);
+ * siderust::StarTarget vega_target(siderust::VEGA());
  * std::cout << vega_target.name() << "\n";  // "Vega"
  * auto alt = vega_target.altitude_at(obs, now);
  * @endcode
@@ -26,8 +26,8 @@ namespace siderust {
  * @brief Target implementation wrapping a `const Star&`.
  *
  * The referenced `Star` must outlive the `StarTarget`. Typically used with
- * the pre-built catalog stars (e.g. `VEGA`, `SIRIUS`) which are `inline const`
- * globals and live for the entire program.
+ * the pre-built catalog stars (e.g. `VEGA()`, `SIRIUS()`) which are
+ * lazy-initialized singletons and live for the entire program.
  */
 class StarTarget : public Target {
 public:
@@ -53,7 +53,7 @@ public:
   qtty::Degree altitude_at(const Geodetic &obs, const MJD &mjd) const override {
     // star_altitude::altitude_at returns Radian; convert to Degree
     auto rad = star_altitude::altitude_at(star_, obs, mjd);
-    return qtty::Degree(rad.value() * 180.0 / 3.14159265358979323846);
+    return rad.to<qtty::Degree>();
   }
 
   std::vector<Period>

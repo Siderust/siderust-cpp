@@ -4,7 +4,7 @@
 using namespace siderust;
 
 TEST(Observatories, RoqueDeLos) {
-  auto obs = ROQUE_DE_LOS_MUCHACHOS;
+  auto obs = ROQUE_DE_LOS_MUCHACHOS();
   // La Palma, approx lon=-17.88, lat=28.76
   EXPECT_NEAR(obs.lon.value(), -17.88, 0.1);
   EXPECT_NEAR(obs.lat.value(), 28.76, 0.1);
@@ -12,21 +12,21 @@ TEST(Observatories, RoqueDeLos) {
 }
 
 TEST(Observatories, ElParanal) {
-  auto obs = EL_PARANAL;
+  auto obs = EL_PARANAL();
   EXPECT_LT(obs.lon.value(), 0.0);
   EXPECT_LT(obs.lat.value(), 0.0); // Southern hemisphere
   EXPECT_GT(obs.height.value(), 2000.0);
 }
 
 TEST(Observatories, MaunaKea) {
-  auto obs = MAUNA_KEA;
+  auto obs = MAUNA_KEA();
   EXPECT_NEAR(obs.lon.value(), -155.47, 0.1);
   EXPECT_NEAR(obs.lat.value(), 19.82, 0.1);
   EXPECT_GT(obs.height.value(), 4000.0);
 }
 
 TEST(Observatories, LaSilla) {
-  auto obs = LA_SILLA_OBSERVATORY;
+  auto obs = LA_SILLA_OBSERVATORY();
   EXPECT_LT(obs.lon.value(), 0.0);
   EXPECT_LT(obs.lat.value(), 0.0);
 }
