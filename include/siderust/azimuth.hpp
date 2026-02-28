@@ -332,6 +332,34 @@ azimuth_crossings(const Star &s, const Geodetic &obs, const MJD &start,
   return azimuth_crossings(s, obs, Period(start, end), bearing, opts);
 }
 
+/**
+ * @brief Find periods when a star's azimuth is within [min, max] (degrees).
+ */
+inline std::vector<Period>
+in_azimuth_range(const Star &s, const Geodetic &obs, const Period &window,
+                 qtty::Degree min_bearing, qtty::Degree max_bearing,
+                 const SearchOptions &opts = {}) {
+  tempoch_period_mjd_t *ptr = nullptr;
+  uintptr_t count = 0;
+  check_status(siderust_star_in_azimuth_range(
+                   s.c_handle(), obs.to_c(), window.c_inner(),
+                   min_bearing.value(), max_bearing.value(), opts.to_c(), &ptr,
+                   &count),
+               "star_altitude::in_azimuth_range");
+  return detail::periods_from_c(ptr, count);
+}
+
+/**
+ * @brief Backward-compatible [start, end] overload.
+ */
+inline std::vector<Period>
+in_azimuth_range(const Star &s, const Geodetic &obs, const MJD &start,
+                 const MJD &end, qtty::Degree min_bearing,
+                 qtty::Degree max_bearing, const SearchOptions &opts = {}) {
+  return in_azimuth_range(s, obs, Period(start, end), min_bearing, max_bearing,
+                          opts);
+}
+
 } // namespace star_altitude
 
 // ============================================================================
