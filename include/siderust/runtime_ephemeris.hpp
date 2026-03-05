@@ -112,8 +112,8 @@ public:
     check_status(
         siderust_runtime_ephemeris_earth_barycentric(handle_, jd.value(), &out),
         "RuntimeEphemeris::earth_barycentric");
-    return cartesian::position::GeoBarycentric<
-        qtty::AstronomicalUnit>::from_c(out);
+    return cartesian::position::GeoBarycentric<qtty::AstronomicalUnit>::from_c(
+        out);
   }
 
   /**
