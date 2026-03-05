@@ -59,9 +59,11 @@ void show_bodycentric_conversion(const char *label, const JulianDate &jd,
   auto err = (src - recovered).magnitude();
 
   std::cout << std::left << std::setw(12) << label << " -> " << std::setw(12)
-            << "Bodycentric" << " dist=" << std::fixed << std::setprecision(6)
-            << bary.distance() << "  roundtrip=" << std::scientific
-            << std::setprecision(3) << err << std::fixed << std::endl;
+            << "Bodycentric";
+  std::cout << " dist=" << std::fixed << std::setprecision(6)
+            << bary.distance();
+  std::cout << "  roundtrip=" << std::scientific << std::setprecision(3) << err
+            << std::fixed << std::endl;
 }
 
 // ─── main
