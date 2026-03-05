@@ -171,6 +171,7 @@ siderust_add_example(08_solar_system_example            examples/08_solar_system
 siderust_add_example(09_star_observability_example      examples/09_star_observability.cpp)
 siderust_add_example(10_time_periods_example            examples/10_time_periods.cpp)
 siderust_add_example(11_serde_serialization_example     examples/11_serde_serialization.cpp)
+siderust_add_example(12_runtime_ephemeris_example       examples/12_runtime_ephemeris.cpp)
 
 # ---------------------------------------------------------------------------
 # Tests

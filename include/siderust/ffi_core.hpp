@@ -87,6 +87,11 @@ public:
       : SiderustException(msg) {}
 };
 
+class DataLoadError : public SiderustException {
+public:
+  explicit DataLoadError(const std::string &msg) : SiderustException(msg) {}
+};
+
 // ============================================================================
 // Error Translation
 // ============================================================================
@@ -117,6 +122,8 @@ inline void check_status(siderust_status_t status, const char *operation) {
     throw InvalidArgumentError(msg + "invalid argument");
   case SIDERUST_STATUS_T_INTERNAL_PANIC:
     throw InternalPanicError(msg + "internal panic in Rust FFI");
+  case SIDERUST_STATUS_T_DATA_ERROR:
+    throw DataLoadError(msg + "data loading error (I/O, download, or parse)");
   default:
     throw SiderustException(msg + "unknown error (" + std::to_string(status) +
                             ")");
