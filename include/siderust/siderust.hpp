@@ -42,6 +42,7 @@
 #include "lunar_phase.hpp"
 #include "orbital_center.hpp"
 #include "observatories.hpp"
+#include "runtime_ephemeris.hpp"
 #include "star_target.hpp"
 #include "subject.hpp"
 #include "target.hpp"
