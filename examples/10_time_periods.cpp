@@ -41,7 +41,7 @@ void print_period(const char *label, const tempoch::Period<T> &period) {
   auto dur = period.template duration<qtty::Day>();
   std::cout << "   " << std::left << std::setw(8) << label << std::right << " ["
             << std::fixed << std::setprecision(9) << period.start() << ", "
-            << period.end() << "]" << "  \u0394 = " << dur << std::endl;
+            << period.end() << "]  \u0394 = " << dur << std::endl;
 }
 
 int main() {
