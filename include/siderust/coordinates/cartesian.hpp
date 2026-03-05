@@ -13,12 +13,16 @@
 
 #include <qtty/qtty.hpp>
 
-#include <ostream>
 #include <cmath>
+#include <ostream>
 #include <type_traits>
 
 // Forward-declare spherical Position to avoid circular include.
-namespace siderust { namespace spherical { template <typename C, typename F, typename U> struct Position; } }
+namespace siderust {
+namespace spherical {
+template <typename C, typename F, typename U> struct Position;
+}
+} // namespace siderust
 
 namespace siderust {
 namespace cartesian {
@@ -48,9 +52,9 @@ template <typename F> struct Direction {
   /**
    * @brief Transform this direction to a different reference frame.
    *
-   * Only enabled when a `FrameRotationProvider` exists for the pair (F, Target).
-   * For time-independent (fixed-epoch) transforms, `jd` is still required but
-   * its value is ignored.
+   * Only enabled when a `FrameRotationProvider` exists for the pair (F,
+   * Target). For time-independent (fixed-epoch) transforms, `jd` is still
+   * required but its value is ignored.
    *
    * @tparam Target  Destination frame tag.
    * @param  jd      Julian Date (TT) for time-dependent rotations.
@@ -62,13 +66,10 @@ template <typename F> struct Direction {
       return Direction<Target>(x, y, z);
     } else {
       siderust_cartesian_pos_t out{};
-      check_status(
-          siderust_cartesian_dir_transform_frame(
-              x, y, z,
-              frames::FrameTraits<F>::ffi_id,
-              frames::FrameTraits<Target>::ffi_id,
-              jd.value(), &out),
-          "cartesian::Direction::to_frame");
+      check_status(siderust_cartesian_dir_transform_frame(
+                       x, y, z, frames::FrameTraits<F>::ffi_id,
+                       frames::FrameTraits<Target>::ffi_id, jd.value(), &out),
+                   "cartesian::Direction::to_frame");
       return Direction<Target>(out.x, out.y, out.z);
     }
   }
@@ -152,16 +153,19 @@ template <typename C, typename F, typename U> struct Position {
   }
 
   /**
-   * @brief Transform this position to a different reference frame (same center).
+   * @brief Transform this position to a different reference frame (same
+   * center).
    *
    * Only a pure rotation is applied; the reference center is unchanged.
-   * Only enabled when a `FrameRotationProvider` exists for the pair (F, Target).
+   * Only enabled when a `FrameRotationProvider` exists for the pair (F,
+   * Target).
    *
    * @tparam Target  Destination frame tag.
    * @param  jd      Julian Date (TT) for time-dependent rotations.
    */
   template <typename Target>
-  std::enable_if_t<frames::has_frame_transform_v<F, Target>, Position<C, Target, U>>
+  std::enable_if_t<frames::has_frame_transform_v<F, Target>,
+                   Position<C, Target, U>>
   to_frame(const JulianDate &jd) const {
     if constexpr (std::is_same_v<F, Target>) {
       return *this;
@@ -169,9 +173,7 @@ template <typename C, typename F, typename U> struct Position {
       siderust_cartesian_pos_t out{};
       check_status(
           siderust_cartesian_pos_transform_frame(
-              to_c(),
-              frames::FrameTraits<Target>::ffi_id,
-              jd.value(), &out),
+              to_c(), frames::FrameTraits<Target>::ffi_id, jd.value(), &out),
           "cartesian::Position::to_frame");
       return Position<C, Target, U>(out.x, out.y, out.z);
     }
@@ -187,7 +189,8 @@ template <typename C, typename F, typename U> struct Position {
   }
 
   /**
-   * @brief Transform this position to a different reference center (same frame).
+   * @brief Transform this position to a different reference center (same
+   * frame).
    *
    * The FFI center-shift uses VSOP87 ephemeris vectors expressed in
    * EclipticMeanJ2000.  When the position is already in that frame the FFI
@@ -198,7 +201,8 @@ template <typename C, typename F, typename U> struct Position {
    * @param  jd       Julian Date (TT) for the ephemeris evaluation.
    */
   template <typename TargetC>
-  std::enable_if_t<centers::has_center_transform_v<C, TargetC>, Position<TargetC, F, U>>
+  std::enable_if_t<centers::has_center_transform_v<C, TargetC>,
+                   Position<TargetC, F, U>>
   to_center(const JulianDate &jd) const {
     if constexpr (std::is_same_v<C, TargetC>) {
       return *this;
@@ -207,14 +211,12 @@ template <typename C, typename F, typename U> struct Position {
       siderust_cartesian_pos_t out{};
       check_status(
           siderust_cartesian_pos_transform_center(
-              to_c(),
-              centers::CenterTraits<TargetC>::ffi_id,
-              jd.value(), &out),
+              to_c(), centers::CenterTraits<TargetC>::ffi_id, jd.value(), &out),
           "cartesian::Position::to_center");
       return Position<TargetC, F, U>(out.x, out.y, out.z);
     } else {
       // Route through ecliptic so the shift vectors match the frame.
-      auto ecl     = to_frame<frames::EclipticMeanJ2000>(jd);
+      auto ecl = to_frame<frames::EclipticMeanJ2000>(jd);
       auto shifted = ecl.template to_center<TargetC>(jd);
       return shifted.template to_frame<F>(jd);
     }
@@ -234,18 +236,18 @@ template <typename C, typename F, typename U> struct Position {
    * @param  jd       Julian Date (TT).
    */
   template <typename TargetC, typename TargetF>
-  std::enable_if_t<
-      frames::has_frame_transform_v<F, TargetF> &&
-      centers::has_center_transform_v<C, TargetC>,
-      Position<TargetC, TargetF, U>>
+  std::enable_if_t<frames::has_frame_transform_v<F, TargetF> &&
+                       centers::has_center_transform_v<C, TargetC>,
+                   Position<TargetC, TargetF, U>>
   transform(const JulianDate &jd) const {
-    auto ecl     = to_frame<frames::EclipticMeanJ2000>(jd);
+    auto ecl = to_frame<frames::EclipticMeanJ2000>(jd);
     auto shifted = ecl.template to_center<TargetC>(jd);
     return shifted.template to_frame<TargetF>(jd);
   }
 
   /**
-   * @brief Subtract two positions in the same center/frame/unit (vector difference).
+   * @brief Subtract two positions in the same center/frame/unit (vector
+   * difference).
    */
   Position operator-(const Position &other) const {
     return Position(U(comp_x.value() - other.comp_x.value()),

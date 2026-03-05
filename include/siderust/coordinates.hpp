@@ -52,8 +52,8 @@
 #include "coordinates/cartesian.hpp"
 #include "coordinates/conversions.hpp"
 #include "coordinates/geodetic.hpp"
-#include "coordinates/spherical.hpp"
 #include "coordinates/pos_conversions.hpp"
+#include "coordinates/spherical.hpp"
 #include "coordinates/types.hpp"
 
 /** @} */ // end of group coordinates

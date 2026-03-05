@@ -66,8 +66,7 @@ TEST_F(AltitudeTest, SunCulminations) {
 
 TEST_F(AltitudeTest, SunAltitudePeriods) {
   // Find periods when sun is between -6° and 0° (civil twilight)
-  auto periods =
-      sun::altitude_periods(obs, window, -6.0_deg, 0.0_deg);
+  auto periods = sun::altitude_periods(obs, window, -6.0_deg, 0.0_deg);
   for (auto &p : periods) {
     EXPECT_GT(p.duration().value(), 0.0);
   }
@@ -104,8 +103,7 @@ TEST_F(AltitudeTest, StarAltitudeAt) {
 
 TEST_F(AltitudeTest, StarAboveThreshold) {
   const auto &vega = VEGA();
-  auto periods =
-      star_altitude::above_threshold(vega, obs, window, 30.0_deg);
+  auto periods = star_altitude::above_threshold(vega, obs, window, 30.0_deg);
   // Vega should be well above 30° from La Palma in July
   EXPECT_GT(periods.size(), 0u);
 }
@@ -115,18 +113,16 @@ TEST_F(AltitudeTest, StarAboveThreshold) {
 // ============================================================================
 
 TEST_F(AltitudeTest, IcrsAltitudeAt) {
-  const spherical::direction::ICRS vega_icrs(279.23_deg,
-                                             38.78_deg);
+  const spherical::direction::ICRS vega_icrs(279.23_deg, 38.78_deg);
   qtty::Radian alt = icrs_altitude::altitude_at(vega_icrs, obs, start);
   EXPECT_GT(alt.value(), -PI / 2.0);
   EXPECT_LT(alt.value(), PI / 2.0);
 }
 
 TEST_F(AltitudeTest, IcrsAboveThreshold) {
-  const spherical::direction::ICRS vega_icrs(279.23_deg,
-                                             38.78_deg);
-  auto periods = icrs_altitude::above_threshold(vega_icrs, obs, window,
-                                                30.0_deg);
+  const spherical::direction::ICRS vega_icrs(279.23_deg, 38.78_deg);
+  auto periods =
+      icrs_altitude::above_threshold(vega_icrs, obs, window, 30.0_deg);
   EXPECT_GT(periods.size(), 0u);
 }
 
@@ -136,8 +132,7 @@ TEST_F(AltitudeTest, IcrsAboveThreshold) {
 
 // Vega ICRS coordinates (J2000): RA=279.2348°, Dec=+38.7836°
 TEST_F(AltitudeTest, ICRSTargetAltitudeAt) {
-  ICRSTarget vega{
-      spherical::direction::ICRS{279.23_deg, 38.78_deg}};
+  ICRSTarget vega{spherical::direction::ICRS{279.23_deg, 38.78_deg}};
   // altitude_at returns qtty::Degree (radian/degree bug-fix verification)
   qtty::Degree alt = vega.altitude_at(obs, start);
   EXPECT_GT(alt.value(), -90.0);
@@ -145,16 +140,14 @@ TEST_F(AltitudeTest, ICRSTargetAltitudeAt) {
 }
 
 TEST_F(AltitudeTest, ICRSTargetAboveThreshold) {
-  ICRSTarget vega{
-      spherical::direction::ICRS{279.23_deg, 38.78_deg}};
+  ICRSTarget vega{spherical::direction::ICRS{279.23_deg, 38.78_deg}};
   auto periods = vega.above_threshold(obs, window, 30.0_deg);
   // Vega should rise above 30° from La Palma in July
   EXPECT_GT(periods.size(), 0u);
 }
 
 TEST_F(AltitudeTest, ICRSTargetTypedAccessors) {
-  ICRSTarget vega{
-      spherical::direction::ICRS{279.23_deg, 38.78_deg}};
+  ICRSTarget vega{spherical::direction::ICRS{279.23_deg, 38.78_deg}};
   EXPECT_NEAR(vega.ra().value(), 279.23, 1e-9);
   EXPECT_NEAR(vega.dec().value(), 38.78, 1e-9);
   // epoch defaults to J2000
@@ -174,8 +167,8 @@ TEST_F(AltitudeTest, ICRSTargetPolymorphic) {
 
 TEST_F(AltitudeTest, EclipticTargetAltitudeAt) {
   // Vega in ecliptic J2000 coordinates (approx): lon≈279.6°, lat≈+61.8°
-  EclipticMeanJ2000Target ec{spherical::direction::EclipticMeanJ2000{
-      279.6_deg, 61.8_deg}};
+  EclipticMeanJ2000Target ec{
+      spherical::direction::EclipticMeanJ2000{279.6_deg, 61.8_deg}};
   // ecl direction retained on the C++ side
   EXPECT_NEAR(ec.direction().lon().value(), 279.6, 1e-9);
   EXPECT_NEAR(ec.direction().lat().value(), 61.8, 1e-9);
@@ -189,8 +182,8 @@ TEST_F(AltitudeTest, EclipticTargetAltitudeAt) {
 }
 
 TEST_F(AltitudeTest, EquatorialMeanJ2000TargetAltitudeAt) {
-  EquatorialMeanJ2000Target vega{spherical::direction::EquatorialMeanJ2000{
-      279.23_deg, 38.78_deg}};
+  EquatorialMeanJ2000Target vega{
+      spherical::direction::EquatorialMeanJ2000{279.23_deg, 38.78_deg}};
   qtty::Degree alt = vega.altitude_at(obs, start);
   EXPECT_GT(alt.value(), -90.0);
   EXPECT_LT(alt.value(), 90.0);

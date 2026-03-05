@@ -32,8 +32,8 @@
  * BodycentricParams iss_params = BodycentricParams::geocentric(iss_orbit);
  *
  * // Moon's approximate geocentric position
- * cartesian::Position<Geocentric, EclipticMeanJ2000, AstronomicalUnit> moon_geo(
- *     0.00257, 0.0, 0.0);
+ * cartesian::Position<Geocentric, EclipticMeanJ2000, AstronomicalUnit>
+ * moon_geo( 0.00257, 0.0, 0.0);
  *
  * // Moon as seen from ISS
  * auto moon_from_iss = to_bodycentric(moon_geo, iss_params, jd);
@@ -89,7 +89,9 @@ struct BodycentricPos {
   U distance() const { return pos.distance(); }
 
   /// Distance to another body-centric position.
-  U distance_to(const BodycentricPos &other) const { return pos.distance_to(other.pos); }
+  U distance_to(const BodycentricPos &other) const {
+    return pos.distance_to(other.pos);
+  }
 
   /// Access the embedded orbital parameters of the body.
   const BodycentricParams &center_params() const { return params; }

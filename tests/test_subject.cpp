@@ -6,8 +6,8 @@
  * @brief Tests for the unified Subject API (subject.hpp).
  */
 
-#include <siderust/siderust.hpp>
 #include <gtest/gtest.h>
+#include <siderust/siderust.hpp>
 
 using namespace siderust;
 
