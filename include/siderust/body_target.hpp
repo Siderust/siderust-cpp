@@ -250,16 +250,26 @@ public:
    */
   std::string name() const override {
     switch (body_) {
-    case Body::Sun:     return "Sun";
-    case Body::Moon:    return "Moon";
-    case Body::Mercury: return "Mercury";
-    case Body::Venus:   return "Venus";
-    case Body::Mars:    return "Mars";
-    case Body::Jupiter: return "Jupiter";
-    case Body::Saturn:  return "Saturn";
-    case Body::Uranus:  return "Uranus";
-    case Body::Neptune: return "Neptune";
-    default:            return "Unknown Body";
+    case Body::Sun:
+      return "Sun";
+    case Body::Moon:
+      return "Moon";
+    case Body::Mercury:
+      return "Mercury";
+    case Body::Venus:
+      return "Venus";
+    case Body::Mars:
+      return "Mars";
+    case Body::Jupiter:
+      return "Jupiter";
+    case Body::Saturn:
+      return "Saturn";
+    case Body::Uranus:
+      return "Uranus";
+    case Body::Neptune:
+      return "Neptune";
+    default:
+      return "Unknown Body";
     }
   }
 

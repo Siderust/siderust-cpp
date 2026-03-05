@@ -60,8 +60,8 @@ enum class OrbitReferenceCenter : std::uint8_t {
  * @brief Parameters for a body-centric coordinate system.
  *
  * Specifies the orbital elements of a celestial body and the reference center
- * for those elements. This allows computing a body's position at any Julian date
- * using Keplerian propagation, then using that position as the origin of a
+ * for those elements. This allows computing a body's position at any Julian
+ * date using Keplerian propagation, then using that position as the origin of a
  * coordinate system.
  *
  * # Use Cases
@@ -144,8 +144,12 @@ struct BodycentricParams {
 
   /// Default: circular 1 AU heliocentric orbit (placeholder).
   BodycentricParams()
-      : orbit{qtty::AstronomicalUnit(1.0), 0.0, qtty::Degree(0.0),
-              qtty::Degree(0.0), qtty::Degree(0.0), qtty::Degree(0.0),
+      : orbit{qtty::AstronomicalUnit(1.0),
+              0.0,
+              qtty::Degree(0.0),
+              qtty::Degree(0.0),
+              qtty::Degree(0.0),
+              qtty::Degree(0.0),
               2451545.0},
         orbit_center(OrbitReferenceCenter::Heliocentric) {}
 
@@ -160,8 +164,7 @@ struct BodycentricParams {
 };
 
 // Stream operator for OrbitReferenceCenter
-inline std::ostream &operator<<(std::ostream &os,
-                                OrbitReferenceCenter center) {
+inline std::ostream &operator<<(std::ostream &os, OrbitReferenceCenter center) {
   switch (center) {
   case OrbitReferenceCenter::Barycentric:
     return os << "Barycentric";

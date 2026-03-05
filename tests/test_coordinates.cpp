@@ -254,12 +254,14 @@ TEST(TypedCoordinates, CartesianPosToFrameRoundtrip) {
   using namespace siderust::frames;
   using AU = qtty::AstronomicalUnit;
 
-  cartesian::Position<centers::Heliocentric, EclipticMeanJ2000, AU> pos(1.0, 0.5, 0.2);
+  cartesian::Position<centers::Heliocentric, EclipticMeanJ2000, AU> pos(
+      1.0, 0.5, 0.2);
   auto jd = JulianDate::J2000();
 
   auto pos_icrs = pos.to_frame<ICRS>(jd);
-  static_assert(std::is_same_v<decltype(pos_icrs),
-                               cartesian::Position<centers::Heliocentric, ICRS, AU>>);
+  static_assert(
+      std::is_same_v<decltype(pos_icrs),
+                     cartesian::Position<centers::Heliocentric, ICRS, AU>>);
 
   // Round-trip back to EclipticMeanJ2000
   auto pos_back = pos_icrs.to_frame<EclipticMeanJ2000>(jd);
@@ -273,13 +275,15 @@ TEST(TypedCoordinates, CartesianPosToFrameSameCenterPreserved) {
   using AU = qtty::AstronomicalUnit;
 
   // Frame-only transform preserves center
-  cartesian::Position<centers::Barycentric, EclipticMeanJ2000, AU> pos(1.0, 0.0, 0.0);
+  cartesian::Position<centers::Barycentric, EclipticMeanJ2000, AU> pos(1.0, 0.0,
+                                                                       0.0);
   auto jd = JulianDate::J2000();
 
   auto transformed = pos.to_frame<EquatorialMeanJ2000>(jd);
   static_assert(
-      std::is_same_v<decltype(transformed),
-                     cartesian::Position<centers::Barycentric, EquatorialMeanJ2000, AU>>);
+      std::is_same_v<
+          decltype(transformed),
+          cartesian::Position<centers::Barycentric, EquatorialMeanJ2000, AU>>);
 
   // Distance must be preserved (rotation)
   double r0 = pos.distance().value();
@@ -335,7 +339,8 @@ TEST(TypedCoordinates, SphericalPosToFrameShorthand) {
   // .to<Target>(jd) shorthand
   auto ecl = sph.to<EclipticMeanJ2000>(jd);
   static_assert(
-      std::is_same_v<decltype(ecl),
-                     spherical::Position<centers::Heliocentric, EclipticMeanJ2000, AU>>);
+      std::is_same_v<
+          decltype(ecl),
+          spherical::Position<centers::Heliocentric, EclipticMeanJ2000, AU>>);
   EXPECT_NEAR(ecl.distance().value(), 1.0, 1e-10);
 }
