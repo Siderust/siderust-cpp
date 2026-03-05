@@ -45,10 +45,10 @@ struct ProperMotion {
 struct Orbit {
   qtty::AstronomicalUnit semi_major_axis; ///< Semi-major axis.
   double eccentricity;                    ///< Orbital eccentricity [0, 1).
-  qtty::Degree inclination;              ///< Orbital inclination.
-  qtty::Degree lon_ascending_node;       ///< Longitude of ascending node.
-  qtty::Degree arg_perihelion;           ///< Argument of perihelion.
-  qtty::Degree mean_anomaly;             ///< Mean anomaly at epoch.
+  qtty::Degree inclination;               ///< Orbital inclination.
+  qtty::Degree lon_ascending_node;        ///< Longitude of ascending node.
+  qtty::Degree arg_perihelion;            ///< Argument of perihelion.
+  qtty::Degree mean_anomaly;              ///< Mean anomaly at epoch.
   double epoch_jd;                        ///< Reference epoch (Julian Date).
 
   static Orbit from_c(const siderust_orbit_t &c) {
@@ -63,9 +63,13 @@ struct Orbit {
 
   /// Convert to C FFI struct.
   siderust_orbit_t to_c() const {
-    return {semi_major_axis.value(), eccentricity, inclination.value(),
-            lon_ascending_node.value(), arg_perihelion.value(),
-            mean_anomaly.value(), epoch_jd};
+    return {semi_major_axis.value(),
+            eccentricity,
+            inclination.value(),
+            lon_ascending_node.value(),
+            arg_perihelion.value(),
+            mean_anomaly.value(),
+            epoch_jd};
   }
 };
 

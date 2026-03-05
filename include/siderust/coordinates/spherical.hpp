@@ -13,12 +13,16 @@
 
 #include <qtty/qtty.hpp>
 
+#include <cmath>
 #include <ostream>
 #include <type_traits>
-#include <cmath>
 
 // Forward-declare cartesian Position to avoid circular include.
-namespace siderust { namespace cartesian { template <typename C, typename F, typename U> struct Position; } }
+namespace siderust {
+namespace cartesian {
+template <typename C, typename F, typename U> struct Position;
+}
+} // namespace siderust
 
 namespace siderust {
 namespace spherical {
@@ -212,7 +216,6 @@ private:
   U dist_;
 
 public:
-
   Position(qtty::Degree azimuth, qtty::Degree polar, U distance)
       : azimuth_(azimuth), polar_(polar), dist_(distance) {}
 
@@ -281,7 +284,8 @@ public:
   cartesian::Position<C, F, U> to_cartesian() const;
 
   /**
-   * @brief Transform this position to a different reference frame (same center).
+   * @brief Transform this position to a different reference frame (same
+   * center).
    *
    * Internally converts to Cartesian, applies the frame rotation, then converts
    * back to spherical. Only enabled when a `FrameRotationProvider` exists for
@@ -291,7 +295,8 @@ public:
    * @param  jd      Julian Date (TT) for time-dependent rotations.
    */
   template <typename Target>
-  std::enable_if_t<frames::has_frame_transform_v<F, Target>, Position<C, Target, U>>
+  std::enable_if_t<frames::has_frame_transform_v<F, Target>,
+                   Position<C, Target, U>>
   to_frame(const JulianDate &jd) const;
 
   /**
@@ -319,9 +324,12 @@ public:
     // dot product of unit direction vectors (spherical -> cartesian)
     double cos_p1 = std::cos(p1);
     double cos_p2 = std::cos(p2);
-    double dot = cos_p1 * cos_p2 * std::cos(a1 - a2) + std::sin(p1) * std::sin(p2);
-    if (dot > 1.0) dot = 1.0;
-    if (dot < -1.0) dot = -1.0;
+    double dot =
+        cos_p1 * cos_p2 * std::cos(a1 - a2) + std::sin(p1) * std::sin(p2);
+    if (dot > 1.0)
+      dot = 1.0;
+    if (dot < -1.0)
+      dot = -1.0;
 
     double d = std::sqrt(r * r + s * s - 2.0 * r * s * dot);
     return U(d);
