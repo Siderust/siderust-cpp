@@ -50,6 +50,32 @@ template <typename F> struct Direction {
   }
 
   /**
+   * @brief Dot product of two unit-direction vectors.
+   *
+   * Returns cos(θ) where θ is the angle between the two directions.
+   * Result is in [-1, 1].
+   */
+  double dot(const Direction &other) const {
+    return x * other.x + y * other.y + z * other.z;
+  }
+
+  /**
+   * @brief Angle between this direction and another, in radians.
+   *
+   * Uses the dot product (numerically clamped to avoid acos domain errors).
+   * Returns a value in [0, π].
+   *
+   * @param other Direction in the same frame.
+   * @return Angle in radians.
+   */
+  double angle_to(const Direction &other) const {
+    double d = dot(other);
+    if (d > 1.0) d = 1.0;
+    if (d < -1.0) d = -1.0;
+    return std::acos(d);
+  }
+
+  /**
    * @brief Transform this direction to a different reference frame.
    *
    * Only enabled when a `FrameRotationProvider` exists for the pair (F,
