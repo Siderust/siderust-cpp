@@ -147,6 +147,31 @@ public:
   /// @}
 
   /**
+   * @brief Angular separation between this direction and another.
+   *
+   * Uses the Vincenty formula for numerical stability, even near 0° and 180°.
+   *
+   * @param other Direction in the same frame.
+   * @return Angular separation in degrees.
+   */
+  qtty::Degree angular_separation(const Direction &other) const {
+    constexpr double DEG2RAD = M_PI / 180.0;
+    constexpr double RAD2DEG = 180.0 / M_PI;
+    const double az1 = azimuth_.value() * DEG2RAD;
+    const double po1 = polar_.value() * DEG2RAD;
+    const double az2 = other.azimuth_.value() * DEG2RAD;
+    const double po2 = other.polar_.value() * DEG2RAD;
+    const double x =
+        std::cos(po1) * std::sin(po2) -
+        std::sin(po1) * std::cos(po2) * std::cos(az2 - az1);
+    const double y = std::cos(po2) * std::sin(az2 - az1);
+    const double z =
+        std::sin(po1) * std::sin(po2) +
+        std::cos(po1) * std::cos(po2) * std::cos(az2 - az1);
+    return qtty::Degree(std::atan2(std::sqrt(x * x + y * y), z) * RAD2DEG);
+  }
+
+  /**
    * @brief Transform to a different reference frame.
    *
    * Only enabled for frame pairs with a FrameRotationProvider in the FFI.
@@ -177,6 +202,21 @@ public:
   auto to(const JulianDate &jd) const
       -> decltype(this->template to_frame<Target>(jd)) {
     return to_frame<Target>(jd);
+  }
+
+  /**
+   * @brief Convert this spherical direction to a Cartesian unit vector.
+   *
+   * Mirrors Rust's `affn::spherical::Direction::to_cartesian()`.
+   * The result is a frame-tagged unit vector in `cartesian::Direction<F>`.
+   */
+  cartesian::Direction<F> to_cartesian() const {
+    constexpr double DEG2RAD = M_PI / 180.0;
+    const double az = azimuth_.value() * DEG2RAD;
+    const double po = polar_.value() * DEG2RAD;
+    const double cp = std::cos(po);
+    return cartesian::Direction<F>(std::cos(az) * cp, std::sin(az) * cp,
+                                   std::sin(po));
   }
 
   /**
@@ -306,6 +346,19 @@ public:
   auto to(const JulianDate &jd) const
       -> decltype(this->template to_frame<Target>(jd)) {
     return to_frame<Target>(jd);
+  }
+
+  /**
+   * @brief Angular separation between this position's direction and another's.
+   *
+   * Uses the Vincenty formula for numerical stability.
+   * The distance component is ignored — only the angles matter.
+   *
+   * @param other Position in the same center and frame.
+   * @return Angular separation in degrees.
+   */
+  qtty::Degree angular_separation(const Position &other) const {
+    return direction().angular_separation(other.direction());
   }
 
   U distance_to(const Position &other) const {

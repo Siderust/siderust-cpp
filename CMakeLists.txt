@@ -172,6 +172,7 @@ siderust_add_example(09_star_observability_example      examples/09_star_observa
 siderust_add_example(10_time_periods_example            examples/10_time_periods.cpp)
 siderust_add_example(11_serde_serialization_example     examples/11_serde_serialization.cpp)
 siderust_add_example(12_runtime_ephemeris_example       examples/12_runtime_ephemeris.cpp)
+siderust_add_example(13_coordinate_operations_example   examples/13_coordinate_operations.cpp)
 
 # ---------------------------------------------------------------------------
 # Tests
