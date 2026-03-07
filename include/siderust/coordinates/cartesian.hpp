@@ -110,6 +110,135 @@ template <typename F> struct Direction {
   }
 };
 
+// Forward-declare Position for Displacement operators.
+template <typename C, typename F, typename U> struct Position;
+
+/**
+ * @brief A 3D Cartesian displacement (free vector), compile-time frame-tagged.
+ *
+ * Mirrors Rust's `affn::cartesian::Displacement<F, U>`.
+ *
+ * Displacements are center-independent free vectors that represent the
+ * difference between two positions. Valid operations:
+ * - Displacement + Displacement -> Displacement
+ * - Displacement - Displacement -> Displacement
+ * - Position + Displacement -> Position
+ * - Position - Displacement -> Position
+ * - Position - Position -> Displacement
+ *
+ * @ingroup coordinates_cartesian
+ * @tparam F Reference frame tag (e.g. `frames::ICRS`).
+ * @tparam U Length unit (default: `qtty::Meter`).
+ */
+template <typename F, typename U> struct Displacement {
+  static_assert(frames::is_frame_v<F>, "F must be a valid frame tag");
+
+  U comp_x; ///< X component.
+  U comp_y; ///< Y component.
+  U comp_z; ///< Z component.
+
+  Displacement() : comp_x(U(0)), comp_y(U(0)), comp_z(U(0)) {}
+
+  Displacement(U x_, U y_, U z_) : comp_x(x_), comp_y(y_), comp_z(z_) {}
+
+  Displacement(double x_, double y_, double z_)
+      : comp_x(U(x_)), comp_y(U(y_)), comp_z(U(z_)) {}
+
+  U x() const { return comp_x; }
+  U y() const { return comp_y; }
+  U z() const { return comp_z; }
+
+  /**
+   * @brief Magnitude of the displacement vector.
+   */
+  U magnitude() const {
+    using std::sqrt;
+    const double vx = comp_x.value();
+    const double vy = comp_y.value();
+    const double vz = comp_z.value();
+    return U(sqrt(vx * vx + vy * vy + vz * vz));
+  }
+
+  static constexpr siderust_frame_t frame_id() {
+    return frames::FrameTraits<F>::ffi_id;
+  }
+
+  /**
+   * @brief Add two displacements.
+   */
+  Displacement operator+(const Displacement &other) const {
+    return Displacement(U(comp_x.value() + other.comp_x.value()),
+                        U(comp_y.value() + other.comp_y.value()),
+                        U(comp_z.value() + other.comp_z.value()));
+  }
+
+  /**
+   * @brief Subtract two displacements.
+   */
+  Displacement operator-(const Displacement &other) const {
+    return Displacement(U(comp_x.value() - other.comp_x.value()),
+                        U(comp_y.value() - other.comp_y.value()),
+                        U(comp_z.value() - other.comp_z.value()));
+  }
+
+  /**
+   * @brief Negate a displacement.
+   */
+  Displacement operator-() const {
+    return Displacement(U(-comp_x.value()), U(-comp_y.value()),
+                        U(-comp_z.value()));
+  }
+
+  /**
+   * @brief Scale a displacement by a scalar.
+   */
+  Displacement operator*(double scalar) const {
+    return Displacement(U(comp_x.value() * scalar), U(comp_y.value() * scalar),
+                        U(comp_z.value() * scalar));
+  }
+
+  /**
+   * @brief Transform this displacement to a different reference frame.
+   *
+   * @tparam Target  Destination frame tag.
+   * @param  jd      Julian Date (TT) for time-dependent rotations.
+   */
+  template <typename Target>
+  std::enable_if_t<frames::has_frame_transform_v<F, Target>,
+                   Displacement<Target, U>>
+  to_frame(const JulianDate &jd) const {
+    if constexpr (std::is_same_v<F, Target>) {
+      return Displacement<Target, U>(comp_x, comp_y, comp_z);
+    } else {
+      siderust_cartesian_pos_t out{};
+      check_status(siderust_cartesian_dir_transform_frame(
+                       comp_x.value(), comp_y.value(), comp_z.value(),
+                       frames::FrameTraits<F>::ffi_id,
+                       frames::FrameTraits<Target>::ffi_id, jd.value(), &out),
+                   "cartesian::Displacement::to_frame");
+      return Displacement<Target, U>(out.x, out.y, out.z);
+    }
+  }
+};
+
+/**
+ * @brief Stream operator for Displacement.
+ */
+template <typename F, typename U>
+inline std::ostream &operator<<(std::ostream &os,
+                                const Displacement<F, U> &d) {
+  return os << d.x() << ", " << d.y() << ", " << d.z();
+}
+
+/**
+ * @brief Scale a displacement by a scalar (scalar on left).
+ */
+template <typename F, typename U>
+inline Displacement<F, U> operator*(double scalar,
+                                     const Displacement<F, U> &d) {
+  return d * scalar;
+}
+
 /**
  * @brief A 3D Cartesian position, compile-time tagged by center, frame, unit.
  *
@@ -272,22 +401,37 @@ template <typename C, typename F, typename U> struct Position {
   }
 
   /**
-   * @brief Subtract two positions in the same center/frame/unit (vector
-   * difference).
+   * @brief Subtract two positions in the same center/frame/unit.
+   *
+   * Returns a Displacement representing the vector from `other` to `this`.
+   * This is the only valid Position-Position operation in affine geometry.
    */
-  Position operator-(const Position &other) const {
-    return Position(U(comp_x.value() - other.comp_x.value()),
-                    U(comp_y.value() - other.comp_y.value()),
-                    U(comp_z.value() - other.comp_z.value()));
+  Displacement<F, U> operator-(const Position &other) const {
+    return Displacement<F, U>(U(comp_x.value() - other.comp_x.value()),
+                              U(comp_y.value() - other.comp_y.value()),
+                              U(comp_z.value() - other.comp_z.value()));
   }
 
   /**
-   * @brief Add two positions in the same center/frame/unit (vector sum).
+   * @brief Translate a position by a displacement.
+   *
+   * Returns a new Position offset by the displacement vector.
    */
-  Position operator+(const Position &other) const {
-    return Position(U(comp_x.value() + other.comp_x.value()),
-                    U(comp_y.value() + other.comp_y.value()),
-                    U(comp_z.value() + other.comp_z.value()));
+  Position operator+(const Displacement<F, U> &displacement) const {
+    return Position(U(comp_x.value() + displacement.comp_x.value()),
+                    U(comp_y.value() + displacement.comp_y.value()),
+                    U(comp_z.value() + displacement.comp_z.value()));
+  }
+
+  /**
+   * @brief Translate a position backwards by a displacement.
+   *
+   * Returns a new Position offset by the negated displacement vector.
+   */
+  Position operator-(const Displacement<F, U> &displacement) const {
+    return Position(U(comp_x.value() - displacement.comp_x.value()),
+                    U(comp_y.value() - displacement.comp_y.value()),
+                    U(comp_z.value() - displacement.comp_z.value()));
   }
 
   /**
