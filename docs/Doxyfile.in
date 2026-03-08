@@ -47,7 +47,7 @@ MACRO_EXPANSION        = NO
 SKIP_FUNCTION_MACROS   = YES
 INCLUDE_PATH           = \
     "@CMAKE_CURRENT_SOURCE_DIR@/include" \
-    "@CMAKE_CURRENT_SOURCE_DIR@/qtty-cpp/include" \
+    "@CMAKE_CURRENT_SOURCE_DIR@/tempoch-cpp/qtty-cpp/include" \
     "@CMAKE_CURRENT_SOURCE_DIR@/siderust-ffi/include" \
     "@CMAKE_CURRENT_SOURCE_DIR@/siderust-ffi/siderust/dev-deps/tempoch/tempoch-ffi/include"
 

@@ -81,7 +81,6 @@ run_coverage() {
         --root . \
         --exclude 'build-coverage/.*' \
         --exclude 'siderust/.*' \
-        --exclude 'qtty-cpp/.*' \
         --exclude 'tempoch-cpp/.*' \
         --exclude 'tests/.*' \
         --exclude 'examples/.*' \
@@ -92,7 +91,6 @@ run_coverage() {
         --root . \
         --exclude 'build-coverage/.*' \
         --exclude 'siderust/.*' \
-        --exclude 'qtty-cpp/.*' \
         --exclude 'tempoch-cpp/.*' \
         --exclude 'tests/.*' \
         --exclude 'examples/.*' \
