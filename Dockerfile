@@ -37,7 +37,7 @@ COPY . /workspace
 # Fail early if required submodules are missing from the build context.
 RUN test -f siderust/siderust-ffi/Cargo.toml && \
     test -f tempoch-cpp/tempoch/tempoch-ffi/Cargo.toml && \
-    test -f qtty-cpp/CMakeLists.txt
+    test -f tempoch-cpp/qtty-cpp/CMakeLists.txt
 
 # Validate the container toolchain by configuring, building, testing, and generating docs.
 RUN rm -rf build && \

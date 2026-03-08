@@ -32,6 +32,12 @@ export CMAKE_BUILD_PARALLEL_LEVEL=${CMAKE_BUILD_PARALLEL_LEVEL:-2}
 
 cd /workspace
 
+echo "==> Selected dependency revisions"
+git submodule status --recursive
+echo
+echo "siderust-ffi: $(git -C siderust/siderust-ffi rev-parse HEAD) ($(git -C siderust/siderust-ffi describe --tags --always 2>/dev/null || true))"
+echo "siderust:     $(git -C siderust rev-parse HEAD) ($(git -C siderust describe --tags --always 2>/dev/null || true))"
+
 run_lint() {
     echo "==> Lint: configure + clang-format + clang-tidy"
     rm -rf build
@@ -79,9 +85,8 @@ run_coverage() {
     mkdir -p coverage_html
     gcovr \
         --root . \
-        --exclude 'build-coverage/.*' \
+        --exclude 'build-coverage[^/]*/.*' \
         --exclude 'siderust/.*' \
-        --exclude 'qtty-cpp/.*' \
         --exclude 'tempoch-cpp/.*' \
         --exclude 'tests/.*' \
         --exclude 'examples/.*' \
@@ -90,9 +95,8 @@ run_coverage() {
 
     gcovr \
         --root . \
-        --exclude 'build-coverage/.*' \
+        --exclude 'build-coverage[^/]*/.*' \
         --exclude 'siderust/.*' \
-        --exclude 'qtty-cpp/.*' \
         --exclude 'tempoch-cpp/.*' \
         --exclude 'tests/.*' \
         --exclude 'examples/.*' \
