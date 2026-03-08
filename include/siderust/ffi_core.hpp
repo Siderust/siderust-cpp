@@ -15,6 +15,10 @@
 
 #include <tempoch/ffi_core.hpp>
 
+#ifdef __cplusplus
+using QttyQuantity = qtty_quantity_t;
+#endif
+
 extern "C" {
 #include "siderust_ffi.h"
 }
