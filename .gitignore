@@ -3,8 +3,7 @@ build/
 cmake-build-*/
 out/
 build-*
-coverage_html/
-coverage.xml
+coverage*
 
 # IDE files
 .vscode/

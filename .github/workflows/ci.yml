@@ -92,8 +92,8 @@ jobs:
           set -euo pipefail
           git submodule status --recursive
           echo
-          echo "siderust-ffi: $(git -C siderust-ffi rev-parse HEAD) ($(git -C siderust-ffi describe --tags --always 2>/dev/null || true))"
-          echo "siderust:     $(git -C siderust-ffi/siderust rev-parse HEAD) ($(git -C siderust-ffi/siderust describe --tags --always 2>/dev/null || true))"
+          echo "siderust-ffi: $(git -C siderust/siderust-ffi rev-parse HEAD) ($(git -C siderust/siderust-ffi describe --tags --always 2>/dev/null || true))"
+          echo "siderust:     $(git -C siderust rev-parse HEAD) ($(git -C siderust describe --tags --always 2>/dev/null || true))"
 
       - name: Install system dependencies
         shell: bash
@@ -130,8 +130,9 @@ jobs:
           path: |
             ~/.cargo/registry
             ~/.cargo/git
-            siderust-ffi/target
-            siderust-ffi/siderust/dev-deps/tempoch/tempoch-ffi/target
+            siderust/siderust-ffi/target
+            siderust/target
+            tempoch-cpp/tempoch/tempoch-ffi/target
             tempoch-cpp/qtty-cpp/qtty/target
             tempoch-cpp/qtty-cpp/qtty/qtty-ffi/target
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
@@ -221,7 +222,7 @@ jobs:
           set -euo pipefail
           gcovr \
             --root . \
-            --exclude 'build-coverage/.*' \
+            --exclude 'build-coverage[^/]*/.*' \
             --exclude 'siderust/.*' \
             --exclude 'tempoch-cpp/.*' \
             --exclude 'tests/.*' \
@@ -236,7 +237,7 @@ jobs:
           mkdir -p coverage_html
           gcovr \
             --root . \
-            --exclude 'build-coverage/.*' \
+            --exclude 'build-coverage[^/]*/.*' \
             --exclude 'siderust/.*' \
             --exclude 'tempoch-cpp/.*' \
             --exclude 'tests/.*' \

@@ -161,13 +161,11 @@ public:
     const double po1 = polar_.value() * DEG2RAD;
     const double az2 = other.azimuth_.value() * DEG2RAD;
     const double po2 = other.polar_.value() * DEG2RAD;
-    const double x =
-        std::cos(po1) * std::sin(po2) -
-        std::sin(po1) * std::cos(po2) * std::cos(az2 - az1);
+    const double x = std::cos(po1) * std::sin(po2) -
+                     std::sin(po1) * std::cos(po2) * std::cos(az2 - az1);
     const double y = std::cos(po2) * std::sin(az2 - az1);
-    const double z =
-        std::sin(po1) * std::sin(po2) +
-        std::cos(po1) * std::cos(po2) * std::cos(az2 - az1);
+    const double z = std::sin(po1) * std::sin(po2) +
+                     std::cos(po1) * std::cos(po2) * std::cos(az2 - az1);
     return qtty::Degree(std::atan2(std::sqrt(x * x + y * y), z) * RAD2DEG);
   }
 
