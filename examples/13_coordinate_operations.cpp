@@ -8,8 +8,9 @@
 /// cartesian dot product, Euclidean 3D distance, and how type safety prevents
 /// accidentally mixing incompatible coordinate systems.
 ///
-/// Build with: cmake --build build-local --target 13_coordinate_operations_example
-/// Run with:   ./build-local/13_coordinate_operations_example
+/// Build with: cmake --build build-local --target
+/// 13_coordinate_operations_example Run with:
+/// ./build-local/13_coordinate_operations_example
 
 #include <siderust/siderust.hpp>
 
@@ -36,8 +37,8 @@ int main() {
   // Two well-known stars using EquatorialMeanJ2000 directions.
   // Constructor: Direction(azimuth, polar) = Direction(RA, Dec)
   spherical::direction::EquatorialMeanJ2000 polaris(
-      37.9546_deg,  // Right Ascension
-      89.2641_deg   // Declination
+      37.9546_deg, // Right Ascension
+      89.2641_deg  // Declination
   );
   spherical::direction::EquatorialMeanJ2000 sirius(
       101.2872_deg, // Right Ascension
@@ -62,8 +63,8 @@ int main() {
   // Self-separation must be exactly 0
   auto self_sep = polaris.angular_separation(polaris);
   std::cout << std::setprecision(6);
-  std::cout << "Self-separation of Polaris = " << self_sep
-            << "  (must be 0)" << std::endl
+  std::cout << "Self-separation of Polaris = " << self_sep << "  (must be 0)"
+            << std::endl
             << std::endl;
 
   // =========================================================================
@@ -81,13 +82,14 @@ int main() {
   double angle_deg = angle_rad * 180.0 / M_PI;
 
   std::cout << std::setprecision(4);
-  std::cout << "Polaris cartesian: (" << polaris_cart.x << ", " << polaris_cart.y
-            << ", " << polaris_cart.z << ")" << std::endl;
+  std::cout << "Polaris cartesian: (" << polaris_cart.x << ", "
+            << polaris_cart.y << ", " << polaris_cart.z << ")" << std::endl;
   std::cout << "Sirius  cartesian: (" << sirius_cart.x << ", " << sirius_cart.y
             << ", " << sirius_cart.z << ")" << std::endl;
   std::cout << std::setprecision(6);
-  std::cout << "  angle_to (Cartesian)          = " << angle_rad << " rad = "
-            << std::setprecision(4) << angle_deg << "\u00b0" << std::endl;
+  std::cout << "  angle_to (Cartesian)          = " << angle_rad
+            << " rad = " << std::setprecision(4) << angle_deg << "\u00b0"
+            << std::endl;
   std::cout << "  angular_separation (Vincenty)  = " << sep << std::endl;
   std::cout << std::scientific << std::setprecision(2);
   std::cout << "  Difference                     = "
@@ -110,8 +112,7 @@ int main() {
 
   std::cout << std::setprecision(6);
   std::cout << "dot(North Pole, Equatorial point)   = "
-            << north_pole_c.dot(equatorial_c)
-            << "  (must be  0)" << std::endl;
+            << north_pole_c.dot(equatorial_c) << "  (must be  0)" << std::endl;
 
   // Anti-Polaris: opposite direction on the sky
   spherical::direction::EquatorialMeanJ2000 anti_polaris(
@@ -119,15 +120,15 @@ int main() {
       qtty::Degree(-polaris.dec().value()));
   auto anti_polaris_c = anti_polaris.to_cartesian();
   std::cout << "dot(Polaris, anti-Polaris)          = "
-            << polaris_cart.dot(anti_polaris_c)
-            << "  (must be -1)" << std::endl
+            << polaris_cart.dot(anti_polaris_c) << "  (must be -1)" << std::endl
             << std::endl;
 
   // =========================================================================
   // 4. Euclidean Distance Between Spherical Positions
   // =========================================================================
   std::cout << "4. EUCLIDEAN DISTANCE BETWEEN SPHERICAL POSITIONS" << std::endl;
-  std::cout << "--------------------------------------------------" << std::endl;
+  std::cout << "--------------------------------------------------"
+            << std::endl;
 
   // Approximate heliocentric ecliptic positions (lon, lat, distance)
   spherical::position::EclipticMeanJ2000<qtty::AstronomicalUnit> earth(
@@ -172,7 +173,7 @@ int main() {
   auto diff = mars_cart - earth_cart;
   std::cout << "  Mars \u2212 Earth vector: (" << diff.x() << ", " << diff.y()
             << ", " << diff.z() << ")" << std::endl;
-  std::cout << "  |Mars \u2212 Earth|      = " << diff.distance() << std::endl
+  std::cout << "  |Mars \u2212 Earth|      = " << diff.magnitude() << std::endl
             << std::endl;
 
   // =========================================================================
@@ -194,12 +195,10 @@ int main() {
             << "  (must be 90\u00b0)" << std::endl
             << std::endl;
 
-  std::cout
-      << "  Type safety note: spherical::direction::EclipticMeanJ2000 and"
-      << std::endl;
-  std::cout
-      << "  spherical::direction::EquatorialMeanJ2000 are distinct types."
-      << std::endl;
+  std::cout << "  Type safety note: spherical::direction::EclipticMeanJ2000 and"
+            << std::endl;
+  std::cout << "  spherical::direction::EquatorialMeanJ2000 are distinct types."
+            << std::endl;
   std::cout << "  angular_separation only compiles within the same frame."
             << std::endl
             << std::endl;
