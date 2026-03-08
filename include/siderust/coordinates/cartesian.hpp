@@ -70,8 +70,10 @@ template <typename F> struct Direction {
    */
   double angle_to(const Direction &other) const {
     double d = dot(other);
-    if (d > 1.0) d = 1.0;
-    if (d < -1.0) d = -1.0;
+    if (d > 1.0)
+      d = 1.0;
+    if (d < -1.0)
+      d = -1.0;
     return std::acos(d);
   }
 
@@ -225,8 +227,7 @@ template <typename F, typename U> struct Displacement {
  * @brief Stream operator for Displacement.
  */
 template <typename F, typename U>
-inline std::ostream &operator<<(std::ostream &os,
-                                const Displacement<F, U> &d) {
+inline std::ostream &operator<<(std::ostream &os, const Displacement<F, U> &d) {
   return os << d.x() << ", " << d.y() << ", " << d.z();
 }
 
@@ -235,7 +236,7 @@ inline std::ostream &operator<<(std::ostream &os,
  */
 template <typename F, typename U>
 inline Displacement<F, U> operator*(double scalar,
-                                     const Displacement<F, U> &d) {
+                                    const Displacement<F, U> &d) {
   return d * scalar;
 }
 
