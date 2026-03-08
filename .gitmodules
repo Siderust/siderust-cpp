@@ -1,6 +1,3 @@
-[submodule "qtty-cpp"]
-	path = qtty-cpp
-	url = git@github.com:VPRamon/qtty-cpp.git
 [submodule "tempoch-cpp"]
 	path = tempoch-cpp
 	url = git@github.com:Siderust/tempoch-cpp.git
