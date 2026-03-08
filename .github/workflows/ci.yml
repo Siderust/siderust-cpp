@@ -132,8 +132,8 @@ jobs:
             ~/.cargo/git
             siderust-ffi/target
             siderust-ffi/siderust/dev-deps/tempoch/tempoch-ffi/target
-            qtty-cpp/qtty/target
-            qtty-cpp/qtty/qtty-ffi/target
+            tempoch-cpp/qtty-cpp/qtty/target
+            tempoch-cpp/qtty-cpp/qtty/qtty-ffi/target
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-cargo-
@@ -223,7 +223,6 @@ jobs:
             --root . \
             --exclude 'build-coverage/.*' \
             --exclude 'siderust/.*' \
-            --exclude 'qtty-cpp/.*' \
             --exclude 'tempoch-cpp/.*' \
             --exclude 'tests/.*' \
             --exclude 'examples/.*' \
@@ -239,7 +238,6 @@ jobs:
             --root . \
             --exclude 'build-coverage/.*' \
             --exclude 'siderust/.*' \
-            --exclude 'qtty-cpp/.*' \
             --exclude 'tempoch-cpp/.*' \
             --exclude 'tests/.*' \
             --exclude 'examples/.*' \
