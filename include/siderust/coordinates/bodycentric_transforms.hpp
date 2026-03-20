@@ -203,4 +203,38 @@ kepler_position(const Orbit &orbit, const JulianDate &jd) {
       qtty::AstronomicalUnit(c_out.z));
 }
 
+/**
+ * @brief Compute an orbital position for a mean-motion orbit at a Julian Date.
+ */
+template <typename C = centers::Heliocentric>
+inline cartesian::Position<C, frames::EclipticMeanJ2000, qtty::AstronomicalUnit>
+kepler_position(const MeanMotionOrbit &orbit, const JulianDate &jd) {
+  static_assert(centers::is_center_v<C>,
+                "C must be a valid center tag (default: Heliocentric)");
+  siderust_cartesian_pos_t c_out{};
+  check_status(siderust_mean_motion_position(orbit.to_c(), jd.value(), &c_out),
+               "kepler_position(mean_motion)");
+  return cartesian::Position<C, frames::EclipticMeanJ2000,
+                             qtty::AstronomicalUnit>(
+      qtty::AstronomicalUnit(c_out.x), qtty::AstronomicalUnit(c_out.y),
+      qtty::AstronomicalUnit(c_out.z));
+}
+
+/**
+ * @brief Compute an orbital position for unified conic elements at a Julian Date.
+ */
+template <typename C = centers::Heliocentric>
+inline cartesian::Position<C, frames::EclipticMeanJ2000, qtty::AstronomicalUnit>
+kepler_position(const ConicOrbit &orbit, const JulianDate &jd) {
+  static_assert(centers::is_center_v<C>,
+                "C must be a valid center tag (default: Heliocentric)");
+  siderust_cartesian_pos_t c_out{};
+  check_status(siderust_conic_position(orbit.to_c(), jd.value(), &c_out),
+               "kepler_position(conic)");
+  return cartesian::Position<C, frames::EclipticMeanJ2000,
+                             qtty::AstronomicalUnit>(
+      qtty::AstronomicalUnit(c_out.x), qtty::AstronomicalUnit(c_out.y),
+      qtty::AstronomicalUnit(c_out.z));
+}
+
 } // namespace siderust

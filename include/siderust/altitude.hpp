@@ -17,6 +17,36 @@
 
 namespace siderust {
 
+/**
+ * @brief Standard twilight / horizon thresholds for solar altitude queries.
+ */
+enum class Twilight {
+  Civil,
+  Nautical,
+  Astronomical,
+  Horizon,
+  ApparentHorizon,
+};
+
+/**
+ * @brief Convert a twilight category to its altitude threshold.
+ */
+inline qtty::Degree twilight_angle(Twilight twilight) {
+  switch (twilight) {
+  case Twilight::Civil:
+    return qtty::Degree(-6.0);
+  case Twilight::Nautical:
+    return qtty::Degree(-12.0);
+  case Twilight::Astronomical:
+    return qtty::Degree(-18.0);
+  case Twilight::Horizon:
+    return qtty::Degree(0.0);
+  case Twilight::ApparentHorizon:
+    return qtty::Degree(-0.833);
+  }
+  return qtty::Degree(-18.0);
+}
+
 // ============================================================================
 // Event types
 // ============================================================================

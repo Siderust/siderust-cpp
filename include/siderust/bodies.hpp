@@ -73,6 +73,91 @@ struct Orbit {
   }
 };
 
+/**
+ * @brief Elliptic orbit whose explicit mean motion is authoritative.
+ */
+struct MeanMotionOrbit {
+  qtty::AstronomicalUnit semi_major_axis; ///< Semi-major axis.
+  double eccentricity;                    ///< Orbital eccentricity [0, 1).
+  qtty::Degree inclination;               ///< Orbital inclination.
+  qtty::Degree lon_ascending_node;        ///< Longitude of ascending node.
+  qtty::Degree arg_periapsis;             ///< Argument of periapsis.
+  double mean_motion_deg_per_day;         ///< Mean motion in degrees per day.
+  double epoch_jd;                        ///< Epoch at zero mean anomaly.
+
+  static MeanMotionOrbit from_c(const siderust_mean_motion_orbit_t &c) {
+    return {qtty::AstronomicalUnit(c.semi_major_axis_au),
+            c.eccentricity,
+            qtty::Degree(c.inclination_deg),
+            qtty::Degree(c.lon_ascending_node_deg),
+            qtty::Degree(c.arg_periapsis_deg),
+            c.mean_motion_deg_per_day,
+            c.epoch_jd};
+  }
+
+  siderust_mean_motion_orbit_t to_c() const {
+    return {semi_major_axis.value(),
+            eccentricity,
+            inclination.value(),
+            lon_ascending_node.value(),
+            arg_periapsis.value(),
+            mean_motion_deg_per_day,
+            epoch_jd};
+  }
+};
+
+/**
+ * @brief Conic-family classification inferred from eccentricity.
+ */
+enum class ConicKind {
+  Elliptic,
+  Parabolic,
+  Hyperbolic,
+};
+
+/**
+ * @brief Unified conic elements expressed using periapsis distance.
+ */
+struct ConicOrbit {
+  qtty::AstronomicalUnit periapsis_distance; ///< Periapsis distance.
+  double eccentricity;                       ///< Orbital eccentricity.
+  qtty::Degree inclination;                  ///< Orbital inclination.
+  qtty::Degree lon_ascending_node;           ///< Longitude of ascending node.
+  qtty::Degree arg_periapsis;                ///< Argument of periapsis.
+  qtty::Degree mean_anomaly;                 ///< Mean anomaly at epoch.
+  double epoch_jd;                           ///< Reference epoch.
+
+  static ConicOrbit from_c(const siderust_conic_orbit_t &c) {
+    return {qtty::AstronomicalUnit(c.periapsis_distance_au),
+            c.eccentricity,
+            qtty::Degree(c.inclination_deg),
+            qtty::Degree(c.lon_ascending_node_deg),
+            qtty::Degree(c.arg_periapsis_deg),
+            qtty::Degree(c.mean_anomaly_deg),
+            c.epoch_jd};
+  }
+
+  siderust_conic_orbit_t to_c() const {
+    return {periapsis_distance.value(),
+            eccentricity,
+            inclination.value(),
+            lon_ascending_node.value(),
+            arg_periapsis.value(),
+            mean_anomaly.value(),
+            epoch_jd};
+  }
+
+  ConicKind kind() const {
+    if (eccentricity < 1.0) {
+      return ConicKind::Elliptic;
+    }
+    if (eccentricity > 1.0) {
+      return ConicKind::Hyperbolic;
+    }
+    return ConicKind::Parabolic;
+  }
+};
+
 // ============================================================================
 // Planet
 // ============================================================================
