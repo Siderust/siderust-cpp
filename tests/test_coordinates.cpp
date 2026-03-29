@@ -118,6 +118,39 @@ TEST(TypedCoordinates, MultiHopTransform) {
   EXPECT_NEAR(true_od.dec().value(), 30.0, 0.1);
 }
 
+TEST(TypedCoordinates, DirectionToFrameWithDefaultContextMatchesDefaultPath) {
+  using namespace siderust::frames;
+
+  spherical::direction::ICRS icrs(qtty::Degree(100.0), qtty::Degree(30.0));
+  auto jd = JulianDate(2458850.0);
+  AstroContext ctx;
+
+  auto direct = icrs.to_frame<EquatorialTrueOfDate>(jd);
+  auto with_ctx = icrs.to_frame_with<EquatorialTrueOfDate>(jd, ctx);
+
+  EXPECT_NEAR(with_ctx.ra().value(), direct.ra().value(), 1e-12);
+  EXPECT_NEAR(with_ctx.dec().value(), direct.dec().value(), 1e-12);
+}
+
+TEST(TypedCoordinates, DirectionToFrameWithDifferentModelsChangesResult) {
+  using namespace siderust::frames;
+
+  cartesian::Direction<ICRS> icrs(0.6, -0.3, 0.74);
+  auto jd = JulianDate(2458850.0);
+  AstroContext ctx;
+
+  auto with_nutation =
+      icrs.to_frame_with<EquatorialTrueOfDate>(jd, ctx.with_model<Iau2006A>());
+  auto precession_only =
+      icrs.to_frame_with<EquatorialTrueOfDate>(jd, ctx.with_model<Iau2006>());
+
+  const double delta =
+      std::sqrt(std::pow(with_nutation.x - precession_only.x, 2) +
+                std::pow(with_nutation.y - precession_only.y, 2) +
+                std::pow(with_nutation.z - precession_only.z, 2));
+  EXPECT_GT(delta, 1e-10);
+}
+
 TEST(TypedCoordinates, SameFrameIdentity) {
   using namespace siderust::frames;
 

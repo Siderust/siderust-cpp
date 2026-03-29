@@ -229,14 +229,14 @@ TEST(BodycentricFFI, InvalidCenterInput) {
 
 TEST(BodycentricFFI, NullOutputPointer_KeplerPosition) {
   siderust_orbit_t orbit{1.0, 0.0, 0.0, 0.0, 0.0, 0.0, J2000};
-  auto s = siderust_kepler_position(orbit, J2000, nullptr);
+  auto s = siderust_kepler_position_ex(orbit, 1, J2000, nullptr);
   EXPECT_EQ(s, SIDERUST_STATUS_T_NULL_POINTER);
 }
 
 TEST(BodycentricFFI, KeplerPositionReturnsFinite) {
   siderust_orbit_t orbit{1.524, 0.0934, 1.85, 49.56, 286.5, 19.41, J2000};
   siderust_cartesian_pos_t out{};
-  auto s = siderust_kepler_position(orbit, J2000, &out);
+  auto s = siderust_kepler_position_ex(orbit, 1, J2000, &out);
   EXPECT_EQ(s, SIDERUST_STATUS_T_OK);
   EXPECT_TRUE(std::isfinite(out.x));
   EXPECT_TRUE(std::isfinite(out.y));
