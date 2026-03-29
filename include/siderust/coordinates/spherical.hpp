@@ -7,6 +7,7 @@
  */
 
 #include "../centers.hpp"
+#include "../astro_context.hpp"
 #include "../frames.hpp"
 #include "../time.hpp"
 #include "geodetic.hpp"
@@ -194,6 +195,28 @@ public:
   }
 
   /**
+   * @brief Transform to a different reference frame with an explicit context.
+   */
+  template <typename Target>
+  std::enable_if_t<frames::has_frame_transform_v<F, Target>, Direction<Target>>
+  to_frame_with(const JulianDate &jd, const AstroContext &ctx) const {
+    if constexpr (std::is_same_v<F, Target>) {
+      return Direction<Target>(azimuth_, polar_);
+    } else {
+      siderust_spherical_dir_t out;
+      check_status(siderust_spherical_dir_transform_frame_model(
+                       polar_.value(), azimuth_.value(),
+                       frames::FrameTraits<F>::ffi_id,
+                       frames::FrameTraits<Target>::ffi_id, jd.value(),
+                       static_cast<SiderustEarthOrientationModel>(
+                           ctx.model()),
+                       &out),
+                   "Direction::to_frame_with");
+      return Direction<Target>::from_c(out);
+    }
+  }
+
+  /**
    * @brief Shorthand: `.to<Target>(jd)` (calls `to_frame`).
    */
   template <typename Target>
@@ -230,6 +253,24 @@ public:
                                              frames::FrameTraits<F>::ffi_id,
                                              jd.value(), observer.to_c(), &out),
         "Direction::to_horizontal");
+    return Direction<frames::Horizontal>::from_c(out);
+  }
+
+  /**
+   * @brief Transform to the horizontal frame with an explicit context.
+   */
+  template <typename F_ = F>
+  std::enable_if_t<frames::has_horizontal_transform_v<F_>,
+                   Direction<frames::Horizontal>>
+  to_horizontal_with(const JulianDate &jd, const Geodetic &observer,
+                     const AstroContext &ctx) const {
+    siderust_spherical_dir_t out;
+    check_status(
+        siderust_spherical_dir_to_horizontal_model(
+            polar_.value(), azimuth_.value(), frames::FrameTraits<F>::ffi_id,
+            jd.value(), observer.to_c(),
+            static_cast<SiderustEarthOrientationModel>(ctx.model()), &out),
+        "Direction::to_horizontal_with");
     return Direction<frames::Horizontal>::from_c(out);
   }
 };
@@ -336,6 +377,11 @@ public:
   std::enable_if_t<frames::has_frame_transform_v<F, Target>,
                    Position<C, Target, U>>
   to_frame(const JulianDate &jd) const;
+
+  template <typename Target>
+  std::enable_if_t<frames::has_frame_transform_v<F, Target>,
+                   Position<C, Target, U>>
+  to_frame_with(const JulianDate &jd, const AstroContext &ctx) const;
 
   /**
    * @brief Shorthand: `.to<Target>(jd)` (calls `to_frame`).

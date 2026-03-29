@@ -11,7 +11,8 @@ Modern, header-only C++17 wrapper for **siderust** — a high-precision astronom
 | **Time** (`time.hpp`) | `JulianDate`, `MJD`, `UTC`, `Period` — value types with arithmetic and UTC round-trips |
 | **Coordinates** (`coordinates.hpp`) | Modular typed API (`coordinates/{geodetic,spherical,cartesian,types}.hpp`) plus selective alias headers under `coordinates/types/{spherical,cartesian}/...` |
 | **Frames & Centers** (`frames.hpp`, `centers.hpp`) | Compile-time frame/center tags and transform capability traits |
-| **Bodies** (`bodies.hpp`) | `Star` (RAII, catalog + custom), `Planet` (8 planets), `ProperMotion`, `Orbit` |
+| **Orbits** (`orbit.hpp`) | `KeplerianOrbit`, `MeanMotionOrbit`, `ConicOrbit`, `PreparedOrbit`, plus compatibility alias `Orbit` |
+| **Bodies** (`bodies.hpp`) | `Star` (RAII, catalog + custom), `Planet` (8 planets), `ProperMotion`, planet orbit data |
 | **Observatories** (`observatories.hpp`) | Named sites: Roque de los Muchachos, Paranal, Mauna Kea, La Silla |
 | **Altitude** (`altitude.hpp`) | Sun / Moon / Star / ICRS altitude: instant, above/below threshold, crossings, culminations |
 | **Azimuth** (`azimuth.hpp`) | Sun / Moon / Star / ICRS azimuth: instant, crossings, extrema, range windows |
@@ -61,13 +62,8 @@ cmake ..
 cmake --build .
 
 # Run example
-./siderust_demo
-./coordinates_examples
-./coordinate_systems_example
-./solar_system_bodies_example
-./altitude_events_example
-./trackable_targets_example
-./azimuth_lunar_phase_example
+./14_nutation_models_example
+./15_orbit_models_example
 
 # Run tests
 ctest --output-on-failure

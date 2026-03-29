@@ -173,6 +173,8 @@ siderust_add_example(10_time_periods_example            examples/10_time_periods
 siderust_add_example(11_serde_serialization_example     examples/11_serde_serialization.cpp)
 siderust_add_example(12_runtime_ephemeris_example       examples/12_runtime_ephemeris.cpp)
 siderust_add_example(13_coordinate_operations_example   examples/13_coordinate_operations.cpp)
+siderust_add_example(14_nutation_models_example         examples/14_nutation_models.cpp)
+siderust_add_example(15_orbit_models_example            examples/15_orbit_models.cpp)
 
 # ---------------------------------------------------------------------------
 # Tests
@@ -186,6 +188,7 @@ set(TEST_SOURCES
     tests/test_altitude.cpp
     tests/test_ephemeris.cpp
     tests/test_bodycentric.cpp
+    tests/test_orbits.cpp
     tests/test_subject.cpp
 )
 

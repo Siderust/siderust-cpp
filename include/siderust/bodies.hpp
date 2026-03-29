@@ -7,6 +7,7 @@
 
 #include "coordinates.hpp"
 #include "ffi_core.hpp"
+#include "orbit.hpp"
 #include <optional>
 #include <string>
 #include <utility>
@@ -32,44 +33,6 @@ struct ProperMotion {
   siderust_proper_motion_t to_c() const {
     return {pm_ra_deg_yr, pm_dec_deg_yr,
             static_cast<siderust_ra_convention_t>(convention)};
-  }
-};
-
-// ============================================================================
-// Orbit
-// ============================================================================
-
-/**
- * @brief Keplerian orbital elements.
- */
-struct Orbit {
-  qtty::AstronomicalUnit semi_major_axis; ///< Semi-major axis.
-  double eccentricity;                    ///< Orbital eccentricity [0, 1).
-  qtty::Degree inclination;               ///< Orbital inclination.
-  qtty::Degree lon_ascending_node;        ///< Longitude of ascending node.
-  qtty::Degree arg_perihelion;            ///< Argument of perihelion.
-  qtty::Degree mean_anomaly;              ///< Mean anomaly at epoch.
-  double epoch_jd;                        ///< Reference epoch (Julian Date).
-
-  static Orbit from_c(const siderust_orbit_t &c) {
-    return {qtty::AstronomicalUnit(c.semi_major_axis_au),
-            c.eccentricity,
-            qtty::Degree(c.inclination_deg),
-            qtty::Degree(c.lon_ascending_node_deg),
-            qtty::Degree(c.arg_perihelion_deg),
-            qtty::Degree(c.mean_anomaly_deg),
-            c.epoch_jd};
-  }
-
-  /// Convert to C FFI struct.
-  siderust_orbit_t to_c() const {
-    return {semi_major_axis.value(),
-            eccentricity,
-            inclination.value(),
-            lon_ascending_node.value(),
-            arg_perihelion.value(),
-            mean_anomaly.value(),
-            epoch_jd};
   }
 };
 

@@ -172,35 +172,4 @@ BodycentricPos<F, U>::to_geocentric(const JulianDate &jd) const {
                                                         U(c_out.z));
 }
 
-// ============================================================================
-// kepler_position() — Keplerian orbital propagation
-// ============================================================================
-
-/**
- * @brief Compute an orbital position at a given Julian Date via Kepler's laws.
- *
- * Returns the body's position in the EclipticMeanJ2000 frame in AU.
- * The reference center of the returned position equals the orbit's own
- * reference center (e.g. heliocentric for a planet's orbit).
- *
- * @tparam C  Desired center tag for the result (caller must know from context,
- *            e.g. `centers::Geocentric` for a satellite orbit).
- * @param orbit  Keplerian orbital elements.
- * @param jd     Julian Date.
- * @return Position in EclipticMeanJ2000/AU with center C.
- */
-template <typename C = centers::Heliocentric>
-inline cartesian::Position<C, frames::EclipticMeanJ2000, qtty::AstronomicalUnit>
-kepler_position(const Orbit &orbit, const JulianDate &jd) {
-  static_assert(centers::is_center_v<C>,
-                "C must be a valid center tag (default: Heliocentric)");
-  siderust_cartesian_pos_t c_out{};
-  check_status(siderust_kepler_position(orbit.to_c(), jd.value(), &c_out),
-               "kepler_position");
-  return cartesian::Position<C, frames::EclipticMeanJ2000,
-                             qtty::AstronomicalUnit>(
-      qtty::AstronomicalUnit(c_out.x), qtty::AstronomicalUnit(c_out.y),
-      qtty::AstronomicalUnit(c_out.z));
-}
-
 } // namespace siderust

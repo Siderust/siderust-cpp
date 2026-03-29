@@ -67,4 +67,17 @@ spherical::Position<C, F, U>::to_frame(const JulianDate &jd) const {
   }
 }
 
+template <typename C, typename F, typename U>
+template <typename Target>
+std::enable_if_t<siderust::frames::has_frame_transform_v<F, Target>,
+                 siderust::spherical::Position<C, Target, U>>
+spherical::Position<C, F, U>::to_frame_with(const JulianDate &jd,
+                                            const AstroContext &ctx) const {
+  if constexpr (std::is_same_v<F, Target>) {
+    return *this;
+  } else {
+    return to_cartesian().template to_frame_with<Target>(jd, ctx).to_spherical();
+  }
+}
+
 } // namespace siderust

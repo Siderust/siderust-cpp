@@ -18,7 +18,8 @@ codebase without writing a single line of Rust.
 | **Time** (`time.hpp`) | `JulianDate`, `MJD`, `UTC`, `Period` — value types with arithmetic and UTC round-trips |
 | **Coordinates** (`coordinates.hpp`) | Modular typed API (`coordinates/{geodetic,spherical,cartesian,types}.hpp`) plus selective alias headers under `coordinates/types/{spherical,cartesian}/...` |
 | **Frames & Centers** (`frames.hpp`, `centers.hpp`) | Compile-time frame/center tags, `FrameTraits`/`CenterTraits`, transform concept checks |
-| **Bodies** (`bodies.hpp`) | `Star` (RAII, catalog + custom), `Planet` (8 planets), `ProperMotion`, `Orbit` |
+| **Orbits** (`orbit.hpp`) | `KeplerianOrbit`, `MeanMotionOrbit`, `ConicOrbit`, `PreparedOrbit`, plus compatibility alias `Orbit` |
+| **Bodies** (`bodies.hpp`) | `Star` (RAII, catalog + custom), `Planet` (8 planets), `ProperMotion`, planet orbit data |
 | **Observatories** (`observatories.hpp`) | Named sites: Roque de los Muchachos, Paranal, Mauna Kea, La Silla |
 | **Altitude** (`altitude.hpp`) | Sun / Moon / Star / ICRS altitude: instant, above/below threshold, crossings, culminations |
 | **Azimuth** (`azimuth.hpp`) | Sun / Moon / Star / ICRS azimuth: instant, crossings, extrema, range windows |

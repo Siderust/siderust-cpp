@@ -180,6 +180,13 @@ enum class Center : int32_t {
   Bodycentric = SIDERUST_CENTER_T_BODYCENTRIC,
 };
 
+enum class EarthOrientationModel : int32_t {
+  Iau2000A = SIDERUST_EARTH_ORIENTATION_MODEL_IAU2000_A,
+  Iau2000B = SIDERUST_EARTH_ORIENTATION_MODEL_IAU2000_B,
+  Iau2006 = SIDERUST_EARTH_ORIENTATION_MODEL_IAU2006,
+  Iau2006A = SIDERUST_EARTH_ORIENTATION_MODEL_IAU2006_A,
+};
+
 enum class CrossingDirection : int32_t {
   Rising = SIDERUST_CROSSING_DIRECTION_T_RISING,
   Setting = SIDERUST_CROSSING_DIRECTION_T_SETTING,
@@ -212,6 +219,20 @@ inline std::ostream &operator<<(std::ostream &os, CulminationKind kind) {
     return os << "min";
   }
   return os << "unknown";
+}
+
+inline std::ostream &operator<<(std::ostream &os, EarthOrientationModel model) {
+  switch (model) {
+  case EarthOrientationModel::Iau2000A:
+    return os << "Iau2000A";
+  case EarthOrientationModel::Iau2000B:
+    return os << "Iau2000B";
+  case EarthOrientationModel::Iau2006:
+    return os << "Iau2006";
+  case EarthOrientationModel::Iau2006A:
+    return os << "Iau2006A";
+  }
+  return os << "Unknown";
 }
 
 enum class RaConvention : int32_t {
