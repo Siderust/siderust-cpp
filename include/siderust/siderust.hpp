@@ -30,6 +30,7 @@
  */
 
 #include "altitude.hpp"
+#include "astro_context.hpp"
 #include "azimuth.hpp"
 #include "bodies.hpp"
 #include "body_target.hpp"
@@ -41,6 +42,7 @@
 #include "frames.hpp"
 #include "lunar_phase.hpp"
 #include "observatories.hpp"
+#include "orbit.hpp"
 #include "orbital_center.hpp"
 #include "runtime_ephemeris.hpp"
 #include "star_target.hpp"

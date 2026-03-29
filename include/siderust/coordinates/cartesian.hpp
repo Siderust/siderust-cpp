@@ -7,6 +7,7 @@
  */
 
 #include "../centers.hpp"
+#include "../astro_context.hpp"
 #include "../ffi_core.hpp"
 #include "../frames.hpp"
 #include "../time.hpp"
@@ -98,6 +99,27 @@ template <typename F> struct Direction {
                        x, y, z, frames::FrameTraits<F>::ffi_id,
                        frames::FrameTraits<Target>::ffi_id, jd.value(), &out),
                    "cartesian::Direction::to_frame");
+      return Direction<Target>(out.x, out.y, out.z);
+    }
+  }
+
+  /**
+   * @brief Transform this direction with an explicit astronomical context.
+   */
+  template <typename Target>
+  std::enable_if_t<frames::has_frame_transform_v<F, Target>, Direction<Target>>
+  to_frame_with(const JulianDate &jd, const AstroContext &ctx) const {
+    if constexpr (std::is_same_v<F, Target>) {
+      return Direction<Target>(x, y, z);
+    } else {
+      siderust_cartesian_pos_t out{};
+      check_status(siderust_cartesian_dir_transform_frame_model(
+                       x, y, z, frames::FrameTraits<F>::ffi_id,
+                       frames::FrameTraits<Target>::ffi_id, jd.value(),
+                       static_cast<SiderustEarthOrientationModel>(
+                           ctx.model()),
+                       &out),
+                   "cartesian::Direction::to_frame_with");
       return Direction<Target>(out.x, out.y, out.z);
     }
   }
@@ -221,6 +243,29 @@ template <typename F, typename U> struct Displacement {
       return Displacement<Target, U>(out.x, out.y, out.z);
     }
   }
+
+  /**
+   * @brief Transform this displacement with an explicit astronomical context.
+   */
+  template <typename Target>
+  std::enable_if_t<frames::has_frame_transform_v<F, Target>,
+                   Displacement<Target, U>>
+  to_frame_with(const JulianDate &jd, const AstroContext &ctx) const {
+    if constexpr (std::is_same_v<F, Target>) {
+      return Displacement<Target, U>(comp_x, comp_y, comp_z);
+    } else {
+      siderust_cartesian_pos_t out{};
+      check_status(siderust_cartesian_dir_transform_frame_model(
+                       comp_x.value(), comp_y.value(), comp_z.value(),
+                       frames::FrameTraits<F>::ffi_id,
+                       frames::FrameTraits<Target>::ffi_id, jd.value(),
+                       static_cast<SiderustEarthOrientationModel>(
+                           ctx.model()),
+                       &out),
+                   "cartesian::Displacement::to_frame_with");
+      return Displacement<Target, U>(out.x, out.y, out.z);
+    }
+  }
 };
 
 /**
@@ -331,6 +376,27 @@ template <typename C, typename F, typename U> struct Position {
           siderust_cartesian_pos_transform_frame(
               to_c(), frames::FrameTraits<Target>::ffi_id, jd.value(), &out),
           "cartesian::Position::to_frame");
+      return Position<C, Target, U>(out.x, out.y, out.z);
+    }
+  }
+
+  /**
+   * @brief Transform this position with an explicit astronomical context.
+   */
+  template <typename Target>
+  std::enable_if_t<frames::has_frame_transform_v<F, Target>,
+                   Position<C, Target, U>>
+  to_frame_with(const JulianDate &jd, const AstroContext &ctx) const {
+    if constexpr (std::is_same_v<F, Target>) {
+      return *this;
+    } else {
+      siderust_cartesian_pos_t out{};
+      check_status(
+          siderust_cartesian_pos_transform_frame_model(
+              to_c(), frames::FrameTraits<Target>::ffi_id, jd.value(),
+              static_cast<SiderustEarthOrientationModel>(ctx.model()),
+              &out),
+          "cartesian::Position::to_frame_with");
       return Position<C, Target, U>(out.x, out.y, out.z);
     }
   }
