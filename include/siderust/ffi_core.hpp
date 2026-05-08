@@ -96,6 +96,16 @@ public:
   explicit DataLoadError(const std::string &msg) : SiderustException(msg) {}
 };
 
+class OutOfRangeError : public SiderustException {
+public:
+  explicit OutOfRangeError(const std::string &msg) : SiderustException(msg) {}
+};
+
+class NoEopDataError : public SiderustException {
+public:
+  explicit NoEopDataError(const std::string &msg) : SiderustException(msg) {}
+};
+
 // ============================================================================
 // Error Translation
 // ============================================================================
@@ -128,6 +138,10 @@ inline void check_status(siderust_status_t status, const char *operation) {
     throw InternalPanicError(msg + "internal panic in Rust FFI");
   case SIDERUST_STATUS_T_DATA_ERROR:
     throw DataLoadError(msg + "data loading error (I/O, download, or parse)");
+  case SIDERUST_STATUS_T_OUT_OF_RANGE:
+    throw OutOfRangeError(msg + "epoch outside covered data range");
+  case SIDERUST_STATUS_T_NO_EOP_DATA:
+    throw NoEopDataError(msg + "Earth Orientation Parameters unavailable for epoch");
   default:
     throw SiderustException(msg + "unknown error (" + std::to_string(status) +
                             ")");

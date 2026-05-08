@@ -215,3 +215,67 @@ TEST(SubjectTest, StarAltitudeConsistency) {
   auto alt_star = star_altitude::altitude_at(vega, paris(), mid_day());
   EXPECT_DOUBLE_EQ(alt_subject.value(), alt_star.value());
 }
+
+// ============================================================================
+// ProperMotionTarget
+// ============================================================================
+
+TEST(ProperMotionTarget, Construction) {
+  // Barnard's star approximate Hipparcos values
+  EXPECT_NO_THROW(ProperMotionTarget(
+      269.4521, 4.6933, JulianDate::J2000(),
+      -798.58e-3, 10337.8e-3, RaConvention::MuAlphaStar, "Barnard"));
+}
+
+TEST(ProperMotionTarget, Name) {
+  ProperMotionTarget t(100.0, 20.0, JulianDate::J2000(),
+                       0.0, 0.0, RaConvention::MuAlphaStar, "TestStar");
+  EXPECT_EQ(t.name(), "TestStar");
+}
+
+TEST(ProperMotionTarget, AutoName) {
+  ProperMotionTarget t(100.0, 20.0, JulianDate::J2000(),
+                       0.0, 0.0, RaConvention::MuAlphaStar);
+  auto n = t.name();
+  // Auto-generated name should be non-empty.
+  EXPECT_FALSE(n.empty());
+}
+
+TEST(ProperMotionTarget, EpochJd) {
+  auto epoch = JulianDate::J2000();
+  ProperMotionTarget t(100.0, 20.0, epoch, 0.0, 0.0,
+                       RaConvention::MuAlphaStar);
+  // epoch_jd() should round-trip the construction epoch.
+  EXPECT_NEAR(t.epoch_jd(), epoch.value(), 1.0);
+}
+
+TEST(ProperMotionTarget, DataPayload) {
+  ProperMotionTarget t(100.0, 20.0, JulianDate::J2000(), 0.0, 0.0,
+                       RaConvention::MuAlphaStar);
+  auto d = t.data();
+  // Verify RA is approximately 100°.
+  EXPECT_NEAR(d.coord.spherical_dir.azimuth_deg, 100.0, 1.0);
+  EXPECT_NEAR(d.coord.spherical_dir.polar_deg, 20.0, 1.0);
+}
+
+TEST(ProperMotionTarget, AltitudeAtDoesNotCrash) {
+  ProperMotionTarget barnard(269.4521, 4.6933, JulianDate::J2000(),
+                              -798.58e-3, 10337.8e-3,
+                              RaConvention::MuAlphaStar);
+  EXPECT_NO_THROW(barnard.altitude_at(paris(), mid_day()));
+}
+
+TEST(DirectionTarget, EpochJdAccessor) {
+  auto epoch = JulianDate::J2000();
+  ICRSTarget t(spherical::direction::ICRS(qtty::Degree(0.0), qtty::Degree(0.0)),
+               epoch);
+  EXPECT_NEAR(t.epoch_jd(), epoch.value(), 1.0);
+}
+
+TEST(DirectionTarget, DataAccessor) {
+  ICRSTarget t(spherical::direction::ICRS(qtty::Degree(45.0),
+                                          qtty::Degree(30.0)));
+  auto d = t.data();
+  EXPECT_NEAR(d.coord.spherical_dir.azimuth_deg, 45.0, 1.0);
+  EXPECT_NEAR(d.coord.spherical_dir.polar_deg, 30.0, 1.0);
+}
