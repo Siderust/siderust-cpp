@@ -108,7 +108,8 @@ namespace sun {
  */
 inline qtty::Degree azimuth_at(const Geodetic &obs, const MJD &mjd) {
   double out;
-  check_status(siderust_sun_azimuth_at(obs.to_c(), mjd.value(), &out),
+  check_status(siderust_azimuth_at(detail::make_body_subject(SIDERUST_BODY_SUN),
+                                   obs.to_c(), mjd.value(), &out),
                "sun::azimuth_at");
   return qtty::Degree(out);
 }
@@ -121,9 +122,10 @@ azimuth_crossings(const Geodetic &obs, const Period &window,
                   qtty::Degree bearing, const SearchOptions &opts = {}) {
   siderust_azimuth_crossing_event_t *ptr = nullptr;
   uintptr_t count = 0;
-  check_status(siderust_sun_azimuth_crossings(obs.to_c(), window.c_inner(),
-                                              bearing.value(), opts.to_c(),
-                                              &ptr, &count),
+  check_status(siderust_azimuth_crossings(
+                   detail::make_body_subject(SIDERUST_BODY_SUN), obs.to_c(),
+                   window.c_inner(), bearing.value(), opts.to_c(), &ptr,
+                   &count),
                "sun::azimuth_crossings");
   return detail::az_crossings_from_c(ptr, count);
 }
@@ -145,8 +147,9 @@ azimuth_extrema(const Geodetic &obs, const Period &window,
                 const SearchOptions &opts = {}) {
   siderust_azimuth_extremum_t *ptr = nullptr;
   uintptr_t count = 0;
-  check_status(siderust_sun_azimuth_extrema(obs.to_c(), window.c_inner(),
-                                            opts.to_c(), &ptr, &count),
+  check_status(siderust_azimuth_extrema(
+                   detail::make_body_subject(SIDERUST_BODY_SUN), obs.to_c(),
+                   window.c_inner(), opts.to_c(), &ptr, &count),
                "sun::azimuth_extrema");
   return detail::az_extrema_from_c(ptr, count);
 }
@@ -171,9 +174,10 @@ inline std::vector<Period> in_azimuth_range(const Geodetic &obs,
                                             const SearchOptions &opts = {}) {
   tempoch_period_mjd_t *ptr = nullptr;
   uintptr_t count = 0;
-  check_status(siderust_sun_in_azimuth_range(
-                   obs.to_c(), window.c_inner(), min_bearing.value(),
-                   max_bearing.value(), opts.to_c(), &ptr, &count),
+  check_status(siderust_in_azimuth_range(
+                   detail::make_body_subject(SIDERUST_BODY_SUN), obs.to_c(),
+                   window.c_inner(), min_bearing.value(), max_bearing.value(),
+                   opts.to_c(), &ptr, &count),
                "sun::in_azimuth_range");
   return detail::periods_from_c(ptr, count);
 }
@@ -204,7 +208,8 @@ namespace moon {
  */
 inline qtty::Degree azimuth_at(const Geodetic &obs, const MJD &mjd) {
   double out;
-  check_status(siderust_moon_azimuth_at(obs.to_c(), mjd.value(), &out),
+  check_status(siderust_azimuth_at(detail::make_body_subject(SIDERUST_BODY_MOON),
+                                   obs.to_c(), mjd.value(), &out),
                "moon::azimuth_at");
   return qtty::Degree(out);
 }
@@ -217,9 +222,10 @@ azimuth_crossings(const Geodetic &obs, const Period &window,
                   qtty::Degree bearing, const SearchOptions &opts = {}) {
   siderust_azimuth_crossing_event_t *ptr = nullptr;
   uintptr_t count = 0;
-  check_status(siderust_moon_azimuth_crossings(obs.to_c(), window.c_inner(),
-                                               bearing.value(), opts.to_c(),
-                                               &ptr, &count),
+  check_status(siderust_azimuth_crossings(
+                   detail::make_body_subject(SIDERUST_BODY_MOON), obs.to_c(),
+                   window.c_inner(), bearing.value(), opts.to_c(), &ptr,
+                   &count),
                "moon::azimuth_crossings");
   return detail::az_crossings_from_c(ptr, count);
 }
@@ -241,8 +247,9 @@ azimuth_extrema(const Geodetic &obs, const Period &window,
                 const SearchOptions &opts = {}) {
   siderust_azimuth_extremum_t *ptr = nullptr;
   uintptr_t count = 0;
-  check_status(siderust_moon_azimuth_extrema(obs.to_c(), window.c_inner(),
-                                             opts.to_c(), &ptr, &count),
+  check_status(siderust_azimuth_extrema(
+                   detail::make_body_subject(SIDERUST_BODY_MOON), obs.to_c(),
+                   window.c_inner(), opts.to_c(), &ptr, &count),
                "moon::azimuth_extrema");
   return detail::az_extrema_from_c(ptr, count);
 }
@@ -267,9 +274,10 @@ inline std::vector<Period> in_azimuth_range(const Geodetic &obs,
                                             const SearchOptions &opts = {}) {
   tempoch_period_mjd_t *ptr = nullptr;
   uintptr_t count = 0;
-  check_status(siderust_moon_in_azimuth_range(
-                   obs.to_c(), window.c_inner(), min_bearing.value(),
-                   max_bearing.value(), opts.to_c(), &ptr, &count),
+  check_status(siderust_in_azimuth_range(
+                   detail::make_body_subject(SIDERUST_BODY_MOON), obs.to_c(),
+                   window.c_inner(), min_bearing.value(), max_bearing.value(),
+                   opts.to_c(), &ptr, &count),
                "moon::in_azimuth_range");
   return detail::periods_from_c(ptr, count);
 }
@@ -301,9 +309,9 @@ namespace star_altitude {
 inline qtty::Degree azimuth_at(const Star &s, const Geodetic &obs,
                                const MJD &mjd) {
   double out;
-  check_status(
-      siderust_star_azimuth_at(s.c_handle(), obs.to_c(), mjd.value(), &out),
-      "star_altitude::azimuth_at");
+  check_status(siderust_azimuth_at(detail::make_star_subject(s.c_handle()),
+                                   obs.to_c(), mjd.value(), &out),
+               "star_altitude::azimuth_at");
   return qtty::Degree(out);
 }
 
@@ -315,9 +323,10 @@ azimuth_crossings(const Star &s, const Geodetic &obs, const Period &window,
                   qtty::Degree bearing, const SearchOptions &opts = {}) {
   siderust_azimuth_crossing_event_t *ptr = nullptr;
   uintptr_t count = 0;
-  check_status(siderust_star_azimuth_crossings(
-                   s.c_handle(), obs.to_c(), window.c_inner(), bearing.value(),
-                   opts.to_c(), &ptr, &count),
+  check_status(siderust_azimuth_crossings(
+                   detail::make_star_subject(s.c_handle()), obs.to_c(),
+                   window.c_inner(), bearing.value(), opts.to_c(), &ptr,
+                   &count),
                "star_altitude::azimuth_crossings");
   return detail::az_crossings_from_c(ptr, count);
 }
@@ -343,9 +352,10 @@ inline std::vector<Period> in_azimuth_range(const Star &s, const Geodetic &obs,
   tempoch_period_mjd_t *ptr = nullptr;
   uintptr_t count = 0;
   check_status(
-      siderust_star_in_azimuth_range(s.c_handle(), obs.to_c(), window.c_inner(),
-                                     min_bearing.value(), max_bearing.value(),
-                                     opts.to_c(), &ptr, &count),
+      siderust_in_azimuth_range(detail::make_star_subject(s.c_handle()),
+                                obs.to_c(), window.c_inner(),
+                                min_bearing.value(), max_bearing.value(),
+                                opts.to_c(), &ptr, &count),
       "star_altitude::in_azimuth_range");
   return detail::periods_from_c(ptr, count);
 }
@@ -376,9 +386,9 @@ namespace icrs_altitude {
 inline qtty::Degree azimuth_at(const spherical::direction::ICRS &dir,
                                const Geodetic &obs, const MJD &mjd) {
   double out;
-  check_status(
-      siderust_icrs_azimuth_at(dir.to_c(), obs.to_c(), mjd.value(), &out),
-      "icrs_altitude::azimuth_at");
+  check_status(siderust_azimuth_at(detail::make_icrs_subject(dir.to_c()),
+                                   obs.to_c(), mjd.value(), &out),
+               "icrs_altitude::azimuth_at");
   return qtty::Degree(out);
 }
 
@@ -399,9 +409,10 @@ azimuth_crossings(const spherical::direction::ICRS &dir, const Geodetic &obs,
                   const SearchOptions &opts = {}) {
   siderust_azimuth_crossing_event_t *ptr = nullptr;
   uintptr_t count = 0;
-  check_status(siderust_icrs_azimuth_crossings(
-                   dir.to_c(), obs.to_c(), window.c_inner(), bearing.value(),
-                   opts.to_c(), &ptr, &count),
+  check_status(siderust_azimuth_crossings(
+                   detail::make_icrs_subject(dir.to_c()), obs.to_c(),
+                   window.c_inner(), bearing.value(), opts.to_c(), &ptr,
+                   &count),
                "icrs_altitude::azimuth_crossings");
   return detail::az_crossings_from_c(ptr, count);
 }

@@ -181,10 +181,10 @@ enum class Center : int32_t {
 };
 
 enum class EarthOrientationModel : int32_t {
-  Iau2000A = SIDERUST_EARTH_ORIENTATION_MODEL_IAU2000_A,
-  Iau2000B = SIDERUST_EARTH_ORIENTATION_MODEL_IAU2000_B,
-  Iau2006 = SIDERUST_EARTH_ORIENTATION_MODEL_IAU2006,
-  Iau2006A = SIDERUST_EARTH_ORIENTATION_MODEL_IAU2006_A,
+  Iau2000A = SIDERUST_EARTH_ORIENTATION_MODEL_T_IAU2000_A,
+  Iau2000B = SIDERUST_EARTH_ORIENTATION_MODEL_T_IAU2000_B,
+  Iau2006 = SIDERUST_EARTH_ORIENTATION_MODEL_T_IAU2006,
+  Iau2006A = SIDERUST_EARTH_ORIENTATION_MODEL_T_IAU2006_A,
 };
 
 enum class CrossingDirection : int32_t {
@@ -239,5 +239,43 @@ enum class RaConvention : int32_t {
   MuAlpha = SIDERUST_RA_CONVENTION_T_MU_ALPHA,
   MuAlphaStar = SIDERUST_RA_CONVENTION_T_MU_ALPHA_STAR,
 };
+
+namespace detail {
+
+/// Build a `siderust_subject_t` for a solar-system body.
+inline siderust_subject_t make_body_subject(SiderustBody b) {
+  siderust_subject_t s{};
+  s.kind = SIDERUST_SUBJECT_KIND_T_BODY;
+  s.body = b;
+  return s;
+}
+
+/// Build a `siderust_subject_t` for a star, borrowing the handle.
+inline siderust_subject_t make_star_subject(const SiderustStar *h) {
+  siderust_subject_t s{};
+  s.kind = SIDERUST_SUBJECT_KIND_T_STAR;
+  s.star_handle = h;
+  return s;
+}
+
+/// Build a `siderust_subject_t` for a fixed ICRS direction.
+inline siderust_subject_t
+make_icrs_subject(const siderust_spherical_dir_t &dir) {
+  siderust_subject_t s{};
+  s.kind = SIDERUST_SUBJECT_KIND_T_ICRS;
+  s.icrs_dir = dir;
+  return s;
+}
+
+/// Build a `siderust_subject_t` for a generic target opaque handle.
+inline siderust_subject_t
+make_generic_target_subject(const SiderustGenericTarget *h) {
+  siderust_subject_t s{};
+  s.kind = SIDERUST_SUBJECT_KIND_T_GENERIC_TARGET;
+  s.generic_target_handle = h;
+  return s;
+}
+
+} // namespace detail
 
 } // namespace siderust
