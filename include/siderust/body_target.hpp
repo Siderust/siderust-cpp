@@ -67,8 +67,9 @@ namespace body {
  */
 inline qtty::Radian altitude_at(Body b, const Geodetic &obs, const MJD &mjd) {
   double out;
-  check_status(siderust_body_altitude_at(static_cast<SiderustBody>(b),
-                                         obs.to_c(), mjd.value(), &out),
+  check_status(siderust_altitude_at(
+                   detail::make_body_subject(static_cast<SiderustBody>(b)),
+                   obs.to_c(), mjd.value(), &out),
                "body::altitude_at");
   return qtty::Radian(out);
 }
@@ -82,9 +83,10 @@ inline std::vector<Period> above_threshold(Body b, const Geodetic &obs,
                                            const SearchOptions &opts = {}) {
   tempoch_period_mjd_t *ptr = nullptr;
   uintptr_t count = 0;
-  check_status(siderust_body_above_threshold(
-                   static_cast<SiderustBody>(b), obs.to_c(), window.c_inner(),
-                   threshold.value(), opts.to_c(), &ptr, &count),
+  check_status(siderust_above_threshold(
+                   detail::make_body_subject(static_cast<SiderustBody>(b)),
+                   obs.to_c(), window.c_inner(), threshold.value(),
+                   opts.to_c(), &ptr, &count),
                "body::above_threshold");
   return detail::periods_from_c(ptr, count);
 }
@@ -98,9 +100,10 @@ inline std::vector<Period> below_threshold(Body b, const Geodetic &obs,
                                            const SearchOptions &opts = {}) {
   tempoch_period_mjd_t *ptr = nullptr;
   uintptr_t count = 0;
-  check_status(siderust_body_below_threshold(
-                   static_cast<SiderustBody>(b), obs.to_c(), window.c_inner(),
-                   threshold.value(), opts.to_c(), &ptr, &count),
+  check_status(siderust_below_threshold(
+                   detail::make_body_subject(static_cast<SiderustBody>(b)),
+                   obs.to_c(), window.c_inner(), threshold.value(),
+                   opts.to_c(), &ptr, &count),
                "body::below_threshold");
   return detail::periods_from_c(ptr, count);
 }
@@ -114,9 +117,10 @@ inline std::vector<CrossingEvent> crossings(Body b, const Geodetic &obs,
                                             const SearchOptions &opts = {}) {
   siderust_crossing_event_t *ptr = nullptr;
   uintptr_t count = 0;
-  check_status(siderust_body_crossings(static_cast<SiderustBody>(b), obs.to_c(),
-                                       window.c_inner(), threshold.value(),
-                                       opts.to_c(), &ptr, &count),
+  check_status(siderust_crossings(
+                   detail::make_body_subject(static_cast<SiderustBody>(b)),
+                   obs.to_c(), window.c_inner(), threshold.value(),
+                   opts.to_c(), &ptr, &count),
                "body::crossings");
   return detail::crossings_from_c(ptr, count);
 }
@@ -129,9 +133,9 @@ culminations(Body b, const Geodetic &obs, const Period &window,
              const SearchOptions &opts = {}) {
   siderust_culmination_event_t *ptr = nullptr;
   uintptr_t count = 0;
-  check_status(siderust_body_culminations(static_cast<SiderustBody>(b),
-                                          obs.to_c(), window.c_inner(),
-                                          opts.to_c(), &ptr, &count),
+  check_status(siderust_culminations(
+                   detail::make_body_subject(static_cast<SiderustBody>(b)),
+                   obs.to_c(), window.c_inner(), opts.to_c(), &ptr, &count),
                "body::culminations");
   return detail::culminations_from_c(ptr, count);
 }
@@ -148,8 +152,9 @@ inline std::vector<Period> altitude_periods(Body b, const Geodetic &obs,
                                  max_alt.value()};
   tempoch_period_mjd_t *ptr = nullptr;
   uintptr_t count = 0;
-  check_status(siderust_body_altitude_periods(static_cast<SiderustBody>(b), q,
-                                              &ptr, &count),
+  check_status(siderust_altitude_periods(
+                   detail::make_body_subject(static_cast<SiderustBody>(b)), q,
+                   &ptr, &count),
                "body::altitude_periods");
   return detail::periods_from_c(ptr, count);
 }
@@ -165,8 +170,9 @@ namespace body {
  */
 inline qtty::Radian azimuth_at(Body b, const Geodetic &obs, const MJD &mjd) {
   double out;
-  check_status(siderust_body_azimuth_at(static_cast<SiderustBody>(b),
-                                        obs.to_c(), mjd.value(), &out),
+  check_status(siderust_azimuth_at(
+                   detail::make_body_subject(static_cast<SiderustBody>(b)),
+                   obs.to_c(), mjd.value(), &out),
                "body::azimuth_at");
   return qtty::Radian(out);
 }
@@ -179,9 +185,10 @@ azimuth_crossings(Body b, const Geodetic &obs, const Period &window,
                   qtty::Degree bearing, const SearchOptions &opts = {}) {
   siderust_azimuth_crossing_event_t *ptr = nullptr;
   uintptr_t count = 0;
-  check_status(siderust_body_azimuth_crossings(
-                   static_cast<SiderustBody>(b), obs.to_c(), window.c_inner(),
-                   bearing.value(), opts.to_c(), &ptr, &count),
+  check_status(siderust_azimuth_crossings(
+                   detail::make_body_subject(static_cast<SiderustBody>(b)),
+                   obs.to_c(), window.c_inner(), bearing.value(), opts.to_c(),
+                   &ptr, &count),
                "body::azimuth_crossings");
   return detail::az_crossings_from_c(ptr, count);
 }
@@ -194,9 +201,9 @@ azimuth_extrema(Body b, const Geodetic &obs, const Period &window,
                 const SearchOptions &opts = {}) {
   siderust_azimuth_extremum_t *ptr = nullptr;
   uintptr_t count = 0;
-  check_status(siderust_body_azimuth_extrema(static_cast<SiderustBody>(b),
-                                             obs.to_c(), window.c_inner(),
-                                             opts.to_c(), &ptr, &count),
+  check_status(siderust_azimuth_extrema(
+                   detail::make_body_subject(static_cast<SiderustBody>(b)),
+                   obs.to_c(), window.c_inner(), opts.to_c(), &ptr, &count),
                "body::azimuth_extrema");
   return detail::az_extrema_from_c(ptr, count);
 }
@@ -210,9 +217,10 @@ inline std::vector<Period> in_azimuth_range(Body b, const Geodetic &obs,
                                             const SearchOptions &opts = {}) {
   tempoch_period_mjd_t *ptr = nullptr;
   uintptr_t count = 0;
-  check_status(siderust_body_in_azimuth_range(
-                   static_cast<SiderustBody>(b), obs.to_c(), window.c_inner(),
-                   min.value(), max.value(), opts.to_c(), &ptr, &count),
+  check_status(siderust_in_azimuth_range(
+                   detail::make_body_subject(static_cast<SiderustBody>(b)),
+                   obs.to_c(), window.c_inner(), min.value(), max.value(),
+                   opts.to_c(), &ptr, &count),
                "body::in_azimuth_range");
   return detail::periods_from_c(ptr, count);
 }

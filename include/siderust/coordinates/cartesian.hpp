@@ -113,12 +113,11 @@ template <typename F> struct Direction {
       return Direction<Target>(x, y, z);
     } else {
       siderust_cartesian_pos_t out{};
-      check_status(siderust_cartesian_dir_transform_frame_model(
+      detail::OwnedFfiContext fctx(ctx);
+      check_status(siderust_cartesian_dir_transform_frame_with_context(
                        x, y, z, frames::FrameTraits<F>::ffi_id,
                        frames::FrameTraits<Target>::ffi_id, jd.value(),
-                       static_cast<SiderustEarthOrientationModel>(
-                           ctx.model()),
-                       &out),
+                       fctx.get(), &out),
                    "cartesian::Direction::to_frame_with");
       return Direction<Target>(out.x, out.y, out.z);
     }
@@ -255,13 +254,12 @@ template <typename F, typename U> struct Displacement {
       return Displacement<Target, U>(comp_x, comp_y, comp_z);
     } else {
       siderust_cartesian_pos_t out{};
-      check_status(siderust_cartesian_dir_transform_frame_model(
+      detail::OwnedFfiContext fctx(ctx);
+      check_status(siderust_cartesian_dir_transform_frame_with_context(
                        comp_x.value(), comp_y.value(), comp_z.value(),
                        frames::FrameTraits<F>::ffi_id,
                        frames::FrameTraits<Target>::ffi_id, jd.value(),
-                       static_cast<SiderustEarthOrientationModel>(
-                           ctx.model()),
-                       &out),
+                       fctx.get(), &out),
                    "cartesian::Displacement::to_frame_with");
       return Displacement<Target, U>(out.x, out.y, out.z);
     }
@@ -391,11 +389,11 @@ template <typename C, typename F, typename U> struct Position {
       return *this;
     } else {
       siderust_cartesian_pos_t out{};
+      detail::OwnedFfiContext fctx(ctx);
       check_status(
-          siderust_cartesian_pos_transform_frame_model(
+          siderust_cartesian_pos_transform_frame_with_context(
               to_c(), frames::FrameTraits<Target>::ffi_id, jd.value(),
-              static_cast<SiderustEarthOrientationModel>(ctx.model()),
-              &out),
+              fctx.get(), &out),
           "cartesian::Position::to_frame_with");
       return Position<C, Target, U>(out.x, out.y, out.z);
     }
