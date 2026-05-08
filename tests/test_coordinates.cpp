@@ -377,3 +377,38 @@ TEST(TypedCoordinates, SphericalPosToFrameShorthand) {
           spherical::Position<centers::Heliocentric, EclipticMeanJ2000, AU>>);
   EXPECT_NEAR(ecl.distance().value(), 1.0, 1e-10);
 }
+
+// ============================================================================
+// High-precision horizontal transform (to_horizontal_precise)
+// ============================================================================
+
+TEST(TypedCoordinates, ToHorizontalPreciseConsistency) {
+  // to_horizontal_precise with equal TT and UT1 should give a result close
+  // to the standard to_horizontal (which also uses a single JD internally).
+  using namespace siderust::frames;
+
+  spherical::Direction<ICRS> vega(qtty::Degree(279.2348), qtty::Degree(38.7836));
+  auto jd = JulianDate::J2000();
+  auto obs = ROQUE_DE_LOS_MUCHACHOS();
+
+  auto hor_basic = vega.to_horizontal(jd, obs);
+  auto hor_precise = vega.to_horizontal_precise(jd, jd, obs);
+
+  // Results should be in the same ballpark; the two routines use different
+  // internal algorithms (SOFA vs. simple), so up to ~1° difference is expected.
+  EXPECT_NEAR(hor_basic.alt().value(), hor_precise.alt().value(), 1.0);
+  EXPECT_NEAR(hor_basic.az().value(), hor_precise.az().value(), 2.0);
+}
+
+TEST(TypedCoordinates, ToHorizontalPreciseReturnType) {
+  using namespace siderust::frames;
+
+  spherical::Direction<EquatorialMeanJ2000> dir(qtty::Degree(90.0),
+                                                qtty::Degree(10.0));
+  auto jd = JulianDate::J2000();
+  auto obs = ROQUE_DE_LOS_MUCHACHOS();
+
+  auto hor = dir.to_horizontal_precise(jd, jd, obs);
+  static_assert(
+      std::is_same_v<decltype(hor), spherical::Direction<Horizontal>>);
+}

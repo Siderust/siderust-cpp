@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.15)
-project(siderust_cpp VERSION 0.1.0 LANGUAGES CXX)
+project(siderust_cpp VERSION 0.2.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -161,7 +161,9 @@ endmacro()
 # Examples
 # ---------------------------------------------------------------------------
 
-# Numbered mirror examples (03–21, mirroring siderust Rust examples)
+# Numbered mirror examples (01–21, mirroring siderust Rust examples)
+siderust_add_example(01_basic_coordinates_example          examples/01_basic_coordinates.cpp)
+siderust_add_example(02_coordinate_transformations_example examples/02_coordinate_transformations.cpp)
 siderust_add_example(03_all_frame_conversions_example   examples/03_all_frames_conversions.cpp)
 siderust_add_example(04_all_center_conversions_example  examples/04_all_center_conversions.cpp)
 siderust_add_example(05_target_tracking_example         examples/05_target_tracking.cpp)
@@ -190,6 +192,8 @@ set(TEST_SOURCES
     tests/test_bodycentric.cpp
     tests/test_orbits.cpp
     tests/test_subject.cpp
+    tests/test_context.cpp
+    tests/test_twilight.cpp
 )
 
 add_executable(test_siderust ${TEST_SOURCES})
@@ -253,3 +257,36 @@ install(EXPORT siderust_cppTargets
     NAMESPACE siderust::
     DESTINATION lib/cmake/siderust_cpp
 )
+
+# ---------------------------------------------------------------------------
+# Packaging (CPack — DEB and RPM)
+# ---------------------------------------------------------------------------
+set(CPACK_PACKAGE_NAME             "siderust-cpp")
+set(CPACK_PACKAGE_VERSION          "${PROJECT_VERSION}")
+set(CPACK_PACKAGE_VENDOR           "Siderust")
+set(CPACK_PACKAGE_CONTACT          "VPRamon <vallespuigramon@gmail.com>")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY
+    "C++ wrapper for the siderust high-precision astronomy library")
+set(CPACK_PACKAGE_DESCRIPTION
+    "siderust-cpp provides a header-only C++17 API over the siderust Rust\n"
+    "astronomy library via the siderust-ffi C ABI.  It bundles pre-built\n"
+    "shared libraries (siderust_ffi, tempoch_ffi, qtty_ffi) together with\n"
+    "the C++ headers and CMake package config.")
+set(CPACK_RESOURCE_FILE_LICENSE    "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
+set(CPACK_PACKAGE_HOMEPAGE_URL     "https://github.com/Siderust/siderust-cpp")
+
+# -- DEB -----------------------------------------------------------------------
+set(CPACK_DEBIAN_PACKAGE_MAINTAINER "VPRamon <vallespuigramon@gmail.com>")
+set(CPACK_DEBIAN_PACKAGE_SECTION    "libs")
+set(CPACK_DEBIAN_PACKAGE_DEPENDS    "libc6 (>= 2.17), libstdc++6 (>= 9)")
+set(CPACK_DEBIAN_FILE_NAME          DEB-DEFAULT)
+
+# -- RPM -----------------------------------------------------------------------
+set(CPACK_RPM_PACKAGE_LICENSE    "AGPL-3.0")
+set(CPACK_RPM_PACKAGE_GROUP      "Development/Libraries")
+set(CPACK_RPM_PACKAGE_REQUIRES   "glibc >= 2.17, libstdc++ >= 9")
+set(CPACK_RPM_FILE_NAME          RPM-DEFAULT)
+
+set(CPACK_GENERATOR "DEB;RPM")
+
+include(CPack)
