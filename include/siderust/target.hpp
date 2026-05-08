@@ -153,17 +153,17 @@ public:
     } else {
       m_icrs_ = dir.template to_frame<frames::ICRS>(epoch);
     }
-    SiderustTarget *h = nullptr;
-    check_status(siderust_target_create(m_icrs_.ra().value(),
-                                        m_icrs_.dec().value(), epoch.value(),
-                                        &h),
+    SiderustGenericTarget *h = nullptr;
+    check_status(siderust_generic_target_create_icrs(m_icrs_.ra().value(),
+                                                     m_icrs_.dec().value(),
+                                                     epoch.value(), &h),
                  "Target::Target");
     handle_ = h;
   }
 
   ~DirectionTarget() {
     if (handle_) {
-      siderust_target_free(handle_);
+      siderust_generic_target_free(handle_);
       handle_ = nullptr;
     }
   }
@@ -180,7 +180,7 @@ public:
   DirectionTarget &operator=(DirectionTarget &&other) noexcept {
     if (this != &other) {
       if (handle_) {
-        siderust_target_free(handle_);
+        siderust_generic_target_free(handle_);
       }
       m_dir_ = std::move(other.m_dir_);
       m_epoch_ = other.m_epoch_;
@@ -254,9 +254,9 @@ public:
    */
   qtty::Degree altitude_at(const Geodetic &obs, const MJD &mjd) const override {
     double out{};
-    check_status(
-        siderust_target_altitude_at(handle_, obs.to_c(), mjd.value(), &out),
-        "Target::altitude_at");
+    check_status(siderust_altitude_at(detail::make_generic_target_subject(handle_),
+                                      obs.to_c(), mjd.value(), &out),
+                 "Target::altitude_at");
     return qtty::Radian(out).to<qtty::Degree>();
   }
 
@@ -269,9 +269,10 @@ public:
                   const SearchOptions &opts = {}) const override {
     tempoch_period_mjd_t *ptr = nullptr;
     uintptr_t count = 0;
-    check_status(siderust_target_above_threshold(
-                     handle_, obs.to_c(), window.c_inner(), threshold.value(),
-                     opts.to_c(), &ptr, &count),
+    check_status(siderust_above_threshold(
+                     detail::make_generic_target_subject(handle_), obs.to_c(),
+                     window.c_inner(), threshold.value(), opts.to_c(), &ptr,
+                     &count),
                  "Target::above_threshold");
     return detail_periods_from_c(ptr, count);
   }
@@ -292,9 +293,10 @@ public:
                   const SearchOptions &opts = {}) const override {
     tempoch_period_mjd_t *ptr = nullptr;
     uintptr_t count = 0;
-    check_status(siderust_target_below_threshold(
-                     handle_, obs.to_c(), window.c_inner(), threshold.value(),
-                     opts.to_c(), &ptr, &count),
+    check_status(siderust_below_threshold(
+                     detail::make_generic_target_subject(handle_), obs.to_c(),
+                     window.c_inner(), threshold.value(), opts.to_c(), &ptr,
+                     &count),
                  "Target::below_threshold");
     return detail_periods_from_c(ptr, count);
   }
@@ -314,9 +316,10 @@ public:
             const SearchOptions &opts = {}) const override {
     siderust_crossing_event_t *ptr = nullptr;
     uintptr_t count = 0;
-    check_status(siderust_target_crossings(handle_, obs.to_c(),
-                                           window.c_inner(), threshold.value(),
-                                           opts.to_c(), &ptr, &count),
+    check_status(siderust_crossings(detail::make_generic_target_subject(handle_),
+                                    obs.to_c(), window.c_inner(),
+                                    threshold.value(), opts.to_c(), &ptr,
+                                    &count),
                  "Target::crossings");
     return detail::crossings_from_c(ptr, count);
   }
@@ -336,9 +339,9 @@ public:
                const SearchOptions &opts = {}) const override {
     siderust_culmination_event_t *ptr = nullptr;
     uintptr_t count = 0;
-    check_status(siderust_target_culminations(handle_, obs.to_c(),
-                                              window.c_inner(), opts.to_c(),
-                                              &ptr, &count),
+    check_status(siderust_culminations(
+                     detail::make_generic_target_subject(handle_), obs.to_c(),
+                     window.c_inner(), opts.to_c(), &ptr, &count),
                  "Target::culminations");
     return detail::culminations_from_c(ptr, count);
   }
@@ -359,9 +362,9 @@ public:
    */
   qtty::Degree azimuth_at(const Geodetic &obs, const MJD &mjd) const override {
     double out{};
-    check_status(
-        siderust_target_azimuth_at(handle_, obs.to_c(), mjd.value(), &out),
-        "Target::azimuth_at");
+    check_status(siderust_azimuth_at(detail::make_generic_target_subject(handle_),
+                                     obs.to_c(), mjd.value(), &out),
+                 "Target::azimuth_at");
     return qtty::Degree(out);
   }
 
@@ -374,9 +377,10 @@ public:
                     const SearchOptions &opts = {}) const override {
     siderust_azimuth_crossing_event_t *ptr = nullptr;
     uintptr_t count = 0;
-    check_status(siderust_target_azimuth_crossings(
-                     handle_, obs.to_c(), window.c_inner(), bearing.value(),
-                     opts.to_c(), &ptr, &count),
+    check_status(siderust_azimuth_crossings(
+                     detail::make_generic_target_subject(handle_), obs.to_c(),
+                     window.c_inner(), bearing.value(), opts.to_c(), &ptr,
+                     &count),
                  "Target::azimuth_crossings");
     return detail::az_crossings_from_c(ptr, count);
   }
@@ -390,14 +394,14 @@ public:
   }
 
   /// Access the underlying C handle (advanced use).
-  const SiderustTarget *c_handle() const { return handle_; }
+  const SiderustGenericTarget *c_handle() const { return handle_; }
 
 private:
   C m_dir_;
   JulianDate m_epoch_;
   spherical::direction::ICRS m_icrs_;
   std::string label_;
-  SiderustTarget *handle_ = nullptr;
+  SiderustGenericTarget *handle_ = nullptr;
 
   /// Build a Period vector from a tempoch_period_mjd_t* array.
   static std::vector<Period> detail_periods_from_c(tempoch_period_mjd_t *ptr,

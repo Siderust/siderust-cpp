@@ -204,13 +204,12 @@ public:
       return Direction<Target>(azimuth_, polar_);
     } else {
       siderust_spherical_dir_t out;
-      check_status(siderust_spherical_dir_transform_frame_model(
+      detail::OwnedFfiContext fctx(ctx);
+      check_status(siderust_spherical_dir_transform_frame_with_context(
                        polar_.value(), azimuth_.value(),
                        frames::FrameTraits<F>::ffi_id,
                        frames::FrameTraits<Target>::ffi_id, jd.value(),
-                       static_cast<SiderustEarthOrientationModel>(
-                           ctx.model()),
-                       &out),
+                       fctx.get(), &out),
                    "Direction::to_frame_with");
       return Direction<Target>::from_c(out);
     }
@@ -265,11 +264,11 @@ public:
   to_horizontal_with(const JulianDate &jd, const Geodetic &observer,
                      const AstroContext &ctx) const {
     siderust_spherical_dir_t out;
+    detail::OwnedFfiContext fctx(ctx);
     check_status(
-        siderust_spherical_dir_to_horizontal_model(
+        siderust_spherical_dir_to_horizontal_precise_with_context(
             polar_.value(), azimuth_.value(), frames::FrameTraits<F>::ffi_id,
-            jd.value(), observer.to_c(),
-            static_cast<SiderustEarthOrientationModel>(ctx.model()), &out),
+            jd.value(), jd.value(), observer.to_c(), fctx.get(), &out),
         "Direction::to_horizontal_with");
     return Direction<frames::Horizontal>::from_c(out);
   }

@@ -63,7 +63,7 @@ enum class SubjectKind : int32_t {
   Body = SIDERUST_SUBJECT_KIND_T_BODY,
   Star = SIDERUST_SUBJECT_KIND_T_STAR,
   Icrs = SIDERUST_SUBJECT_KIND_T_ICRS,
-  Target = SIDERUST_SUBJECT_KIND_T_TARGET,
+  GenericTarget = SIDERUST_SUBJECT_KIND_T_GENERIC_TARGET,
 };
 
 // ============================================================================
@@ -123,8 +123,8 @@ public:
    */
   template <typename C> static Subject target(const DirectionTarget<C> &tgt) {
     siderust_subject_t s{};
-    s.kind = SIDERUST_SUBJECT_KIND_T_TARGET;
-    s.target_handle = tgt.c_handle();
+    s.kind = SIDERUST_SUBJECT_KIND_T_GENERIC_TARGET;
+    s.generic_target_handle = tgt.c_handle();
     return Subject(s);
   }
 

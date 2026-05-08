@@ -43,4 +43,37 @@ public:
   }
 };
 
+namespace detail {
+
+/// RAII wrapper around a `siderust_context_t*` created from an
+/// `EarthOrientationModel`.  Used by the coordinate transform wrappers
+/// to call the new `_with_context` FFI variants.
+class OwnedFfiContext {
+public:
+  explicit OwnedFfiContext(EarthOrientationModel model) {
+    check_status(siderust_context_create_with_model(
+                     static_cast<siderust_earth_orientation_model_t>(model),
+                     &handle_),
+                 "AstroContext::create");
+  }
+  explicit OwnedFfiContext(const AstroContext &ctx)
+      : OwnedFfiContext(ctx.model()) {}
+
+  OwnedFfiContext(const OwnedFfiContext &) = delete;
+  OwnedFfiContext &operator=(const OwnedFfiContext &) = delete;
+
+  ~OwnedFfiContext() {
+    if (handle_) {
+      siderust_context_free(handle_);
+    }
+  }
+
+  const siderust_context_t *get() const { return handle_; }
+
+private:
+  siderust_context_t *handle_ = nullptr;
+};
+
+} // namespace detail
+
 } // namespace siderust
