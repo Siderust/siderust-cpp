@@ -27,6 +27,23 @@
 namespace siderust {
 
 /**
+ * @brief Cartesian velocity in AU/day, tagged by reference frame.
+ *
+ * Returned by `RuntimeEphemeris::earth_barycentric_velocity`.
+ */
+struct CartesianVelocity {
+  double vx; ///< X component (AU/day).
+  double vy; ///< Y component (AU/day).
+  double vz; ///< Z component (AU/day).
+  siderust_frame_t frame;
+
+  /// Construct from the raw C struct.
+  static CartesianVelocity from_c(const siderust_cartesian_vel_t &v) {
+    return {v.vx, v.vy, v.vz, v.frame};
+  }
+};
+
+/**
  * @brief Runtime-loaded JPL DE4xx ephemeris.
  *
  * This class wraps an opaque Rust `RuntimeEphemeris` handle.  It loads a
@@ -139,6 +156,20 @@ public:
         siderust_runtime_ephemeris_moon_geocentric(handle_, jd.value(), &out),
         "RuntimeEphemeris::moon_geocentric");
     return cartesian::position::MoonGeocentric<qtty::Kilometer>::from_c(out);
+  }
+
+  /**
+   * @brief Earth's barycentric velocity (EclipticMeanJ2000, AU/day).
+   *
+   * Returns the first-order time derivative of the Earth's barycentric
+   * position as provided by the loaded JPL DE kernel.
+   */
+  CartesianVelocity earth_barycentric_velocity(const JulianDate &jd) const {
+    siderust_cartesian_vel_t out{};
+    check_status(siderust_runtime_ephemeris_earth_barycentric_velocity(
+                     handle_, jd.value(), &out),
+                 "RuntimeEphemeris::earth_barycentric_velocity");
+    return CartesianVelocity::from_c(out);
   }
 
   // -- Validity --------------------------------------------------------------

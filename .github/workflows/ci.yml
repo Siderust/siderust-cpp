@@ -3,13 +3,19 @@ name: CI
 on:
   pull_request:
   workflow_dispatch:
+  push:
+    branches:
+      - main
+      - "stars/dev"
+    tags:
+      - "v*"
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
-  contents: read
+  contents: write
   checks: write
   pull-requests: write
 
@@ -271,3 +277,132 @@ jobs:
           name: coverage-html
           path: coverage_html
           retention-days: 7
+
+  # ---------------------------------------------------------------------------
+  # Package: build .deb and .rpm via CPack
+  # ---------------------------------------------------------------------------
+  package:
+    name: Package (DEB + RPM)
+    needs: build-test-docs
+    runs-on: ubuntu-22.04
+    env:
+      CARGO_TERM_COLOR: always
+      CMAKE_BUILD_PARALLEL_LEVEL: 2
+    steps:
+      - name: Checkout (with submodules)
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Install system dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential \
+            cmake \
+            ninja-build \
+            pkg-config \
+            libssl-dev \
+            rpm
+
+      - name: Set up Rust (stable)
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
+
+      - name: Cache cargo + build artifacts
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            siderust/siderust-ffi/target
+            siderust/target
+            tempoch-cpp/tempoch/tempoch-ffi/target
+            tempoch-cpp/qtty-cpp/qtty/target
+            tempoch-cpp/qtty-cpp/qtty/qtty-ffi/target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+
+      - name: Configure (CMake, Release)
+        shell: bash
+        run: |
+          set -euo pipefail
+          cmake -S . -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DSIDERUST_BUILD_DOCS=OFF
+
+      - name: Build
+        shell: bash
+        run: cmake --build build --target test_siderust
+
+      - name: Install to staging prefix
+        shell: bash
+        run: cmake --install build --prefix build/staging
+
+      - name: Copy shared libraries to staging
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build/staging/lib
+          cp siderust/target/release/libsiderust_ffi.so \
+             tempoch-cpp/tempoch/tempoch-ffi/target/release/libtempoch_ffi.so \
+             tempoch-cpp/qtty-cpp/qtty/qtty-ffi/target/release/libqtty_ffi.so \
+             build/staging/lib/ || true
+
+      - name: Generate packages (CPack)
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd build
+          cpack --config CPackConfig.cmake -G "DEB;RPM" -B packages
+          ls -lh packages/
+
+      - name: Upload DEB package
+        uses: actions/upload-artifact@v4
+        with:
+          name: siderust-cpp-deb
+          path: build/packages/*.deb
+          retention-days: 30
+
+      - name: Upload RPM package
+        uses: actions/upload-artifact@v4
+        with:
+          name: siderust-cpp-rpm
+          path: build/packages/*.rpm
+          retention-days: 30
+
+  # ---------------------------------------------------------------------------
+  # Release: create GitHub Release and attach packages (tag pushes only)
+  # ---------------------------------------------------------------------------
+  release:
+    name: GitHub Release
+    needs: package
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+    steps:
+      - name: Download DEB artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: siderust-cpp-deb
+          path: dist/
+
+      - name: Download RPM artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: siderust-cpp-rpm
+          path: dist/
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

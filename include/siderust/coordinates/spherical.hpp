@@ -272,6 +272,31 @@ public:
         "Direction::to_horizontal_with");
     return Direction<frames::Horizontal>::from_c(out);
   }
+
+  /**
+   * @brief High-precision horizontal transform with explicit TT and UT1 epochs.
+   *
+   * Use this overload when you have separately-computed TT and UT1 Julian
+   * Dates available (e.g. from a precise time-scale conversion) and want
+   * maximum accuracy without constructing an explicit `AstroContext`.
+   *
+   * @param jd_tt   Terrestrial Time (TT) Julian Date.
+   * @param jd_ut1  Universal Time (UT1) Julian Date.
+   * @param observer  Observer geodetic position.
+   */
+  template <typename F_ = F>
+  std::enable_if_t<frames::has_horizontal_transform_v<F_>,
+                   Direction<frames::Horizontal>>
+  to_horizontal_precise(const JulianDate &jd_tt, const JulianDate &jd_ut1,
+                        const Geodetic &observer) const {
+    siderust_spherical_dir_t out;
+    check_status(
+        siderust_spherical_dir_to_horizontal_precise(
+            polar_.value(), azimuth_.value(), frames::FrameTraits<F>::ffi_id,
+            jd_tt.value(), jd_ut1.value(), observer.to_c(), &out),
+        "Direction::to_horizontal_precise");
+    return Direction<frames::Horizontal>::from_c(out);
+  }
 };
 
 /**
