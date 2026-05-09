@@ -4,9 +4,3 @@
 [submodule "siderust"]
 	path = siderust
 	url = git@github.com:Siderust/siderust.git
-[submodule "cheby"]
-	path = cheby
-	url = git@github.com:Siderust/cheby.git
-[submodule "qtty"]
-	path = qtty
-	url = git@github.com:Siderust/qtty
