@@ -31,8 +31,7 @@ namespace siderust {
 
 class SiderustException : public std::runtime_error {
 public:
-  explicit SiderustException(const std::string &msg)
-      : std::runtime_error(msg) {}
+  explicit SiderustException(const std::string &msg) : std::runtime_error(msg) {}
 };
 
 class NullPointerError : public SiderustException {
@@ -47,14 +46,12 @@ public:
 
 class InvalidCenterError : public SiderustException {
 public:
-  explicit InvalidCenterError(const std::string &msg)
-      : SiderustException(msg) {}
+  explicit InvalidCenterError(const std::string &msg) : SiderustException(msg) {}
 };
 
 class TransformFailedError : public SiderustException {
 public:
-  explicit TransformFailedError(const std::string &msg)
-      : SiderustException(msg) {}
+  explicit TransformFailedError(const std::string &msg) : SiderustException(msg) {}
 };
 
 class InvalidBodyError : public SiderustException {
@@ -69,31 +66,37 @@ public:
 
 class InvalidPeriodError : public SiderustException {
 public:
-  explicit InvalidPeriodError(const std::string &msg)
-      : SiderustException(msg) {}
+  explicit InvalidPeriodError(const std::string &msg) : SiderustException(msg) {}
 };
 
 class AllocationFailedError : public SiderustException {
 public:
-  explicit AllocationFailedError(const std::string &msg)
-      : SiderustException(msg) {}
+  explicit AllocationFailedError(const std::string &msg) : SiderustException(msg) {}
 };
 
 class InvalidArgumentError : public SiderustException {
 public:
-  explicit InvalidArgumentError(const std::string &msg)
-      : SiderustException(msg) {}
+  explicit InvalidArgumentError(const std::string &msg) : SiderustException(msg) {}
 };
 
 class InternalPanicError : public SiderustException {
 public:
-  explicit InternalPanicError(const std::string &msg)
-      : SiderustException(msg) {}
+  explicit InternalPanicError(const std::string &msg) : SiderustException(msg) {}
 };
 
 class DataLoadError : public SiderustException {
 public:
   explicit DataLoadError(const std::string &msg) : SiderustException(msg) {}
+};
+
+class OutOfRangeError : public SiderustException {
+public:
+  explicit OutOfRangeError(const std::string &msg) : SiderustException(msg) {}
+};
+
+class NoEopDataError : public SiderustException {
+public:
+  explicit NoEopDataError(const std::string &msg) : SiderustException(msg) {}
 };
 
 // ============================================================================
@@ -128,15 +131,17 @@ inline void check_status(siderust_status_t status, const char *operation) {
     throw InternalPanicError(msg + "internal panic in Rust FFI");
   case SIDERUST_STATUS_T_DATA_ERROR:
     throw DataLoadError(msg + "data loading error (I/O, download, or parse)");
+  case SIDERUST_STATUS_T_OUT_OF_RANGE:
+    throw OutOfRangeError(msg + "epoch outside covered data range");
+  case SIDERUST_STATUS_T_NO_EOP_DATA:
+    throw NoEopDataError(msg + "Earth Orientation Parameters unavailable for epoch");
   default:
-    throw SiderustException(msg + "unknown error (" + std::to_string(status) +
-                            ")");
+    throw SiderustException(msg + "unknown error (" + std::to_string(status) + ")");
   }
 }
 
 /// @brief Backward-compatible wrapper — delegates to tempoch::check_status.
-inline void check_tempoch_status(tempoch_status_t status,
-                                 const char *operation) {
+inline void check_tempoch_status(tempoch_status_t status, const char *operation) {
   tempoch::check_status(status, operation);
 }
 
@@ -181,10 +186,10 @@ enum class Center : int32_t {
 };
 
 enum class EarthOrientationModel : int32_t {
-  Iau2000A = SIDERUST_EARTH_ORIENTATION_MODEL_IAU2000_A,
-  Iau2000B = SIDERUST_EARTH_ORIENTATION_MODEL_IAU2000_B,
-  Iau2006 = SIDERUST_EARTH_ORIENTATION_MODEL_IAU2006,
-  Iau2006A = SIDERUST_EARTH_ORIENTATION_MODEL_IAU2006_A,
+  Iau2000A = SIDERUST_EARTH_ORIENTATION_MODEL_T_IAU2000_A,
+  Iau2000B = SIDERUST_EARTH_ORIENTATION_MODEL_T_IAU2000_B,
+  Iau2006 = SIDERUST_EARTH_ORIENTATION_MODEL_T_IAU2006,
+  Iau2006A = SIDERUST_EARTH_ORIENTATION_MODEL_T_IAU2006_A,
 };
 
 enum class CrossingDirection : int32_t {
@@ -239,5 +244,41 @@ enum class RaConvention : int32_t {
   MuAlpha = SIDERUST_RA_CONVENTION_T_MU_ALPHA,
   MuAlphaStar = SIDERUST_RA_CONVENTION_T_MU_ALPHA_STAR,
 };
+
+namespace detail {
+
+/// Build a `siderust_subject_t` for a solar-system body.
+inline siderust_subject_t make_body_subject(SiderustBody b) {
+  siderust_subject_t s{};
+  s.kind = SIDERUST_SUBJECT_KIND_T_BODY;
+  s.body = b;
+  return s;
+}
+
+/// Build a `siderust_subject_t` for a star, borrowing the handle.
+inline siderust_subject_t make_star_subject(const SiderustStar *h) {
+  siderust_subject_t s{};
+  s.kind = SIDERUST_SUBJECT_KIND_T_STAR;
+  s.star_handle = h;
+  return s;
+}
+
+/// Build a `siderust_subject_t` for a fixed ICRS direction.
+inline siderust_subject_t make_icrs_subject(const siderust_spherical_dir_t &dir) {
+  siderust_subject_t s{};
+  s.kind = SIDERUST_SUBJECT_KIND_T_ICRS;
+  s.icrs_dir = dir;
+  return s;
+}
+
+/// Build a `siderust_subject_t` for a generic target opaque handle.
+inline siderust_subject_t make_generic_target_subject(const SiderustGenericTarget *h) {
+  siderust_subject_t s{};
+  s.kind = SIDERUST_SUBJECT_KIND_T_GENERIC_TARGET;
+  s.generic_target_handle = h;
+  return s;
+}
+
+} // namespace detail
 
 } // namespace siderust

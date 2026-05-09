@@ -14,8 +14,7 @@ namespace detail {
 
 inline Geodetic make_roque_de_los_muchachos() {
   siderust_geodetic_t out;
-  check_status(siderust_observatory_roque_de_los_muchachos(&out),
-               "ROQUE_DE_LOS_MUCHACHOS");
+  check_status(siderust_observatory_roque_de_los_muchachos(&out), "ROQUE_DE_LOS_MUCHACHOS");
   return Geodetic::from_c(out);
 }
 
@@ -42,11 +41,9 @@ inline Geodetic make_la_silla() {
 /**
  * @brief Create a custom geodetic position (WGS84).
  */
-inline Geodetic geodetic(double lon_deg, double lat_deg,
-                         double height_m = 0.0) {
+inline Geodetic geodetic(double lon_deg, double lat_deg, double height_m = 0.0) {
   siderust_geodetic_t out;
-  check_status(siderust_geodetic_new(lon_deg, lat_deg, height_m, &out),
-               "geodetic");
+  check_status(siderust_geodetic_new(lon_deg, lat_deg, height_m, &out), "geodetic");
   return Geodetic::from_c(out);
 }
 

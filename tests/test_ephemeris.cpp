@@ -13,14 +13,12 @@ TEST(Ephemeris, EarthHeliocentric) {
   auto pos = ephemeris::earth_heliocentric(jd);
 
   // Compile-time type checks
-  static_assert(
-      std::is_same_v<decltype(pos), cartesian::position::EclipticMeanJ2000<
-                                        qtty::AstronomicalUnit>>);
+  static_assert(std::is_same_v<decltype(pos),
+                               cartesian::position::EclipticMeanJ2000<qtty::AstronomicalUnit>>);
   static_assert(std::is_same_v<decltype(pos.comp_x), qtty::AstronomicalUnit>);
 
   // Value check — distance should be ~1 AU
-  double r = std::sqrt(pos.x().value() * pos.x().value() +
-                       pos.y().value() * pos.y().value() +
+  double r = std::sqrt(pos.x().value() * pos.x().value() + pos.y().value() * pos.y().value() +
                        pos.z().value() * pos.z().value());
   EXPECT_NEAR(r, 1.0, 0.02);
 
@@ -39,12 +37,32 @@ TEST(Ephemeris, MoonGeocentric) {
   auto pos = ephemeris::moon_geocentric(jd);
 
   static_assert(
-      std::is_same_v<decltype(pos),
-                     cartesian::position::MoonGeocentric<qtty::Kilometer>>);
+      std::is_same_v<decltype(pos), cartesian::position::MoonGeocentric<qtty::Kilometer>>);
   static_assert(std::is_same_v<decltype(pos.comp_x), qtty::Kilometer>);
 
-  double r = std::sqrt(pos.x().value() * pos.x().value() +
-                       pos.y().value() * pos.y().value() +
+  double r = std::sqrt(pos.x().value() * pos.x().value() + pos.y().value() * pos.y().value() +
                        pos.z().value() * pos.z().value());
   EXPECT_NEAR(r, 384400.0, 25000.0);
+}
+
+// ============================================================================
+// RuntimeEphemeris — type correctness and error handling
+// ============================================================================
+
+TEST(RuntimeEphemeris, InvalidBspThrows) {
+  // Passing garbage bytes must throw DataLoadError, not crash.
+  const uint8_t bad[] = {0x00, 0x01, 0x02, 0x03};
+  EXPECT_THROW(RuntimeEphemeris(bad, sizeof(bad)), DataLoadError);
+}
+
+TEST(RuntimeEphemeris, InvalidPathThrows) {
+  EXPECT_THROW(RuntimeEphemeris("/nonexistent/path/de440.bsp"), DataLoadError);
+}
+
+TEST(RuntimeEphemeris, CartesianVelocityFieldsExist) {
+  // Structural check: CartesianVelocity must expose vx, vy, vz, frame.
+  CartesianVelocity v{1.0, 2.0, 3.0, SIDERUST_FRAME_T_ECLIPTIC_MEAN_J2000};
+  EXPECT_DOUBLE_EQ(v.vx, 1.0);
+  EXPECT_DOUBLE_EQ(v.vy, 2.0);
+  EXPECT_DOUBLE_EQ(v.vz, 3.0);
 }
