@@ -46,14 +46,12 @@ template <typename P> struct Snapshot {
 inline Orbit halley_orbit() {
   // a = 17.834 AU, e = 0.96714, i = 162.26°, Ω = 58.42°, ω = 111.33°,
   // M = 38.38° at epoch JD 2446467.4 (≈1986 Feb 9).
-  return {17.834_au,  0.96714,   162.26_deg, 58.42_deg,
-          111.33_deg, 38.38_deg, 2446467.4};
+  return {17.834_au, 0.96714, 162.26_deg, 58.42_deg, 111.33_deg, 38.38_deg, 2446467.4};
 }
 
 // ─── Section 1: Trackable objects ───────────────────────────────────────────
 
-void section_trackable_objects(const JulianDate &jd,
-                               const JulianDate &jd_next) {
+void section_trackable_objects(const JulianDate &jd, const JulianDate &jd_next) {
   std::puts("1) Trackable objects (ICRS, star, Sun, planet, Moon)");
 
   // ICRS direction — time-invariant target
@@ -61,13 +59,12 @@ void section_trackable_objects(const JulianDate &jd,
   ICRSTarget icrs_target(fixed_icrs, jd, "FixedICRS");
 
   // Verify time-invariance: the ICRS direction coordinates are constant.
-  std::cout << "  ICRS direction is time-invariant: " << std::fixed
-            << std::setprecision(3) << fixed_icrs << std::endl;
+  std::cout << "  ICRS direction is time-invariant: " << std::fixed << std::setprecision(3)
+            << fixed_icrs << std::endl;
 
   // Sirius via the catalog StarTarget
   StarTarget sirius_target(SIRIUS());
-  std::printf("  Sirius via StarTarget: name = %s\n",
-              sirius_target.name().c_str());
+  std::printf("  Sirius via StarTarget: name = %s\n", sirius_target.name().c_str());
 
   // Sun, Mars, Moon via BodyTarget
   BodyTarget sun_target(Body::Sun);
@@ -76,18 +73,18 @@ void section_trackable_objects(const JulianDate &jd,
 
   // Show Sun barycentric distance at J2000
   auto sun_bary = ephemeris::sun_barycentric(jd);
-  std::cout << "  Sun barycentric distance: " << std::fixed
-            << std::setprecision(6) << sun_bary.distance() << std::endl;
+  std::cout << "  Sun barycentric distance: " << std::fixed << std::setprecision(6)
+            << sun_bary.distance() << std::endl;
 
   // Mars heliocentric distance
   auto mars_helio = ephemeris::mars_heliocentric(jd);
-  std::cout << "  Mars heliocentric distance: " << std::fixed
-            << std::setprecision(6) << mars_helio.distance() << std::endl;
+  std::cout << "  Mars heliocentric distance: " << std::fixed << std::setprecision(6)
+            << mars_helio.distance() << std::endl;
 
   // Moon geocentric distance
   auto moon_geo = ephemeris::moon_geocentric(jd);
-  std::cout << "  Moon geocentric distance: " << std::fixed
-            << std::setprecision(1) << moon_geo.distance() << "\n"
+  std::cout << "  Moon geocentric distance: " << std::fixed << std::setprecision(1)
+            << moon_geo.distance() << "\n"
             << std::endl;
 }
 
@@ -97,36 +94,31 @@ void section_target_snapshots(const JulianDate &jd, const JulianDate &jd_next) {
   std::puts("2) Target snapshots for arbitrary sky objects");
 
   // Mars heliocentric snapshot (VSOP87 ephemeris)
-  Snapshot<cartesian::position::EclipticMeanJ2000<qtty::AstronomicalUnit>>
-      mars_snap{ephemeris::mars_heliocentric(jd), jd};
-  std::cout << "  Mars target at JD " << std::fixed << std::setprecision(1)
-            << mars_snap.time << ": r = " << std::setprecision(6)
-            << mars_snap.position.distance() << std::endl;
+  Snapshot<cartesian::position::EclipticMeanJ2000<qtty::AstronomicalUnit>> mars_snap{
+      ephemeris::mars_heliocentric(jd), jd};
+  std::cout << "  Mars target at JD " << std::fixed << std::setprecision(1) << mars_snap.time
+            << ": r = " << std::setprecision(6) << mars_snap.position.distance() << std::endl;
 
   // Update with next-day ephemeris
   mars_snap.update(ephemeris::mars_heliocentric(jd_next), jd_next);
-  std::cout << "  Mars target updated to JD " << std::fixed
-            << std::setprecision(1) << mars_snap.time
-            << ": r = " << std::setprecision(6) << mars_snap.position.distance()
+  std::cout << "  Mars target updated to JD " << std::fixed << std::setprecision(1)
+            << mars_snap.time << ": r = " << std::setprecision(6) << mars_snap.position.distance()
             << std::endl;
 
   // Halley's comet — Kepler-propagated snapshot
   auto halley_pos = kepler_position(halley_orbit(), jd);
-  Snapshot<cartesian::position::EclipticMeanJ2000<qtty::AstronomicalUnit>>
-      halley_snap{halley_pos, jd};
-  std::cout << "  Halley target at JD " << std::fixed << std::setprecision(1)
-            << halley_snap.time << ": r = " << std::setprecision(6)
-            << halley_snap.position.distance() << std::endl;
+  Snapshot<cartesian::position::EclipticMeanJ2000<qtty::AstronomicalUnit>> halley_snap{halley_pos,
+                                                                                       jd};
+  std::cout << "  Halley target at JD " << std::fixed << std::setprecision(1) << halley_snap.time
+            << ": r = " << std::setprecision(6) << halley_snap.position.distance() << std::endl;
 
   // DemoSat — satellite-like custom object with a geocentric orbit
-  Orbit demosat_orbit{1.0002_au, 0.001,    0.1_deg,   35.0_deg,
-                      80.0_deg,  10.0_deg, jd.value()};
+  Orbit demosat_orbit{1.0002_au, 0.001, 0.1_deg, 35.0_deg, 80.0_deg, 10.0_deg, jd.value()};
   auto demosat_pos = kepler_position(demosat_orbit, jd);
-  Snapshot<cartesian::position::EclipticMeanJ2000<qtty::AstronomicalUnit>>
-      demosat_snap{demosat_pos, jd};
-  std::cout << "  DemoSat target at JD " << std::fixed << std::setprecision(1)
-            << demosat_snap.time << ": r = " << std::setprecision(6)
-            << demosat_snap.position.distance() << "\n"
+  Snapshot<cartesian::position::EclipticMeanJ2000<qtty::AstronomicalUnit>> demosat_snap{demosat_pos,
+                                                                                        jd};
+  std::cout << "  DemoSat target at JD " << std::fixed << std::setprecision(1) << demosat_snap.time
+            << ": r = " << std::setprecision(6) << demosat_snap.position.distance() << "\n"
             << std::endl;
 }
 
@@ -136,10 +128,10 @@ void section_target_snapshots(const JulianDate &jd, const JulianDate &jd_next) {
 ///
 /// Computes: RA' = RA + μα* · Δt / cos(dec),  Dec' = Dec + μδ · Δt
 /// where Δt is in Julian years since the reference epoch.
-inline spherical::direction::ICRS
-apply_proper_motion(const spherical::direction::ICRS &pos,
-                    const ProperMotion &pm, const JulianDate &epoch,
-                    const JulianDate &target_epoch) {
+inline spherical::direction::ICRS apply_proper_motion(const spherical::direction::ICRS &pos,
+                                                      const ProperMotion &pm,
+                                                      const JulianDate &epoch,
+                                                      const JulianDate &target_epoch) {
   constexpr double JULIAN_YEAR = 365.25; // days
   double dt_years = (target_epoch.value() - epoch.value()) / JULIAN_YEAR;
 
@@ -153,8 +145,7 @@ apply_proper_motion(const spherical::direction::ICRS &pos,
   double dra = (cos_dec > 1e-12) ? pm.pm_ra_deg_yr * dt_years / cos_dec : 0.0;
   double ddec = pm.pm_dec_deg_yr * dt_years;
 
-  return spherical::direction::ICRS(qtty::Degree(ra_deg + dra),
-                                    qtty::Degree(dec_deg + ddec));
+  return spherical::direction::ICRS(qtty::Degree(ra_deg + dra), qtty::Degree(dec_deg + ddec));
 }
 
 void section_target_with_proper_motion(const JulianDate &jd) {
@@ -169,17 +160,16 @@ void section_target_with_proper_motion(const JulianDate &jd) {
   constexpr double MAS_TO_DEG = 1.0 / 3600000.0;
   ProperMotion pm(27.54 * MAS_TO_DEG, 10.86 * MAS_TO_DEG);
 
-  std::cout << "  Betelgeuse-like target at J2000: RA " << std::fixed
-            << std::setprecision(6) << betelgeuse_pos.ra() << ", Dec "
-            << betelgeuse_pos.dec() << std::endl;
+  std::cout << "  Betelgeuse-like target at J2000: RA " << std::fixed << std::setprecision(6)
+            << betelgeuse_pos.ra() << ", Dec " << betelgeuse_pos.dec() << std::endl;
 
   // Propagate 25 years
   constexpr double JULIAN_YEAR = 365.25;
   JulianDate jd_future(jd.value() + 25.0 * JULIAN_YEAR);
   auto moved = apply_proper_motion(betelgeuse_pos, pm, jd, jd_future);
 
-  std::cout << "  After 25 years: RA " << std::fixed << std::setprecision(6)
-            << moved.ra() << ", Dec " << moved.dec() << "\n"
+  std::cout << "  After 25 years: RA " << std::fixed << std::setprecision(6) << moved.ra()
+            << ", Dec " << moved.dec() << "\n"
             << std::endl;
 }
 
@@ -190,13 +180,12 @@ void section_target_transform(const JulianDate &jd) {
 
   // Mars heliocentric ecliptic → geocentric equatorial
   auto mars_helio = ephemeris::mars_heliocentric(jd);
-  auto mars_geoeq =
-      mars_helio.template transform<Geocentric, EquatorialMeanJ2000>(jd);
+  auto mars_geoeq = mars_helio.template transform<Geocentric, EquatorialMeanJ2000>(jd);
 
-  std::cout << "  Mars heliocentric ecliptic target: r = " << std::fixed
-            << std::setprecision(6) << mars_helio.distance() << std::endl;
-  std::cout << "  Mars geocentric equatorial target: r = " << std::fixed
-            << std::setprecision(6) << mars_geoeq.distance() << std::endl;
+  std::cout << "  Mars heliocentric ecliptic target: r = " << std::fixed << std::setprecision(6)
+            << mars_helio.distance() << std::endl;
+  std::cout << "  Mars geocentric equatorial target: r = " << std::fixed << std::setprecision(6)
+            << mars_geoeq.distance() << std::endl;
 }
 
 // ─── main

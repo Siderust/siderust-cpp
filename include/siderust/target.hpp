@@ -57,18 +57,15 @@ namespace detail {
 /// True iff T is an instantiation of spherical::Direction<F>.
 template <typename T> struct is_spherical_direction : std::false_type {};
 
-template <typename F>
-struct is_spherical_direction<spherical::Direction<F>> : std::true_type {};
+template <typename F> struct is_spherical_direction<spherical::Direction<F>> : std::true_type {};
 
 template <typename T>
-inline constexpr bool is_spherical_direction_v =
-    is_spherical_direction<T>::value;
+inline constexpr bool is_spherical_direction_v = is_spherical_direction<T>::value;
 
 /// Extract the frame tag F from spherical::Direction<F>.
 template <typename T> struct spherical_direction_frame; // undefined primary
 
-template <typename F>
-struct spherical_direction_frame<spherical::Direction<F>> {
+template <typename F> struct spherical_direction_frame<spherical::Direction<F>> {
   using type = F;
 };
 
@@ -114,18 +111,16 @@ using spherical_direction_frame_t = typename spherical_direction_frame<T>::type;
  */
 template <typename C> class DirectionTarget : public Target {
 
-  static_assert(detail::is_spherical_direction_v<C>,
-                "Target<C>: C must be a specialisation of "
-                "siderust::spherical::Direction<F>");
+  static_assert(detail::is_spherical_direction_v<C>, "Target<C>: C must be a specialisation of "
+                                                     "siderust::spherical::Direction<F>");
 
   using Frame = detail::spherical_direction_frame_t<C>;
 
-  static_assert(
-      frames::has_frame_transform_v<Frame, frames::ICRS>,
-      "Target<C>: frame F must support a transform to ICRS "
-      "(frames::has_frame_transform_v<F, frames::ICRS> must be true). "
-      "Supported frames: ICRS, ICRF, EquatorialMeanJ2000, "
-      "EquatorialMeanOfDate, EquatorialTrueOfDate, EclipticMeanJ2000.");
+  static_assert(frames::has_frame_transform_v<Frame, frames::ICRS>,
+                "Target<C>: frame F must support a transform to ICRS "
+                "(frames::has_frame_transform_v<F, frames::ICRS> must be true). "
+                "Supported frames: ICRS, ICRF, EquatorialMeanJ2000, "
+                "EquatorialMeanOfDate, EquatorialTrueOfDate, EclipticMeanJ2000.");
 
 public:
   // ------------------------------------------------------------------
@@ -144,8 +139,7 @@ public:
    * @param label  Optional human-readable name.  If empty, a default
    *               "Frame(lon°, lat°)" string is generated from the direction.
    */
-  explicit DirectionTarget(C dir, JulianDate epoch = JulianDate::J2000(),
-                           std::string label = "")
+  explicit DirectionTarget(C dir, JulianDate epoch = JulianDate::J2000(), std::string label = "")
       : m_dir_(dir), m_epoch_(epoch), label_(std::move(label)) {
     // Convert to ICRS for the FFI; identity transform when already ICRS.
     if constexpr (std::is_same_v<Frame, frames::ICRS>) {
@@ -154,8 +148,7 @@ public:
       m_icrs_ = dir.template to_frame<frames::ICRS>(epoch);
     }
     SiderustGenericTarget *h = nullptr;
-    check_status(siderust_generic_target_create_icrs(m_icrs_.ra().value(),
-                                                     m_icrs_.dec().value(),
+    check_status(siderust_generic_target_create_icrs(m_icrs_.ra().value(), m_icrs_.dec().value(),
                                                      epoch.value(), &h),
                  "Target::Target");
     handle_ = h;
@@ -170,9 +163,8 @@ public:
 
   /// Move constructor.
   DirectionTarget(DirectionTarget &&other) noexcept
-      : m_dir_(std::move(other.m_dir_)), m_epoch_(other.m_epoch_),
-        m_icrs_(other.m_icrs_), label_(std::move(other.label_)),
-        handle_(other.handle_) {
+      : m_dir_(std::move(other.m_dir_)), m_epoch_(other.m_epoch_), m_icrs_(other.m_icrs_),
+        label_(std::move(other.label_)), handle_(other.handle_) {
     other.handle_ = nullptr;
   }
 
@@ -210,8 +202,8 @@ public:
     if (!label_.empty())
       return label_;
     std::ostringstream ss;
-    ss << "Direction(" << m_icrs_.ra().value() << "\xc2\xb0, "
-       << m_icrs_.dec().value() << "\xc2\xb0)";
+    ss << "Direction(" << m_icrs_.ra().value() << "\xc2\xb0, " << m_icrs_.dec().value()
+       << "\xc2\xb0)";
     return ss.str();
   }
 
@@ -230,15 +222,13 @@ public:
   const spherical::direction::ICRS &icrs_direction() const { return m_icrs_; }
 
   /// Right ascension — only available for equatorial frames (RA/Dec).
-  template <typename F_ = Frame,
-            std::enable_if_t<frames::has_ra_dec_v<F_>, int> = 0>
+  template <typename F_ = Frame, std::enable_if_t<frames::has_ra_dec_v<F_>, int> = 0>
   qtty::Degree ra() const {
     return m_dir_.ra();
   }
 
   /// Declination — only available for equatorial frames (RA/Dec).
-  template <typename F_ = Frame,
-            std::enable_if_t<frames::has_ra_dec_v<F_>, int> = 0>
+  template <typename F_ = Frame, std::enable_if_t<frames::has_ra_dec_v<F_>, int> = 0>
   qtty::Degree dec() const {
     return m_dir_.dec();
   }
@@ -254,8 +244,8 @@ public:
    */
   qtty::Degree altitude_at(const Geodetic &obs, const MJD &mjd) const override {
     double out{};
-    check_status(siderust_altitude_at(detail::make_generic_target_subject(handle_),
-                                      obs.to_c(), mjd.value(), &out),
+    check_status(siderust_altitude_at(detail::make_generic_target_subject(handle_), obs.to_c(),
+                                      mjd.value(), &out),
                  "Target::altitude_at");
     return qtty::Radian(out).to<qtty::Degree>();
   }
@@ -263,23 +253,21 @@ public:
   /**
    * @brief Find periods when the target is above a threshold altitude.
    */
-  std::vector<Period>
-  above_threshold(const Geodetic &obs, const Period &window,
-                  qtty::Degree threshold,
-                  const SearchOptions &opts = {}) const override {
+  std::vector<Period> above_threshold(const Geodetic &obs, const Period &window,
+                                      qtty::Degree threshold,
+                                      const SearchOptions &opts = {}) const override {
     tempoch_period_mjd_t *ptr = nullptr;
     uintptr_t count = 0;
-    check_status(siderust_above_threshold(
-                     detail::make_generic_target_subject(handle_), obs.to_c(),
-                     window.c_inner(), threshold.value(), opts.to_c(), &ptr,
-                     &count),
+    check_status(siderust_above_threshold(detail::make_generic_target_subject(handle_), obs.to_c(),
+                                          window.c_inner(), threshold.value(), opts.to_c(), &ptr,
+                                          &count),
                  "Target::above_threshold");
     return detail_periods_from_c(ptr, count);
   }
 
   /// Backward-compatible [start, end] overload.
-  std::vector<Period> above_threshold(const Geodetic &obs, const MJD &start,
-                                      const MJD &end, qtty::Degree threshold,
+  std::vector<Period> above_threshold(const Geodetic &obs, const MJD &start, const MJD &end,
+                                      qtty::Degree threshold,
                                       const SearchOptions &opts = {}) const {
     return above_threshold(obs, Period(start, end), threshold, opts);
   }
@@ -287,23 +275,21 @@ public:
   /**
    * @brief Find periods when the target is below a threshold altitude.
    */
-  std::vector<Period>
-  below_threshold(const Geodetic &obs, const Period &window,
-                  qtty::Degree threshold,
-                  const SearchOptions &opts = {}) const override {
+  std::vector<Period> below_threshold(const Geodetic &obs, const Period &window,
+                                      qtty::Degree threshold,
+                                      const SearchOptions &opts = {}) const override {
     tempoch_period_mjd_t *ptr = nullptr;
     uintptr_t count = 0;
-    check_status(siderust_below_threshold(
-                     detail::make_generic_target_subject(handle_), obs.to_c(),
-                     window.c_inner(), threshold.value(), opts.to_c(), &ptr,
-                     &count),
+    check_status(siderust_below_threshold(detail::make_generic_target_subject(handle_), obs.to_c(),
+                                          window.c_inner(), threshold.value(), opts.to_c(), &ptr,
+                                          &count),
                  "Target::below_threshold");
     return detail_periods_from_c(ptr, count);
   }
 
   /// Backward-compatible [start, end] overload.
-  std::vector<Period> below_threshold(const Geodetic &obs, const MJD &start,
-                                      const MJD &end, qtty::Degree threshold,
+  std::vector<Period> below_threshold(const Geodetic &obs, const MJD &start, const MJD &end,
+                                      qtty::Degree threshold,
                                       const SearchOptions &opts = {}) const {
     return below_threshold(obs, Period(start, end), threshold, opts);
   }
@@ -311,22 +297,20 @@ public:
   /**
    * @brief Find threshold-crossing events (rising / setting).
    */
-  std::vector<CrossingEvent>
-  crossings(const Geodetic &obs, const Period &window, qtty::Degree threshold,
-            const SearchOptions &opts = {}) const override {
+  std::vector<CrossingEvent> crossings(const Geodetic &obs, const Period &window,
+                                       qtty::Degree threshold,
+                                       const SearchOptions &opts = {}) const override {
     siderust_crossing_event_t *ptr = nullptr;
     uintptr_t count = 0;
-    check_status(siderust_crossings(detail::make_generic_target_subject(handle_),
-                                    obs.to_c(), window.c_inner(),
-                                    threshold.value(), opts.to_c(), &ptr,
-                                    &count),
+    check_status(siderust_crossings(detail::make_generic_target_subject(handle_), obs.to_c(),
+                                    window.c_inner(), threshold.value(), opts.to_c(), &ptr, &count),
                  "Target::crossings");
     return detail::crossings_from_c(ptr, count);
   }
 
   /// Backward-compatible [start, end] overload.
-  std::vector<CrossingEvent> crossings(const Geodetic &obs, const MJD &start,
-                                       const MJD &end, qtty::Degree threshold,
+  std::vector<CrossingEvent> crossings(const Geodetic &obs, const MJD &start, const MJD &end,
+                                       qtty::Degree threshold,
                                        const SearchOptions &opts = {}) const {
     return crossings(obs, Period(start, end), threshold, opts);
   }
@@ -334,22 +318,19 @@ public:
   /**
    * @brief Find culmination (local altitude extremum) events.
    */
-  std::vector<CulminationEvent>
-  culminations(const Geodetic &obs, const Period &window,
-               const SearchOptions &opts = {}) const override {
+  std::vector<CulminationEvent> culminations(const Geodetic &obs, const Period &window,
+                                             const SearchOptions &opts = {}) const override {
     siderust_culmination_event_t *ptr = nullptr;
     uintptr_t count = 0;
-    check_status(siderust_culminations(
-                     detail::make_generic_target_subject(handle_), obs.to_c(),
-                     window.c_inner(), opts.to_c(), &ptr, &count),
+    check_status(siderust_culminations(detail::make_generic_target_subject(handle_), obs.to_c(),
+                                       window.c_inner(), opts.to_c(), &ptr, &count),
                  "Target::culminations");
     return detail::culminations_from_c(ptr, count);
   }
 
   /// Backward-compatible [start, end] overload.
-  std::vector<CulminationEvent>
-  culminations(const Geodetic &obs, const MJD &start, const MJD &end,
-               const SearchOptions &opts = {}) const {
+  std::vector<CulminationEvent> culminations(const Geodetic &obs, const MJD &start, const MJD &end,
+                                             const SearchOptions &opts = {}) const {
     return culminations(obs, Period(start, end), opts);
   }
 
@@ -362,8 +343,8 @@ public:
    */
   qtty::Degree azimuth_at(const Geodetic &obs, const MJD &mjd) const override {
     double out{};
-    check_status(siderust_azimuth_at(detail::make_generic_target_subject(handle_),
-                                     obs.to_c(), mjd.value(), &out),
+    check_status(siderust_azimuth_at(detail::make_generic_target_subject(handle_), obs.to_c(),
+                                     mjd.value(), &out),
                  "Target::azimuth_at");
     return qtty::Degree(out);
   }
@@ -372,24 +353,21 @@ public:
    * @brief Find epochs when the target crosses a given azimuth bearing.
    */
   std::vector<AzimuthCrossingEvent>
-  azimuth_crossings(const Geodetic &obs, const Period &window,
-                    qtty::Degree bearing,
+  azimuth_crossings(const Geodetic &obs, const Period &window, qtty::Degree bearing,
                     const SearchOptions &opts = {}) const override {
     siderust_azimuth_crossing_event_t *ptr = nullptr;
     uintptr_t count = 0;
-    check_status(siderust_azimuth_crossings(
-                     detail::make_generic_target_subject(handle_), obs.to_c(),
-                     window.c_inner(), bearing.value(), opts.to_c(), &ptr,
-                     &count),
+    check_status(siderust_azimuth_crossings(detail::make_generic_target_subject(handle_),
+                                            obs.to_c(), window.c_inner(), bearing.value(),
+                                            opts.to_c(), &ptr, &count),
                  "Target::azimuth_crossings");
     return detail::az_crossings_from_c(ptr, count);
   }
 
   /// Backward-compatible [start, end] overload.
-  std::vector<AzimuthCrossingEvent>
-  azimuth_crossings(const Geodetic &obs, const MJD &start, const MJD &end,
-                    qtty::Degree bearing,
-                    const SearchOptions &opts = {}) const {
+  std::vector<AzimuthCrossingEvent> azimuth_crossings(const Geodetic &obs, const MJD &start,
+                                                      const MJD &end, qtty::Degree bearing,
+                                                      const SearchOptions &opts = {}) const {
     return azimuth_crossings(obs, Period(start, end), bearing, opts);
   }
 
@@ -399,16 +377,14 @@ public:
   /// Epoch of the coordinate (Julian Date, queried from the FFI handle).
   double epoch_jd() const {
     double out{};
-    check_status(siderust_generic_target_epoch_jd(handle_, &out),
-                 "DirectionTarget::epoch_jd");
+    check_status(siderust_generic_target_epoch_jd(handle_, &out), "DirectionTarget::epoch_jd");
     return out;
   }
 
   /// Raw coordinate payload stored in the FFI handle.
   SiderustGenericTargetData data() const {
     SiderustGenericTargetData out{};
-    check_status(siderust_generic_target_get_data(handle_, &out),
-                 "DirectionTarget::data");
+    check_status(siderust_generic_target_get_data(handle_, &out), "DirectionTarget::data");
     return out;
   }
 
@@ -420,8 +396,7 @@ private:
   SiderustGenericTarget *handle_ = nullptr;
 
   /// Build a Period vector from a tempoch_period_mjd_t* array.
-  static std::vector<Period> detail_periods_from_c(tempoch_period_mjd_t *ptr,
-                                                   uintptr_t count) {
+  static std::vector<Period> detail_periods_from_c(tempoch_period_mjd_t *ptr, uintptr_t count) {
     std::vector<Period> result;
     result.reserve(count);
     for (uintptr_t i = 0; i < count; ++i) {
@@ -443,21 +418,17 @@ using ICRSTarget = DirectionTarget<spherical::direction::ICRS>;
 using ICRFTarget = DirectionTarget<spherical::direction::ICRF>;
 
 /// Fixed direction in mean equatorial coordinates of J2000.0 (FK5).
-using EquatorialMeanJ2000Target =
-    DirectionTarget<spherical::direction::EquatorialMeanJ2000>;
+using EquatorialMeanJ2000Target = DirectionTarget<spherical::direction::EquatorialMeanJ2000>;
 
 /// Fixed direction in mean equatorial coordinates of date (precessed only).
-using EquatorialMeanOfDateTarget =
-    DirectionTarget<spherical::direction::EquatorialMeanOfDate>;
+using EquatorialMeanOfDateTarget = DirectionTarget<spherical::direction::EquatorialMeanOfDate>;
 
 /// Fixed direction in true equatorial coordinates of date (precessed +
 /// nutated).
-using EquatorialTrueOfDateTarget =
-    DirectionTarget<spherical::direction::EquatorialTrueOfDate>;
+using EquatorialTrueOfDateTarget = DirectionTarget<spherical::direction::EquatorialTrueOfDate>;
 
 /// Fixed direction in mean ecliptic coordinates of J2000.0.
-using EclipticMeanJ2000Target =
-    DirectionTarget<spherical::direction::EclipticMeanJ2000>;
+using EclipticMeanJ2000Target = DirectionTarget<spherical::direction::EclipticMeanJ2000>;
 
 // ============================================================================
 // ProperMotionTarget
@@ -498,17 +469,15 @@ public:
    * @param convention   Which RA PM convention the rates use.
    * @param label        Optional human-readable name.
    */
-  ProperMotionTarget(double ra_deg, double dec_deg, JulianDate epoch,
-                     double pm_ra_deg_yr, double pm_dec_deg_yr,
-                     RaConvention convention = RaConvention::MuAlphaStar,
+  ProperMotionTarget(double ra_deg, double dec_deg, JulianDate epoch, double pm_ra_deg_yr,
+                     double pm_dec_deg_yr, RaConvention convention = RaConvention::MuAlphaStar,
                      std::string label = "")
       : epoch_(epoch), label_(std::move(label)) {
     SiderustGenericTarget *h = nullptr;
-    check_status(
-        siderust_generic_target_create_icrs_with_pm(
-            ra_deg, dec_deg, epoch.value(), pm_ra_deg_yr, pm_dec_deg_yr,
-            static_cast<siderust_ra_convention_t>(convention), &h),
-        "ProperMotionTarget::ProperMotionTarget");
+    check_status(siderust_generic_target_create_icrs_with_pm(
+                     ra_deg, dec_deg, epoch.value(), pm_ra_deg_yr, pm_dec_deg_yr,
+                     static_cast<siderust_ra_convention_t>(convention), &h),
+                 "ProperMotionTarget::ProperMotionTarget");
     handle_ = h;
   }
 
@@ -520,8 +489,7 @@ public:
   }
 
   ProperMotionTarget(ProperMotionTarget &&other) noexcept
-      : epoch_(other.epoch_), label_(std::move(other.label_)),
-        handle_(other.handle_) {
+      : epoch_(other.epoch_), label_(std::move(other.label_)), handle_(other.handle_) {
     other.handle_ = nullptr;
   }
 
@@ -560,108 +528,91 @@ public:
   /// Epoch Julian Date queried from the FFI handle.
   double epoch_jd() const {
     double out{};
-    check_status(siderust_generic_target_epoch_jd(handle_, &out),
-                 "ProperMotionTarget::epoch_jd");
+    check_status(siderust_generic_target_epoch_jd(handle_, &out), "ProperMotionTarget::epoch_jd");
     return out;
   }
 
   /// Raw coordinate payload stored in the FFI handle.
   SiderustGenericTargetData data() const {
     SiderustGenericTargetData out{};
-    check_status(siderust_generic_target_get_data(handle_, &out),
-                 "ProperMotionTarget::data");
+    check_status(siderust_generic_target_get_data(handle_, &out), "ProperMotionTarget::data");
     return out;
   }
 
   // -- Altitude tracking (implements Trackable) ------------------------------
 
-  qtty::Degree altitude_at(const Geodetic &obs,
-                            const MJD &mjd) const override {
+  qtty::Degree altitude_at(const Geodetic &obs, const MJD &mjd) const override {
     double out{};
-    check_status(
-        siderust_altitude_at(detail::make_generic_target_subject(handle_),
-                             obs.to_c(), mjd.value(), &out),
-        "ProperMotionTarget::altitude_at");
+    check_status(siderust_altitude_at(detail::make_generic_target_subject(handle_), obs.to_c(),
+                                      mjd.value(), &out),
+                 "ProperMotionTarget::altitude_at");
     return qtty::Radian(out).to<qtty::Degree>();
   }
 
-  std::vector<Period>
-  above_threshold(const Geodetic &obs, const Period &window,
-                  qtty::Degree threshold,
-                  const SearchOptions &opts = {}) const override {
+  std::vector<Period> above_threshold(const Geodetic &obs, const Period &window,
+                                      qtty::Degree threshold,
+                                      const SearchOptions &opts = {}) const override {
     tempoch_period_mjd_t *ptr = nullptr;
     uintptr_t count = 0;
-    check_status(
-        siderust_above_threshold(detail::make_generic_target_subject(handle_),
-                                 obs.to_c(), window.c_inner(),
-                                 threshold.value(), opts.to_c(), &ptr, &count),
-        "ProperMotionTarget::above_threshold");
+    check_status(siderust_above_threshold(detail::make_generic_target_subject(handle_), obs.to_c(),
+                                          window.c_inner(), threshold.value(), opts.to_c(), &ptr,
+                                          &count),
+                 "ProperMotionTarget::above_threshold");
     return detail_periods_from_c(ptr, count);
   }
 
-  std::vector<Period>
-  below_threshold(const Geodetic &obs, const Period &window,
-                  qtty::Degree threshold,
-                  const SearchOptions &opts = {}) const override {
+  std::vector<Period> below_threshold(const Geodetic &obs, const Period &window,
+                                      qtty::Degree threshold,
+                                      const SearchOptions &opts = {}) const override {
     tempoch_period_mjd_t *ptr = nullptr;
     uintptr_t count = 0;
-    check_status(
-        siderust_below_threshold(detail::make_generic_target_subject(handle_),
-                                 obs.to_c(), window.c_inner(),
-                                 threshold.value(), opts.to_c(), &ptr, &count),
-        "ProperMotionTarget::below_threshold");
+    check_status(siderust_below_threshold(detail::make_generic_target_subject(handle_), obs.to_c(),
+                                          window.c_inner(), threshold.value(), opts.to_c(), &ptr,
+                                          &count),
+                 "ProperMotionTarget::below_threshold");
     return detail_periods_from_c(ptr, count);
   }
 
-  std::vector<CrossingEvent>
-  crossings(const Geodetic &obs, const Period &window, qtty::Degree threshold,
-            const SearchOptions &opts = {}) const override {
+  std::vector<CrossingEvent> crossings(const Geodetic &obs, const Period &window,
+                                       qtty::Degree threshold,
+                                       const SearchOptions &opts = {}) const override {
     siderust_crossing_event_t *ptr = nullptr;
     uintptr_t count = 0;
-    check_status(
-        siderust_crossings(detail::make_generic_target_subject(handle_),
-                           obs.to_c(), window.c_inner(), threshold.value(),
-                           opts.to_c(), &ptr, &count),
-        "ProperMotionTarget::crossings");
+    check_status(siderust_crossings(detail::make_generic_target_subject(handle_), obs.to_c(),
+                                    window.c_inner(), threshold.value(), opts.to_c(), &ptr, &count),
+                 "ProperMotionTarget::crossings");
     return detail::crossings_from_c(ptr, count);
   }
 
-  std::vector<CulminationEvent>
-  culminations(const Geodetic &obs, const Period &window,
-               const SearchOptions &opts = {}) const override {
+  std::vector<CulminationEvent> culminations(const Geodetic &obs, const Period &window,
+                                             const SearchOptions &opts = {}) const override {
     siderust_culmination_event_t *ptr = nullptr;
     uintptr_t count = 0;
-    check_status(
-        siderust_culminations(detail::make_generic_target_subject(handle_),
-                              obs.to_c(), window.c_inner(), opts.to_c(), &ptr,
-                              &count),
-        "ProperMotionTarget::culminations");
+    check_status(siderust_culminations(detail::make_generic_target_subject(handle_), obs.to_c(),
+                                       window.c_inner(), opts.to_c(), &ptr, &count),
+                 "ProperMotionTarget::culminations");
     return detail::culminations_from_c(ptr, count);
   }
 
   // -- Azimuth tracking (implements Trackable) -------------------------------
 
-  qtty::Degree azimuth_at(const Geodetic &obs,
-                           const MJD &mjd) const override {
+  qtty::Degree azimuth_at(const Geodetic &obs, const MJD &mjd) const override {
     double out{};
-    check_status(
-        siderust_azimuth_at(detail::make_generic_target_subject(handle_),
-                            obs.to_c(), mjd.value(), &out),
-        "ProperMotionTarget::azimuth_at");
+    check_status(siderust_azimuth_at(detail::make_generic_target_subject(handle_), obs.to_c(),
+                                     mjd.value(), &out),
+                 "ProperMotionTarget::azimuth_at");
     return qtty::Degree(out);
   }
 
   std::vector<AzimuthCrossingEvent>
-  azimuth_crossings(const Geodetic &obs, const Period &window,
-                    qtty::Degree bearing,
+  azimuth_crossings(const Geodetic &obs, const Period &window, qtty::Degree bearing,
                     const SearchOptions &opts = {}) const override {
     siderust_azimuth_crossing_event_t *ptr = nullptr;
     uintptr_t count = 0;
-    check_status(
-        siderust_azimuth_crossings(detail::make_generic_target_subject(handle_),
-                                   obs.to_c(), window.c_inner(),
-                                   bearing.value(), opts.to_c(), &ptr, &count),
-        "ProperMotionTarget::azimuth_crossings");
+    check_status(siderust_azimuth_crossings(detail::make_generic_target_subject(handle_),
+                                            obs.to_c(), window.c_inner(), bearing.value(),
+                                            opts.to_c(), &ptr, &count),
+                 "ProperMotionTarget::azimuth_crossings");
     return detail::az_crossings_from_c(ptr, count);
   }
 
@@ -670,8 +621,7 @@ private:
   std::string label_;
   SiderustGenericTarget *handle_ = nullptr;
 
-  static std::vector<Period>
-  detail_periods_from_c(tempoch_period_mjd_t *ptr, uintptr_t count) {
+  static std::vector<Period> detail_periods_from_c(tempoch_period_mjd_t *ptr, uintptr_t count) {
     std::vector<Period> result;
     result.reserve(count);
     for (uintptr_t i = 0; i < count; ++i) {

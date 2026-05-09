@@ -31,8 +31,7 @@ namespace siderust {
 
 class SiderustException : public std::runtime_error {
 public:
-  explicit SiderustException(const std::string &msg)
-      : std::runtime_error(msg) {}
+  explicit SiderustException(const std::string &msg) : std::runtime_error(msg) {}
 };
 
 class NullPointerError : public SiderustException {
@@ -47,14 +46,12 @@ public:
 
 class InvalidCenterError : public SiderustException {
 public:
-  explicit InvalidCenterError(const std::string &msg)
-      : SiderustException(msg) {}
+  explicit InvalidCenterError(const std::string &msg) : SiderustException(msg) {}
 };
 
 class TransformFailedError : public SiderustException {
 public:
-  explicit TransformFailedError(const std::string &msg)
-      : SiderustException(msg) {}
+  explicit TransformFailedError(const std::string &msg) : SiderustException(msg) {}
 };
 
 class InvalidBodyError : public SiderustException {
@@ -69,26 +66,22 @@ public:
 
 class InvalidPeriodError : public SiderustException {
 public:
-  explicit InvalidPeriodError(const std::string &msg)
-      : SiderustException(msg) {}
+  explicit InvalidPeriodError(const std::string &msg) : SiderustException(msg) {}
 };
 
 class AllocationFailedError : public SiderustException {
 public:
-  explicit AllocationFailedError(const std::string &msg)
-      : SiderustException(msg) {}
+  explicit AllocationFailedError(const std::string &msg) : SiderustException(msg) {}
 };
 
 class InvalidArgumentError : public SiderustException {
 public:
-  explicit InvalidArgumentError(const std::string &msg)
-      : SiderustException(msg) {}
+  explicit InvalidArgumentError(const std::string &msg) : SiderustException(msg) {}
 };
 
 class InternalPanicError : public SiderustException {
 public:
-  explicit InternalPanicError(const std::string &msg)
-      : SiderustException(msg) {}
+  explicit InternalPanicError(const std::string &msg) : SiderustException(msg) {}
 };
 
 class DataLoadError : public SiderustException {
@@ -143,14 +136,12 @@ inline void check_status(siderust_status_t status, const char *operation) {
   case SIDERUST_STATUS_T_NO_EOP_DATA:
     throw NoEopDataError(msg + "Earth Orientation Parameters unavailable for epoch");
   default:
-    throw SiderustException(msg + "unknown error (" + std::to_string(status) +
-                            ")");
+    throw SiderustException(msg + "unknown error (" + std::to_string(status) + ")");
   }
 }
 
 /// @brief Backward-compatible wrapper — delegates to tempoch::check_status.
-inline void check_tempoch_status(tempoch_status_t status,
-                                 const char *operation) {
+inline void check_tempoch_status(tempoch_status_t status, const char *operation) {
   tempoch::check_status(status, operation);
 }
 
@@ -273,8 +264,7 @@ inline siderust_subject_t make_star_subject(const SiderustStar *h) {
 }
 
 /// Build a `siderust_subject_t` for a fixed ICRS direction.
-inline siderust_subject_t
-make_icrs_subject(const siderust_spherical_dir_t &dir) {
+inline siderust_subject_t make_icrs_subject(const siderust_spherical_dir_t &dir) {
   siderust_subject_t s{};
   s.kind = SIDERUST_SUBJECT_KIND_T_ICRS;
   s.icrs_dir = dir;
@@ -282,8 +272,7 @@ make_icrs_subject(const siderust_spherical_dir_t &dir) {
 }
 
 /// Build a `siderust_subject_t` for a generic target opaque handle.
-inline siderust_subject_t
-make_generic_target_subject(const SiderustGenericTarget *h) {
+inline siderust_subject_t make_generic_target_subject(const SiderustGenericTarget *h) {
   siderust_subject_t s{};
   s.kind = SIDERUST_SUBJECT_KIND_T_GENERIC_TARGET;
   s.generic_target_handle = h;

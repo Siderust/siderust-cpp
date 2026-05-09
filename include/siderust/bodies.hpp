@@ -26,13 +26,11 @@ struct ProperMotion {
   double pm_dec_deg_yr;    ///< Dec proper motion (deg/yr).
   RaConvention convention; ///< RA rate convention.
 
-  ProperMotion(double ra, double dec,
-               RaConvention conv = RaConvention::MuAlphaStar)
+  ProperMotion(double ra, double dec, RaConvention conv = RaConvention::MuAlphaStar)
       : pm_ra_deg_yr(ra), pm_dec_deg_yr(dec), convention(conv) {}
 
   siderust_proper_motion_t to_c() const {
-    return {pm_ra_deg_yr, pm_dec_deg_yr,
-            static_cast<siderust_ra_convention_t>(convention)};
+    return {pm_ra_deg_yr, pm_dec_deg_yr, static_cast<siderust_ra_convention_t>(convention)};
   }
 };
 
@@ -49,8 +47,7 @@ struct Planet {
   Orbit orbit;
 
   static Planet from_c(const siderust_planet_t &c) {
-    return {qtty::Kilogram(c.mass_kg), qtty::Kilometer(c.radius_km),
-            Orbit::from_c(c.orbit)};
+    return {qtty::Kilogram(c.mass_kg), qtty::Kilometer(c.radius_km), Orbit::from_c(c.orbit)};
   }
 };
 
@@ -217,11 +214,9 @@ public:
    * @param epoch_jd       Epoch of coordinates (Julian Date).
    * @param pm             Optional proper motion.
    */
-  static Star create(const std::string &name, double distance_ly,
-                     double mass_solar, double radius_solar,
-                     double luminosity_solar, double ra_deg, double dec_deg,
-                     double epoch_jd,
-                     const std::optional<ProperMotion> &pm = std::nullopt) {
+  static Star create(const std::string &name, double distance_ly, double mass_solar,
+                     double radius_solar, double luminosity_solar, double ra_deg, double dec_deg,
+                     double epoch_jd, const std::optional<ProperMotion> &pm = std::nullopt) {
     SiderustStar *h = nullptr;
     const siderust_proper_motion_t *pm_ptr = nullptr;
     siderust_proper_motion_t pm_c{};
@@ -229,9 +224,8 @@ public:
       pm_c = pm->to_c();
       pm_ptr = &pm_c;
     }
-    check_status(siderust_star_create(name.c_str(), distance_ly, mass_solar,
-                                      radius_solar, luminosity_solar, ra_deg,
-                                      dec_deg, epoch_jd, pm_ptr, &h),
+    check_status(siderust_star_create(name.c_str(), distance_ly, mass_solar, radius_solar,
+                                      luminosity_solar, ra_deg, dec_deg, epoch_jd, pm_ptr, &h),
                  "Star::create");
     return Star(h);
   }
@@ -241,17 +235,14 @@ public:
   std::string name() const {
     char buf[256];
     uintptr_t written = 0;
-    check_status(siderust_star_name(m_handle, buf, sizeof(buf), &written),
-                 "Star::name");
+    check_status(siderust_star_name(m_handle, buf, sizeof(buf), &written), "Star::name");
     return std::string(buf, written);
   }
 
   double distance_ly() const { return siderust_star_distance_ly(m_handle); }
   double mass_solar() const { return siderust_star_mass_solar(m_handle); }
   double radius_solar() const { return siderust_star_radius_solar(m_handle); }
-  double luminosity_solar() const {
-    return siderust_star_luminosity_solar(m_handle);
-  }
+  double luminosity_solar() const { return siderust_star_luminosity_solar(m_handle); }
 };
 
 inline const Star &VEGA() {

@@ -32,8 +32,7 @@ int main() {
   std::cout << "------------------------" << std::endl;
 
   // Start with ecliptic coordinates (heliocentric)
-  cartesian::Position<Heliocentric, EclipticMeanJ2000, AU> pos_ecliptic(
-      1.0, 0.0, 0.0);
+  cartesian::Position<Heliocentric, EclipticMeanJ2000, AU> pos_ecliptic(1.0, 0.0, 0.0);
   std::cout << std::setprecision(6);
   std::cout << "Original (Heliocentric EclipticMeanJ2000):" << std::endl;
   std::cout << "  X = " << pos_ecliptic.x() << std::endl;
@@ -75,8 +74,7 @@ int main() {
   std::cout << "  X = " << earth_geo.x() << std::endl;
   std::cout << "  Y = " << earth_geo.y() << std::endl;
   std::cout << "  Z = " << earth_geo.z() << std::endl;
-  std::cout << "  Distance = " << earth_geo.distance() << " (should be ~0)\n"
-            << std::endl;
+  std::cout << "  Distance = " << earth_geo.distance() << " (should be ~0)\n" << std::endl;
 
   // Get Mars position (heliocentric)
   auto mars_helio = ephemeris::mars_heliocentric(jd);
@@ -89,8 +87,7 @@ int main() {
 
   // Transform Mars to geocentric
   auto mars_geo = mars_helio.to_center<Geocentric>(jd);
-  std::cout << "Mars (Geocentric EclipticMeanJ2000) - as seen from Earth:"
-            << std::endl;
+  std::cout << "Mars (Geocentric EclipticMeanJ2000) - as seen from Earth:" << std::endl;
   std::cout << "  X = " << mars_geo.x() << std::endl;
   std::cout << "  Y = " << mars_geo.y() << std::endl;
   std::cout << "  Z = " << mars_geo.z() << std::endl;
@@ -108,20 +105,17 @@ int main() {
 
   // Method 1: Step by step
   auto mars_helio_equ = mars_helio.to_frame<EquatorialMeanJ2000>(jd);
-  std::cout << "  Step 1: Transform frame -> Heliocentric EquatorialMeanJ2000"
-            << std::endl;
+  std::cout << "  Step 1: Transform frame -> Heliocentric EquatorialMeanJ2000" << std::endl;
 
   auto mars_geo_equ = mars_helio_equ.to_center<Geocentric>(jd);
-  std::cout << "  Step 2: Transform center -> Geocentric EquatorialMeanJ2000"
-            << std::endl;
+  std::cout << "  Step 2: Transform center -> Geocentric EquatorialMeanJ2000" << std::endl;
   std::cout << "  Result:" << std::endl;
   std::cout << "    X = " << mars_geo_equ.x() << std::endl;
   std::cout << "    Y = " << mars_geo_equ.y() << std::endl;
   std::cout << "    Z = " << mars_geo_equ.z() << "\n" << std::endl;
 
   // Method 2: Using transform (does both)
-  auto mars_geo_equ_direct =
-      mars_helio.transform<Geocentric, EquatorialMeanJ2000>(jd);
+  auto mars_geo_equ_direct = mars_helio.transform<Geocentric, EquatorialMeanJ2000>(jd);
   std::cout << "  Or using .transform<C,F>(jd) directly:" << std::endl;
   std::cout << "    X = " << mars_geo_equ_direct.x() << std::endl;
   std::cout << "    Y = " << mars_geo_equ_direct.y() << std::endl;
@@ -139,15 +133,13 @@ int main() {
   std::cout << "  X = " << earth_bary.x() << std::endl;
   std::cout << "  Y = " << earth_bary.y() << std::endl;
   std::cout << "  Z = " << earth_bary.z() << std::endl;
-  std::cout << "  Distance from SSB = " << earth_bary.distance() << "\n"
-            << std::endl;
+  std::cout << "  Distance from SSB = " << earth_bary.distance() << "\n" << std::endl;
 
   // Transform to geocentric
   auto earth_geo_from_bary = earth_bary.to_center<Geocentric>(jd);
   std::cout << std::setprecision(10);
   std::cout << "Earth (Geocentric, from Barycentric):" << std::endl;
-  std::cout << "  Distance = " << earth_geo_from_bary.distance()
-            << " (should be ~0)\n"
+  std::cout << "  Distance = " << earth_geo_from_bary.distance() << " (should be ~0)\n"
             << std::endl;
 
   // Transform Mars from barycentric to geocentric
@@ -158,8 +150,7 @@ int main() {
   std::cout << "  X = " << mars_geo_from_bary.x() << std::endl;
   std::cout << "  Y = " << mars_geo_from_bary.y() << std::endl;
   std::cout << "  Z = " << mars_geo_from_bary.z() << std::endl;
-  std::cout << "  Distance = " << mars_geo_from_bary.distance() << "\n"
-            << std::endl;
+  std::cout << "  Distance = " << mars_geo_from_bary.distance() << "\n" << std::endl;
 
   // =========================================================================
   // 5. ICRS Frame Transformations
