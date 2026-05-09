@@ -381,6 +381,6 @@ TEST(TypedCoordinates, ToHorizontalPreciseReturnType) {
   auto jd = JulianDate::J2000();
   auto obs = ROQUE_DE_LOS_MUCHACHOS();
 
-  auto hor = dir.to_horizontal_precise(jd, jd, obs);
+  [[maybe_unused]] auto hor = dir.to_horizontal_precise(jd, jd, obs);
   static_assert(std::is_same_v<decltype(hor), spherical::Direction<Horizontal>>);
 }
