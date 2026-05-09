@@ -14,23 +14,19 @@ namespace {
 constexpr double J2000 = 2451545.0;
 
 KeplerianOrbit earth_like_keplerian() {
-  return {1.0_au,    0.0167,   0.0_deg,   0.0_deg,
-          102.9_deg, 100.0_deg, J2000};
+  return {1.0_au, 0.0167, 0.0_deg, 0.0_deg, 102.9_deg, 100.0_deg, J2000};
 }
 
 MeanMotionOrbit earth_like_mean_motion() {
-  return {1.0_au,   0.0167, 0.0_deg, 0.0_deg,
-          102.9_deg, 0.9856, J2000};
+  return {1.0_au, 0.0167, 0.0_deg, 0.0_deg, 102.9_deg, 0.9856, J2000};
 }
 
 ConicOrbit halley_like_conic() {
-  return {0.586_au, 0.967,    162.3_deg, 58.4_deg,
-          111.3_deg, 38.4_deg, J2000};
+  return {0.586_au, 0.967, 162.3_deg, 58.4_deg, 111.3_deg, 38.4_deg, J2000};
 }
 
 ConicOrbit hyperbolic_conic() {
-  return {0.255_au, 1.2,       122.7_deg, 24.6_deg,
-          241.8_deg, 12.0_deg, J2000};
+  return {0.255_au, 1.2, 122.7_deg, 24.6_deg, 241.8_deg, 12.0_deg, J2000};
 }
 
 } // namespace

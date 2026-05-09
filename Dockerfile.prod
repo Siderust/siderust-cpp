@@ -1,0 +1,121 @@
+# Dockerfile.prod — Multi-stage production image for siderust-cpp
+#
+# Stages:
+#   1. rust-builder   — builds libsiderust_ffi.so, libtempoch_ffi.so, libqtty_ffi.so
+#   2. cpp-builder    — configures CMake, runs install into /install
+#   3. runtime        — minimal Ubuntu 22.04 with only the installed artefacts
+
+ARG UBUNTU_TAG=22.04
+
+# ---------------------------------------------------------------------------
+# Stage 1: Rust shared libraries
+# ---------------------------------------------------------------------------
+FROM ubuntu:${UBUNTU_TAG} AS rust-builder
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV RUSTUP_HOME=/usr/local/rustup
+ENV CARGO_HOME=/usr/local/cargo
+ENV PATH=/usr/local/cargo/bin:${PATH}
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    curl \
+    ca-certificates \
+    pkg-config \
+    libssl-dev \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | \
+    sh -s -- -y --profile minimal --default-toolchain stable
+
+WORKDIR /src
+COPY siderust/ siderust/
+COPY tempoch-cpp/ tempoch-cpp/
+
+# Build all Rust shared libraries in release mode.
+RUN cargo rustc --release --crate-type cdylib \
+        --manifest-path /src/siderust/siderust-ffi/Cargo.toml
+
+RUN cargo rustc --release --crate-type cdylib \
+        --manifest-path /src/tempoch-cpp/tempoch/tempoch-ffi/Cargo.toml
+
+RUN cargo rustc --release --crate-type cdylib \
+        --manifest-path /src/tempoch-cpp/qtty-cpp/qtty/qtty-ffi/Cargo.toml
+
+# ---------------------------------------------------------------------------
+# Stage 2: C++ build and install
+# ---------------------------------------------------------------------------
+FROM ubuntu:${UBUNTU_TAG} AS cpp-builder
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV RUSTUP_HOME=/usr/local/rustup
+ENV CARGO_HOME=/usr/local/cargo
+ENV PATH=/usr/local/cargo/bin:${PATH}
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    cmake \
+    ninja-build \
+    curl \
+    ca-certificates \
+    pkg-config \
+    libssl-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Reuse the Rust toolchain from Stage 1 (avoids re-downloading).
+COPY --from=rust-builder /usr/local/rustup /usr/local/rustup
+COPY --from=rust-builder /usr/local/cargo  /usr/local/cargo
+
+WORKDIR /src
+COPY . /src/
+
+# Bring pre-built Rust artefacts into the expected target/release locations
+# so CMake's custom target finds them and does not rebuild.
+COPY --from=rust-builder \
+    /src/siderust/siderust-ffi/target/release/libsiderust_ffi.so \
+    /src/siderust/target/release/libsiderust_ffi.so
+
+COPY --from=rust-builder \
+    /src/tempoch-cpp/tempoch/tempoch-ffi/target/release/libtempoch_ffi.so \
+    /src/tempoch-cpp/tempoch/tempoch-ffi/target/release/libtempoch_ffi.so
+
+COPY --from=rust-builder \
+    /src/tempoch-cpp/qtty-cpp/qtty/qtty-ffi/target/release/libqtty_ffi.so \
+    /src/tempoch-cpp/qtty-cpp/qtty/qtty-ffi/target/release/libqtty_ffi.so
+
+RUN cmake -S . -B build -G Ninja \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DSIDERUST_BUILD_DOCS=OFF \
+        -DCMAKE_INSTALL_PREFIX=/install \
+    && cmake --build build --target test_siderust \
+    && cmake --install build
+
+# Copy shared libraries into the install prefix.
+RUN mkdir -p /install/lib && \
+    cp /src/siderust/target/release/libsiderust_ffi.so \
+       /src/tempoch-cpp/tempoch/tempoch-ffi/target/release/libtempoch_ffi.so \
+       /src/tempoch-cpp/qtty-cpp/qtty/qtty-ffi/target/release/libqtty_ffi.so \
+       /install/lib/
+
+# ---------------------------------------------------------------------------
+# Stage 3: Minimal runtime image
+# ---------------------------------------------------------------------------
+FROM ubuntu:${UBUNTU_TAG} AS runtime
+
+LABEL org.opencontainers.image.title="siderust-cpp"
+LABEL org.opencontainers.image.description="C++ astronomy library (siderust-cpp runtime)"
+LABEL org.opencontainers.image.source="https://github.com/Siderust/siderust-cpp"
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libstdc++6 \
+    libgcc-s1 \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=cpp-builder /install /usr/local
+
+# Refresh the dynamic linker cache so the copied .so files are found.
+RUN ldconfig
+
+CMD ["/bin/bash"]

@@ -21,16 +21,13 @@ using namespace siderust;
 using namespace qtty::literals;
 
 /// Helper: print a list of MJD periods with their durations.
-void print_periods(const std::string &label,
-                   const std::vector<Period> &periods) {
-  std::cout << "\n"
-            << label << ": " << periods.size() << " period(s)" << std::endl;
+void print_periods(const std::string &label, const std::vector<Period> &periods) {
+  std::cout << "\n" << label << ": " << periods.size() << " period(s)" << std::endl;
   for (const auto &p : periods) {
     auto dur_h = p.duration<qtty::Hour>();
     auto s = p.start().to_utc();
     auto e = p.end().to_utc();
-    std::cout << "  - " << s << " -> " << e << " (" << dur_h << ")"
-              << std::endl;
+    std::cout << "  - " << s << " -> " << e << " (" << dur_h << ")" << std::endl;
   }
 }
 
@@ -44,7 +41,7 @@ int main() {
 
   // Use a fixed date for reproducibility: 2026-03-01 00:00 UTC
   auto jd = JulianDate::from_utc({2026, 3, 1, 0, 0, 0});
-  auto mjd = jd.to<tempoch::MJDScale>();
+  auto mjd = jd.to<tempoch::scales::MJD>();
   auto window = Period(mjd, MJD(mjd.value() + 35.0));
   SearchOptions opts{};
 
@@ -58,47 +55,37 @@ int main() {
   std::cout << "Moon phase at 2026-03-01 00:00 UTC" << std::endl;
   std::cout << "==================================" << std::endl;
   std::cout << std::setprecision(4);
-  std::cout << "Site: lat=" << lat << " deg, lon=" << lon
-            << " deg, h=" << std::setprecision(0) << h_m << " m" << std::endl;
+  std::cout << "Site: lat=" << lat << " deg, lon=" << lon << " deg, h=" << std::setprecision(0)
+            << h_m << " m" << std::endl;
 
   std::cout << "\nGeocentric:" << std::endl;
-  std::cout << "  label                 : " << moon::phase_label(geo)
-            << std::endl;
+  std::cout << "  label                 : " << moon::phase_label(geo) << std::endl;
   std::cout << std::setprecision(4);
-  std::cout << "  illuminated fraction  : " << geo.illuminated_fraction
-            << std::endl;
+  std::cout << "  illuminated fraction  : " << geo.illuminated_fraction << std::endl;
   std::cout << std::setprecision(2);
-  std::cout << "  illuminated percent   : " << illuminated_percent(geo) << " %"
-            << std::endl;
-  std::cout << "  phase angle           : "
-            << geo.phase_angle.to<qtty::Degree>() << std::endl;
-  std::cout << "  elongation            : " << geo.elongation.to<qtty::Degree>()
-            << std::endl;
-  std::cout << "  waxing                : " << std::boolalpha << geo.waxing
-            << std::endl;
+  std::cout << "  illuminated percent   : " << illuminated_percent(geo) << " %" << std::endl;
+  std::cout << "  phase angle           : " << geo.phase_angle.to<qtty::Degree>() << std::endl;
+  std::cout << "  elongation            : " << geo.elongation.to<qtty::Degree>() << std::endl;
+  std::cout << "  waxing                : " << std::boolalpha << geo.waxing << std::endl;
 
   std::cout << "\nTopocentric:" << std::endl;
-  std::cout << "  label                 : " << moon::phase_label(topo)
-            << std::endl;
+  std::cout << "  label                 : " << moon::phase_label(topo) << std::endl;
   std::cout << std::setprecision(4);
-  std::cout << "  illuminated fraction  : " << topo.illuminated_fraction
-            << std::endl;
+  std::cout << "  illuminated fraction  : " << topo.illuminated_fraction << std::endl;
   std::cout << "  illumination delta    : " << std::showpos
-            << (topo.illuminated_fraction - geo.illuminated_fraction) * 100.0
-            << std::noshowpos << " %" << std::endl;
-  std::cout << "  elongation            : "
-            << topo.elongation.to<qtty::Degree>() << std::endl;
+            << (topo.illuminated_fraction - geo.illuminated_fraction) * 100.0 << std::noshowpos
+            << " %" << std::endl;
+  std::cout << "  elongation            : " << topo.elongation.to<qtty::Degree>() << std::endl;
 
   // =========================================================================
   // 2) Principal phase events
   // =========================================================================
   auto events = moon::find_phase_events(window, opts);
-  std::cout << "\nPrincipal phase events in next 35 days: " << events.size()
-            << std::endl;
+  std::cout << "\nPrincipal phase events in next 35 days: " << events.size() << std::endl;
   for (const auto &ev : events) {
     auto utc = ev.time.to_utc();
-    std::cout << "  - " << std::setw(13) << std::right << ev.kind << " at "
-              << utc << " UTC" << std::endl;
+    std::cout << "  - " << std::setw(13) << std::right << ev.kind << " at " << utc << " UTC"
+              << std::endl;
   }
 
   // =========================================================================

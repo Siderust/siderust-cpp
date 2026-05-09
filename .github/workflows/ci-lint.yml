@@ -1,0 +1,73 @@
+name: CI Lint
+
+on:
+  workflow_call:
+
+jobs:
+  lint-cpp:
+    name: C++ Lint (clang-format + clang-tidy)
+    runs-on: ubuntu-22.04
+    env:
+      CARGO_TERM_COLOR: always
+    steps:
+      - name: Checkout (with submodules)
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Install system dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            cmake \
+            ninja-build \
+            clang-tidy
+
+      - name: Install clang-format 18
+        shell: bash
+        run: |
+          set -euo pipefail
+          wget -qO /tmp/llvm.sh https://apt.llvm.org/llvm.sh
+          sudo bash /tmp/llvm.sh 18
+          sudo apt-get install -y --no-install-recommends clang-format-18
+          sudo ln -sf /usr/bin/clang-format-18 /usr/local/bin/clang-format
+          clang-format --version
+
+      - name: Set up Rust (stable)
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
+
+      - name: Configure (CMake, compile commands)
+        shell: bash
+        run: |
+          set -euo pipefail
+          cmake -S . -B build -G Ninja -DSIDERUST_BUILD_DOCS=OFF -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+
+      - name: clang-format check
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t files < <(git ls-files '*.hpp' '*.cpp')
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "No C++ files found."
+            exit 0
+          fi
+          clang-format --dry-run --Werror "${files[@]}"
+
+      - name: clang-tidy check
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t cpp_files < <(git ls-files '*.cpp')
+          if [ ${#cpp_files[@]} -eq 0 ]; then
+            echo "No C++ source files found."
+            exit 0
+          fi
+          for file in "${cpp_files[@]}"; do
+            echo "Running clang-tidy on ${file}"
+            clang-tidy -p build --warnings-as-errors='*' "${file}"
+          done

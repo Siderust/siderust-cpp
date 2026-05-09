@@ -42,19 +42,16 @@ template <typename Pos> static void print_pos(const char *label, const Pos &p) {
             << "    x = " << std::fixed << std::setprecision(8) << p.x() << "\n"
             << "    y = " << std::fixed << std::setprecision(8) << p.y() << "\n"
             << "    z = " << std::fixed << std::setprecision(8) << p.z() << "\n"
-            << "    |r| = " << std::fixed << std::setprecision(8)
-            << p.distance() << "\n";
+            << "    |r| = " << std::fixed << std::setprecision(8) << p.distance() << "\n";
 }
 
 // ─── section 1: load from file ───────────────────────────────────────────────
 
 /// Demonstrates `RuntimeEphemeris(path)` — basic file-based loading.
 static void demo_from_file(const std::string &bsp_path) {
-  std::puts(
-      "─────────────────────────────────────────────────────────────────");
+  std::puts("─────────────────────────────────────────────────────────────────");
   std::puts("1) LOAD FROM BSP FILE");
-  std::puts(
-      "─────────────────────────────────────────────────────────────────");
+  std::puts("─────────────────────────────────────────────────────────────────");
 
   RuntimeEphemeris eph(bsp_path); // throws DataLoadError on failure
 
@@ -80,11 +77,9 @@ static void demo_from_file(const std::string &bsp_path) {
 /// Shows that `RuntimeEphemeris` is move-only and that moves transfer the
 /// underlying handle (no copy, no double-free).
 static void demo_move_semantics(const std::string &bsp_path) {
-  std::puts(
-      "─────────────────────────────────────────────────────────────────");
+  std::puts("─────────────────────────────────────────────────────────────────");
   std::puts("2) MOVE SEMANTICS");
-  std::puts(
-      "─────────────────────────────────────────────────────────────────");
+  std::puts("─────────────────────────────────────────────────────────────────");
 
   RuntimeEphemeris eph1(bsp_path);
 
@@ -98,9 +93,8 @@ static void demo_move_semantics(const std::string &bsp_path) {
   }
 
   JulianDate jd(2451545.0);
-  std::cout << "  Earth-Sun distance via eph2: " << std::fixed
-            << std::setprecision(8) << eph2.earth_heliocentric(jd).distance()
-            << "\n";
+  std::cout << "  Earth-Sun distance via eph2: " << std::fixed << std::setprecision(8)
+            << eph2.earth_heliocentric(jd).distance() << "\n";
   std::puts("");
 }
 
@@ -108,11 +102,9 @@ static void demo_move_semantics(const std::string &bsp_path) {
 
 /// Demonstrates the `DataLoadError` exception thrown for invalid data.
 static void demo_error_handling() {
-  std::puts(
-      "─────────────────────────────────────────────────────────────────");
+  std::puts("─────────────────────────────────────────────────────────────────");
   std::puts("3) ERROR HANDLING");
-  std::puts(
-      "─────────────────────────────────────────────────────────────────");
+  std::puts("─────────────────────────────────────────────────────────────────");
 
   // Attempt to load garbage bytes — should throw DataLoadError.
   const uint8_t bad_data[] = {0xDE, 0xAD, 0xBE, 0xEF, 0x00, 0x01, 0x02};
@@ -129,8 +121,7 @@ static void demo_error_handling() {
     RuntimeEphemeris eph("/does/not/exist/de440.bsp");
     std::puts("  ERROR: expected DataLoadError was not thrown!");
   } catch (const DataLoadError &e) {
-    std::cout << "  Caught expected DataLoadError for missing file: "
-              << e.what() << "\n";
+    std::cout << "  Caught expected DataLoadError for missing file: " << e.what() << "\n";
     std::puts("  Error handling works correctly ✓");
   }
   std::puts("");
@@ -141,11 +132,9 @@ static void demo_error_handling() {
 /// Demonstrates reading a BSP file into a `std::vector<uint8_t>` and
 /// passing the buffer directly to `RuntimeEphemeris(ptr, len)`.
 static void demo_from_bytes(const std::string &bsp_path) {
-  std::puts(
-      "─────────────────────────────────────────────────────────────────");
+  std::puts("─────────────────────────────────────────────────────────────────");
   std::puts("4) LOAD FROM MEMORY BUFFER");
-  std::puts(
-      "─────────────────────────────────────────────────────────────────");
+  std::puts("─────────────────────────────────────────────────────────────────");
 
   // Read entire file into memory.
   std::ifstream file(bsp_path, std::ios::binary | std::ios::ate);
@@ -156,16 +145,14 @@ static void demo_from_bytes(const std::string &bsp_path) {
   const auto fsize = static_cast<std::size_t>(file.tellg());
   file.seekg(0);
   std::vector<uint8_t> buf(fsize);
-  file.read(reinterpret_cast<char *>(buf.data()),
-            static_cast<std::streamsize>(fsize));
+  file.read(reinterpret_cast<char *>(buf.data()), static_cast<std::streamsize>(fsize));
 
   std::cout << "  Loaded " << fsize << " bytes into memory\n";
 
   RuntimeEphemeris eph(buf.data(), buf.size());
   JulianDate jd(2451545.0);
-  std::cout << "  Earth-Sun distance (from buffer): " << std::fixed
-            << std::setprecision(8) << eph.earth_heliocentric(jd).distance()
-            << "\n";
+  std::cout << "  Earth-Sun distance (from buffer): " << std::fixed << std::setprecision(8)
+            << eph.earth_heliocentric(jd).distance() << "\n";
   std::puts("");
 }
 

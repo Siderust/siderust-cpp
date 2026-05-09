@@ -34,14 +34,14 @@ static Period week_from_mjd(const MJD &start) {
   return Period(start, end);
 }
 
-static void print_events_for_type(const Geodetic &site, const Period &week,
-                                  const char *name, qtty::Degree threshold) {
+static void print_events_for_type(const Geodetic &site, const Period &week, const char *name,
+                                  qtty::Degree threshold) {
   auto events = sun::crossings(site, week, threshold);
   int downs = 0, raises = 0;
 
-  std::cout << std::left << std::setw(18) << name << " threshold " << std::right
-            << std::fixed << std::setprecision(3) << threshold << " -> "
-            << events.size() << " crossing(s)" << std::endl;
+  std::cout << std::left << std::setw(18) << name << " threshold " << std::right << std::fixed
+            << std::setprecision(3) << threshold << " -> " << events.size() << " crossing(s)"
+            << std::endl;
 
   for (auto &ev : events) {
     const char *label;
@@ -58,19 +58,18 @@ static void print_events_for_type(const Geodetic &site, const Period &week,
   std::cout << "  summary: down=" << downs << " raise=" << raises << std::endl;
 }
 
-static void print_periods_for_type(const Geodetic &site, const Period &week,
-                                   const char *name, qtty::Degree threshold) {
+static void print_periods_for_type(const Geodetic &site, const Period &week, const char *name,
+                                   qtty::Degree threshold) {
   auto periods = sun::below_threshold(site, week, threshold);
-  std::cout << std::left << std::setw(18) << name << " night periods (Sun < "
-            << std::fixed << std::setprecision(3) << threshold
-            << "): " << periods.size() << std::endl;
+  std::cout << std::left << std::setw(18) << name << " night periods (Sun < " << std::fixed
+            << std::setprecision(3) << threshold << "): " << periods.size() << std::endl;
 
   for (auto &p : periods) {
     auto s = p.start().to_utc();
     auto e = p.end().to_utc();
     auto hours = p.duration<qtty::Hour>();
-    std::cout << "  - " << s << " -> " << e << " (" << std::setprecision(1)
-              << hours << ")" << std::endl;
+    std::cout << "  - " << s << " -> " << e << " (" << std::setprecision(1) << hours << ")"
+              << std::endl;
   }
 }
 
@@ -79,8 +78,7 @@ int main(int argc, char *argv[]) {
   double lon_deg = argc > 2 ? std::stod(argv[2]) : 0.0;
   double height_m = argc > 3 ? std::stod(argv[3]) : 0.0;
 
-  Geodetic site{qtty::Degree(lon_deg), qtty::Degree(lat_deg),
-                qtty::Meter(height_m)};
+  Geodetic site{qtty::Degree(lon_deg), qtty::Degree(lat_deg), qtty::Meter(height_m)};
 
   // Fixed start date: 2024-06-01 00:00 UTC  (MJD ≈ 60461)
   auto mjd_start = MJD::from_utc({2024, 6, 1, 0, 0, 0});
@@ -100,8 +98,7 @@ int main(int argc, char *argv[]) {
 
   std::cout << "Night events over one week" << std::endl;
   std::cout << "==========================" << std::endl;
-  std::cout << "Site: lat=" << lat_deg << " lon=" << lon_deg
-            << " height=" << height_m << std::endl;
+  std::cout << "Site: lat=" << lat_deg << " lon=" << lon_deg << " height=" << height_m << std::endl;
   std::cout << "Week start: 2024-06-01 UTC\n" << std::endl;
 
   std::cout << "1) Night-type crossing events" << std::endl;

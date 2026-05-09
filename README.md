@@ -69,6 +69,68 @@ cmake --build .
 ctest --output-on-failure
 ```
 
+## Deployment
+
+Packages for Debian/Ubuntu (`.deb`) and RHEL/Fedora/openSUSE (`.rpm`) can be
+built with CMake + CPack.
+
+### Prerequisites
+
+```bash
+# Debian/Ubuntu
+sudo apt-get install cmake ninja-build rpm
+
+# RHEL/Fedora
+sudo dnf install cmake ninja-build dpkg
+```
+
+### Build the packages
+
+```bash
+git clone --recurse-submodules <url>
+cd siderust-cpp
+
+cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DSIDERUST_BUILD_DOCS=OFF
+cmake --build build --parallel
+
+# Install headers + cmake config to a staging prefix
+cmake --install build --prefix build/staging
+
+# Copy shared libraries into the staging tree
+mkdir -p build/staging/lib
+cp siderust/target/release/libsiderust_ffi.so \
+   tempoch-cpp/tempoch/tempoch-ffi/target/release/libtempoch_ffi.so \
+   tempoch-cpp/qtty-cpp/qtty/target/release/libqtty_ffi.so \
+   build/staging/lib/
+
+# Generate .deb and .rpm in build/packages/
+cd build
+cpack --config CPackConfig.cmake -G "DEB;RPM" -B packages
+ls packages/
+```
+
+### Install on the target system
+
+```bash
+# Debian/Ubuntu
+sudo dpkg -i packages/siderust-cpp-*.deb
+
+# RHEL/Fedora/openSUSE
+sudo rpm -i packages/siderust-cpp-*.rpm
+```
+
+After installation, headers land in `/usr/local/include/siderust/` and the
+shared libraries in `/usr/local/lib/`.  CMake consumers can then use:
+
+```cmake
+find_package(siderust_cpp REQUIRED)
+target_link_libraries(your_target PRIVATE siderust::siderust_cpp)
+```
+
+> **Note:** Pre-built `.deb` and `.rpm` packages are automatically built by CI
+> and attached to every
+> [GitHub Release](https://github.com/Siderust/siderust-cpp/releases).
+
 ## Docker
 
 The repository includes a root `Dockerfile` that installs all build dependencies

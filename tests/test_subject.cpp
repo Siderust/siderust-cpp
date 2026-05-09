@@ -45,8 +45,7 @@ TEST(SubjectTest, AltitudeAtStar) {
 }
 
 TEST(SubjectTest, AltitudeAtIcrs) {
-  auto dir = spherical::Direction<frames::ICRS>(qtty::Degree(279.23),
-                                                qtty::Degree(38.78));
+  auto dir = spherical::Direction<frames::ICRS>(qtty::Degree(279.23), qtty::Degree(38.78));
   auto subj = Subject::icrs(dir);
   auto alt = altitude_at(subj, paris(), mid_day());
   EXPECT_TRUE(std::isfinite(alt.value()));
@@ -54,8 +53,7 @@ TEST(SubjectTest, AltitudeAtIcrs) {
 
 TEST(SubjectTest, AltitudeAtTarget) {
   auto tgt = DirectionTarget<spherical::Direction<frames::ICRS>>(
-      spherical::Direction<frames::ICRS>(qtty::Degree(279.23),
-                                         qtty::Degree(38.78)));
+      spherical::Direction<frames::ICRS>(qtty::Degree(279.23), qtty::Degree(38.78)));
   auto subj = Subject::target(tgt);
   auto alt = altitude_at(subj, paris(), mid_day());
   EXPECT_TRUE(std::isfinite(alt.value()));
@@ -78,8 +76,7 @@ TEST(SubjectTest, AboveThresholdStar) {
 }
 
 TEST(SubjectTest, AboveThresholdIcrs) {
-  auto dir = spherical::Direction<frames::ICRS>(qtty::Degree(279.23),
-                                                qtty::Degree(38.78));
+  auto dir = spherical::Direction<frames::ICRS>(qtty::Degree(279.23), qtty::Degree(38.78));
   auto subj = Subject::icrs(dir);
   auto periods = above_threshold(subj, paris(), one_day(), qtty::Degree(0));
   EXPECT_GT(periods.size(), 0u);
@@ -118,8 +115,7 @@ TEST(SubjectTest, CulminationsBody) {
 
 TEST(SubjectTest, CulminationsTarget) {
   auto tgt = DirectionTarget<spherical::Direction<frames::ICRS>>(
-      spherical::Direction<frames::ICRS>(qtty::Degree(279.23),
-                                         qtty::Degree(38.78)));
+      spherical::Direction<frames::ICRS>(qtty::Degree(279.23), qtty::Degree(38.78)));
   auto subj = Subject::target(tgt);
   auto evts = culminations(subj, paris(), one_day());
   EXPECT_GT(evts.size(), 0u);
@@ -129,8 +125,7 @@ TEST(SubjectTest, CulminationsTarget) {
 
 TEST(SubjectTest, AltitudePeriodsBody) {
   auto subj = Subject::body(Body::Sun);
-  auto periods = altitude_periods(subj, paris(), one_day(), qtty::Degree(-90),
-                                  qtty::Degree(90));
+  auto periods = altitude_periods(subj, paris(), one_day(), qtty::Degree(-90), qtty::Degree(90));
   // Full altitude range — should cover the entire window
   EXPECT_GT(periods.size(), 0u);
 }
@@ -139,10 +134,7 @@ TEST(SubjectTest, AltitudePeriodsStarThrows) {
   Star vega = Star::catalog("VEGA");
   auto subj = Subject::star(vega);
   EXPECT_THROW(
-      [&]() {
-        altitude_periods(subj, paris(), one_day(), qtty::Degree(-90),
-                         qtty::Degree(90));
-      }(),
+      [&]() { altitude_periods(subj, paris(), one_day(), qtty::Degree(-90), qtty::Degree(90)); }(),
       SiderustException);
 }
 
@@ -162,8 +154,7 @@ TEST(SubjectTest, AzimuthAtStar) {
 }
 
 TEST(SubjectTest, AzimuthAtIcrs) {
-  auto dir = spherical::Direction<frames::ICRS>(qtty::Degree(279.23),
-                                                qtty::Degree(38.78));
+  auto dir = spherical::Direction<frames::ICRS>(qtty::Degree(279.23), qtty::Degree(38.78));
   auto subj = Subject::icrs(dir);
   auto az = azimuth_at(subj, paris(), mid_day());
   EXPECT_TRUE(std::isfinite(az.value()));
@@ -192,8 +183,7 @@ TEST(SubjectTest, AzimuthExtremaBody) {
 
 TEST(SubjectTest, InAzimuthRangeBody) {
   auto subj = Subject::body(Body::Sun);
-  auto periods = in_azimuth_range(subj, paris(), one_day(), qtty::Degree(90),
-                                  qtty::Degree(270));
+  auto periods = in_azimuth_range(subj, paris(), one_day(), qtty::Degree(90), qtty::Degree(270));
   EXPECT_GT(periods.size(), 0u);
 }
 
@@ -214,4 +204,61 @@ TEST(SubjectTest, StarAltitudeConsistency) {
   auto alt_subject = altitude_at(subj, paris(), mid_day());
   auto alt_star = star_altitude::altitude_at(vega, paris(), mid_day());
   EXPECT_DOUBLE_EQ(alt_subject.value(), alt_star.value());
+}
+
+// ============================================================================
+// ProperMotionTarget
+// ============================================================================
+
+TEST(ProperMotionTarget, Construction) {
+  // Barnard's star approximate Hipparcos values
+  EXPECT_NO_THROW(ProperMotionTarget(269.4521, 4.6933, JulianDate::J2000(), -798.58e-3, 10337.8e-3,
+                                     RaConvention::MuAlphaStar, "Barnard"));
+}
+
+TEST(ProperMotionTarget, Name) {
+  ProperMotionTarget t(100.0, 20.0, JulianDate::J2000(), 0.0, 0.0, RaConvention::MuAlphaStar,
+                       "TestStar");
+  EXPECT_EQ(t.name(), "TestStar");
+}
+
+TEST(ProperMotionTarget, AutoName) {
+  ProperMotionTarget t(100.0, 20.0, JulianDate::J2000(), 0.0, 0.0, RaConvention::MuAlphaStar);
+  auto n = t.name();
+  // Auto-generated name should be non-empty.
+  EXPECT_FALSE(n.empty());
+}
+
+TEST(ProperMotionTarget, EpochJd) {
+  auto epoch = JulianDate::J2000();
+  ProperMotionTarget t(100.0, 20.0, epoch, 0.0, 0.0, RaConvention::MuAlphaStar);
+  // epoch_jd() should round-trip the construction epoch.
+  EXPECT_NEAR(t.epoch_jd(), epoch.value(), 1.0);
+}
+
+TEST(ProperMotionTarget, DataPayload) {
+  ProperMotionTarget t(100.0, 20.0, JulianDate::J2000(), 0.0, 0.0, RaConvention::MuAlphaStar);
+  auto d = t.data();
+  // Verify RA is approximately 100°.
+  EXPECT_NEAR(d.coord.spherical_dir.azimuth_deg, 100.0, 1.0);
+  EXPECT_NEAR(d.coord.spherical_dir.polar_deg, 20.0, 1.0);
+}
+
+TEST(ProperMotionTarget, AltitudeAtDoesNotCrash) {
+  ProperMotionTarget barnard(269.4521, 4.6933, JulianDate::J2000(), -798.58e-3, 10337.8e-3,
+                             RaConvention::MuAlphaStar);
+  EXPECT_NO_THROW(barnard.altitude_at(paris(), mid_day()));
+}
+
+TEST(DirectionTarget, EpochJdAccessor) {
+  auto epoch = JulianDate::J2000();
+  ICRSTarget t(spherical::direction::ICRS(qtty::Degree(0.0), qtty::Degree(0.0)), epoch);
+  EXPECT_NEAR(t.epoch_jd(), epoch.value(), 1.0);
+}
+
+TEST(DirectionTarget, DataAccessor) {
+  ICRSTarget t(spherical::direction::ICRS(qtty::Degree(45.0), qtty::Degree(30.0)));
+  auto d = t.data();
+  EXPECT_NEAR(d.coord.spherical_dir.azimuth_deg, 45.0, 1.0);
+  EXPECT_NEAR(d.coord.spherical_dir.polar_deg, 30.0, 1.0);
 }

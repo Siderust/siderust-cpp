@@ -21,27 +21,24 @@ using namespace siderust;
 // ── Helper: print a single scale value + JD round-trip drift ────────────────
 
 template <typename S>
-void print_scale(const char *label, const tempoch::Time<S> &time,
-                 const JulianDate &reference_jd) {
+void print_scale(const char *label, const tempoch::Time<S> &time, const JulianDate &reference_jd) {
   // Convert back to JD so we can measure round-trip drift.
-  auto jd_back = time.template to<tempoch::JDScale>();
+  auto jd_back = time.template to<tempoch::scales::JD>();
   double drift_days = jd_back.value() - reference_jd.value();
   double drift_s = drift_days * 86400.0;
-  std::cout << "   " << std::left << std::setw(8) << label
-            << " value = " << std::right << std::setw(16) << std::fixed
-            << std::setprecision(9) << time
-            << "  | JD roundtrip drift = " << std::scientific
-            << std::setprecision(3) << drift_s << " s" << std::endl;
+  std::cout << "   " << std::left << std::setw(8) << label << " value = " << std::right
+            << std::setw(16) << std::fixed << std::setprecision(9) << time
+            << "  | JD roundtrip drift = " << std::scientific << std::setprecision(3) << drift_s
+            << " s" << std::endl;
 }
 
 // ── Helper: print a Period in a given scale ─────────────────────────────────
 
-template <typename T>
-void print_period(const char *label, const tempoch::Period<T> &period) {
+template <typename T> void print_period(const char *label, const tempoch::Period<T> &period) {
   auto dur = period.template duration<qtty::Day>();
-  std::cout << "   " << std::left << std::setw(8) << label << std::right << " ["
-            << std::fixed << std::setprecision(9) << period.start() << ", "
-            << period.end() << "]  \u0394 = " << dur << std::endl;
+  std::cout << "   " << std::left << std::setw(8) << label << std::right << " [" << std::fixed
+            << std::setprecision(9) << period.start() << ", " << period.end()
+            << "]  \u0394 = " << dur << std::endl;
 }
 
 int main() {
@@ -53,25 +50,24 @@ int main() {
   auto jd = JulianDate::from_utc({2000, 1, 1, 12, 0, 0});
 
   // Convert to every supported scale.
-  auto jde = jd.to<tempoch::JDEScale>();
-  auto mjd = jd.to<tempoch::MJDScale>();
-  auto tdb = jd.to<tempoch::TDBScale>();
-  auto tt = jd.to<tempoch::TTScale>();
-  auto tai = jd.to<tempoch::TAIScale>();
-  auto tcg = jd.to<tempoch::TCGScale>();
-  auto tcb = jd.to<tempoch::TCBScale>();
-  auto gps = jd.to<tempoch::GPSScale>();
-  auto unix_t = jd.to<tempoch::UnixTimeScale>();
-  auto ut = jd.to<tempoch::UTScale>();
+  auto jde = jd.to<tempoch::scales::JDE>();
+  auto mjd = jd.to<tempoch::scales::MJD>();
+  auto tdb = jd.to<tempoch::scales::TDB>();
+  auto tt = jd.to<tempoch::scales::TT>();
+  auto tai = jd.to<tempoch::scales::TAI>();
+  auto tcg = jd.to<tempoch::scales::TCG>();
+  auto tcb = jd.to<tempoch::scales::TCB>();
+  auto gps = jd.to<tempoch::scales::GPS>();
+  auto unix_t = jd.to<tempoch::scales::Unix>();
+  auto ut = jd.to<tempoch::scales::UT>();
 
   auto utc_civil = jd.to_utc();
 
-  std::cout << "Reference UTC instant: " << utc_civil.year << "-"
-            << std::setfill('0') << std::setw(2) << (int)utc_civil.month << "-"
-            << std::setw(2) << (int)utc_civil.day << "T" << std::setw(2)
-            << (int)utc_civil.hour << ":" << std::setw(2)
-            << (int)utc_civil.minute << ":" << std::setw(2)
-            << (int)utc_civil.second << std::setfill(' ') << "\n\n";
+  std::cout << "Reference UTC instant: " << utc_civil.year << "-" << std::setfill('0')
+            << std::setw(2) << (int)utc_civil.month << "-" << std::setw(2) << (int)utc_civil.day
+            << "T" << std::setw(2) << (int)utc_civil.hour << ":" << std::setw(2)
+            << (int)utc_civil.minute << ":" << std::setw(2) << (int)utc_civil.second
+            << std::setfill(' ') << "\n\n";
 
   // ── 1) Each supported time scale for the same instant ───────────────────
 
@@ -90,26 +86,23 @@ int main() {
 
   auto delta_t = ut.delta_t();
   std::cout << "   " << std::left << std::setw(8) << "UT" << std::right
-            << " delta_t = " << std::fixed << std::setprecision(3) << delta_t
-            << " (TT - UT)\n"
+            << " delta_t = " << std::fixed << std::setprecision(3) << delta_t << " (TT - UT)\n"
             << std::endl;
 
   // ── 2) Time formats / aliases ───────────────────────────────────────────
 
   std::cout << "2) Time formats / aliases:\n";
-  std::cout << "   JulianDate alias:         " << std::fixed
-            << std::setprecision(9) << jd << std::endl;
+  std::cout << "   JulianDate alias:         " << std::fixed << std::setprecision(9) << jd
+            << std::endl;
   std::cout << "   JDE (JulianEphemeris):    " << jde << std::endl;
   std::cout << "   ModifiedJulianDate alias: " << mjd << std::endl;
   std::cout << "   UniversalTime alias:      " << ut << std::endl;
 
   auto utc_rt = jd.to_utc();
-  std::cout << "   UTC roundtrip from JD:    " << utc_rt.year << "-"
-            << std::setfill('0') << std::setw(2) << (int)utc_rt.month << "-"
-            << std::setw(2) << (int)utc_rt.day << "T" << std::setw(2)
-            << (int)utc_rt.hour << ":" << std::setw(2) << (int)utc_rt.minute
-            << ":" << std::setw(2) << (int)utc_rt.second << std::setfill(' ')
-            << "\n\n";
+  std::cout << "   UTC roundtrip from JD:    " << utc_rt.year << "-" << std::setfill('0')
+            << std::setw(2) << (int)utc_rt.month << "-" << std::setw(2) << (int)utc_rt.day << "T"
+            << std::setw(2) << (int)utc_rt.hour << ":" << std::setw(2) << (int)utc_rt.minute << ":"
+            << std::setw(2) << (int)utc_rt.second << std::setfill(' ') << "\n\n";
 
   // ── 3) Period representations and conversions ───────────────────────────
 
@@ -120,7 +113,7 @@ int main() {
 
   // Convert period endpoints to each scale via .to<>().
   auto mk_period = [](auto start_jd, auto end_jd, auto /*tag*/) {
-    using S = std::decay_t<decltype(start_jd.template to<tempoch::JDScale>())>;
+    using S = std::decay_t<decltype(start_jd.template to<tempoch::scales::JD>())>;
     (void)sizeof(S); // suppress unused
     auto s = start_jd;
     auto e = end_jd;
@@ -128,26 +121,26 @@ int main() {
   };
   (void)mk_period;
 
-  tempoch::Period period_jde(period_jd.start().to<tempoch::JDEScale>(),
-                             period_jd.end().to<tempoch::JDEScale>());
-  tempoch::Period period_mjd(period_jd.start().to<tempoch::MJDScale>(),
-                             period_jd.end().to<tempoch::MJDScale>());
-  tempoch::Period period_tdb(period_jd.start().to<tempoch::TDBScale>(),
-                             period_jd.end().to<tempoch::TDBScale>());
-  tempoch::Period period_tt(period_jd.start().to<tempoch::TTScale>(),
-                            period_jd.end().to<tempoch::TTScale>());
-  tempoch::Period period_tai(period_jd.start().to<tempoch::TAIScale>(),
-                             period_jd.end().to<tempoch::TAIScale>());
-  tempoch::Period period_tcg(period_jd.start().to<tempoch::TCGScale>(),
-                             period_jd.end().to<tempoch::TCGScale>());
-  tempoch::Period period_tcb(period_jd.start().to<tempoch::TCBScale>(),
-                             period_jd.end().to<tempoch::TCBScale>());
-  tempoch::Period period_gps(period_jd.start().to<tempoch::GPSScale>(),
-                             period_jd.end().to<tempoch::GPSScale>());
-  tempoch::Period period_unix(period_jd.start().to<tempoch::UnixTimeScale>(),
-                              period_jd.end().to<tempoch::UnixTimeScale>());
-  tempoch::Period period_ut(period_jd.start().to<tempoch::UTScale>(),
-                            period_jd.end().to<tempoch::UTScale>());
+  tempoch::Period period_jde(period_jd.start().to<tempoch::scales::JDE>(),
+                             period_jd.end().to<tempoch::scales::JDE>());
+  tempoch::Period period_mjd(period_jd.start().to<tempoch::scales::MJD>(),
+                             period_jd.end().to<tempoch::scales::MJD>());
+  tempoch::Period period_tdb(period_jd.start().to<tempoch::scales::TDB>(),
+                             period_jd.end().to<tempoch::scales::TDB>());
+  tempoch::Period period_tt(period_jd.start().to<tempoch::scales::TT>(),
+                            period_jd.end().to<tempoch::scales::TT>());
+  tempoch::Period period_tai(period_jd.start().to<tempoch::scales::TAI>(),
+                             period_jd.end().to<tempoch::scales::TAI>());
+  tempoch::Period period_tcg(period_jd.start().to<tempoch::scales::TCG>(),
+                             period_jd.end().to<tempoch::scales::TCG>());
+  tempoch::Period period_tcb(period_jd.start().to<tempoch::scales::TCB>(),
+                             period_jd.end().to<tempoch::scales::TCB>());
+  tempoch::Period period_gps(period_jd.start().to<tempoch::scales::GPS>(),
+                             period_jd.end().to<tempoch::scales::GPS>());
+  tempoch::Period period_unix(period_jd.start().to<tempoch::scales::Unix>(),
+                              period_jd.end().to<tempoch::scales::Unix>());
+  tempoch::Period period_ut(period_jd.start().to<tempoch::scales::UT>(),
+                            period_jd.end().to<tempoch::scales::UT>());
 
   print_period("JD", period_jd);
   print_period("JDE", period_jde);
@@ -166,13 +159,11 @@ int main() {
   auto utc_end = period_jd.end().to_utc();
   tempoch::Period<tempoch::CivilTime> period_utc(utc_start, utc_end);
   auto utc_dur = period_utc.duration<qtty::Day>();
-  std::cout << "   UTC      [" << utc_start << " -> " << utc_end
-            << "]  Δ = " << utc_dur << "\n\n";
+  std::cout << "   UTC      [" << utc_start << " -> " << utc_end << "]  Δ = " << utc_dur << "\n\n";
 
   // ── 4) UTC ↔ typed period conversions ───────────────────────────────────
 
-  std::cout
-      << "4) UtcPeriod / CivilTime period conversions back to typed periods:\n";
+  std::cout << "4) UtcPeriod / CivilTime period conversions back to typed periods:\n";
 
   auto utc_ref = tempoch::CivilTime{2000, 1, 1, 12, 0, 0};
   auto utc_ref_end = tempoch::CivilTime{2000, 1, 1, 18, 0, 0};
@@ -188,18 +179,18 @@ int main() {
   print_period("JD", from_utc_jd);
 
   // → MJD
-  tempoch::Period from_utc_mjd(from_utc_jd_start.to<tempoch::MJDScale>(),
-                               from_utc_jd_end.to<tempoch::MJDScale>());
+  tempoch::Period from_utc_mjd(from_utc_jd_start.to<tempoch::scales::MJD>(),
+                               from_utc_jd_end.to<tempoch::scales::MJD>());
   print_period("MJD", from_utc_mjd);
 
   // → UT
-  tempoch::Period from_utc_ut(from_utc_jd_start.to<tempoch::UTScale>(),
-                              from_utc_jd_end.to<tempoch::UTScale>());
+  tempoch::Period from_utc_ut(from_utc_jd_start.to<tempoch::scales::UT>(),
+                              from_utc_jd_end.to<tempoch::scales::UT>());
   print_period("UT", from_utc_ut);
 
   // → UnixTime
-  tempoch::Period from_utc_unix(from_utc_jd_start.to<tempoch::UnixTimeScale>(),
-                                from_utc_jd_end.to<tempoch::UnixTimeScale>());
+  tempoch::Period from_utc_unix(from_utc_jd_start.to<tempoch::scales::Unix>(),
+                                from_utc_jd_end.to<tempoch::scales::Unix>());
   print_period("Unix", from_utc_unix);
 
   // Roundtrip: MJD → CivilTime

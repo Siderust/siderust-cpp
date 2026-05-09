@@ -56,29 +56,26 @@ public:
     return rad.to<qtty::Degree>();
   }
 
-  std::vector<Period>
-  above_threshold(const Geodetic &obs, const Period &window,
-                  qtty::Degree threshold,
-                  const SearchOptions &opts = {}) const override {
+  std::vector<Period> above_threshold(const Geodetic &obs, const Period &window,
+                                      qtty::Degree threshold,
+                                      const SearchOptions &opts = {}) const override {
     return star_altitude::above_threshold(star_, obs, window, threshold, opts);
   }
 
-  std::vector<Period>
-  below_threshold(const Geodetic &obs, const Period &window,
-                  qtty::Degree threshold,
-                  const SearchOptions &opts = {}) const override {
+  std::vector<Period> below_threshold(const Geodetic &obs, const Period &window,
+                                      qtty::Degree threshold,
+                                      const SearchOptions &opts = {}) const override {
     return star_altitude::below_threshold(star_, obs, window, threshold, opts);
   }
 
-  std::vector<CrossingEvent>
-  crossings(const Geodetic &obs, const Period &window, qtty::Degree threshold,
-            const SearchOptions &opts = {}) const override {
+  std::vector<CrossingEvent> crossings(const Geodetic &obs, const Period &window,
+                                       qtty::Degree threshold,
+                                       const SearchOptions &opts = {}) const override {
     return star_altitude::crossings(star_, obs, window, threshold, opts);
   }
 
-  std::vector<CulminationEvent>
-  culminations(const Geodetic &obs, const Period &window,
-               const SearchOptions &opts = {}) const override {
+  std::vector<CulminationEvent> culminations(const Geodetic &obs, const Period &window,
+                                             const SearchOptions &opts = {}) const override {
     return star_altitude::culminations(star_, obs, window, opts);
   }
 
@@ -91,8 +88,7 @@ public:
   }
 
   std::vector<AzimuthCrossingEvent>
-  azimuth_crossings(const Geodetic &obs, const Period &window,
-                    qtty::Degree bearing,
+  azimuth_crossings(const Geodetic &obs, const Period &window, qtty::Degree bearing,
                     const SearchOptions &opts = {}) const override {
     return star_altitude::azimuth_crossings(star_, obs, window, bearing, opts);
   }

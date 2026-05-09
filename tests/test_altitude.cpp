@@ -121,8 +121,7 @@ TEST_F(AltitudeTest, IcrsAltitudeAt) {
 
 TEST_F(AltitudeTest, IcrsAboveThreshold) {
   const spherical::direction::ICRS vega_icrs(279.23_deg, 38.78_deg);
-  auto periods =
-      icrs_altitude::above_threshold(vega_icrs, obs, window, 30.0_deg);
+  auto periods = icrs_altitude::above_threshold(vega_icrs, obs, window, 30.0_deg);
   EXPECT_GT(periods.size(), 0u);
 }
 
@@ -158,8 +157,8 @@ TEST_F(AltitudeTest, ICRSTargetTypedAccessors) {
 
 TEST_F(AltitudeTest, ICRSTargetPolymorphic) {
   // Verify DirectionTarget<C> is usable through the Target interface
-  std::unique_ptr<Target> t = std::make_unique<ICRSTarget>(
-      spherical::direction::ICRS{279.23_deg, 38.78_deg});
+  std::unique_ptr<Target> t =
+      std::make_unique<ICRSTarget>(spherical::direction::ICRS{279.23_deg, 38.78_deg});
   qtty::Degree alt = t->altitude_at(obs, start);
   EXPECT_GT(alt.value(), -90.0);
   EXPECT_LT(alt.value(), 90.0);
@@ -167,8 +166,7 @@ TEST_F(AltitudeTest, ICRSTargetPolymorphic) {
 
 TEST_F(AltitudeTest, EclipticTargetAltitudeAt) {
   // Vega in ecliptic J2000 coordinates (approx): lon≈279.6°, lat≈+61.8°
-  EclipticMeanJ2000Target ec{
-      spherical::direction::EclipticMeanJ2000{279.6_deg, 61.8_deg}};
+  EclipticMeanJ2000Target ec{spherical::direction::EclipticMeanJ2000{279.6_deg, 61.8_deg}};
   // ecl direction retained on the C++ side
   EXPECT_NEAR(ec.direction().lon().value(), 279.6, 1e-9);
   EXPECT_NEAR(ec.direction().lat().value(), 61.8, 1e-9);
@@ -182,8 +180,7 @@ TEST_F(AltitudeTest, EclipticTargetAltitudeAt) {
 }
 
 TEST_F(AltitudeTest, EquatorialMeanJ2000TargetAltitudeAt) {
-  EquatorialMeanJ2000Target vega{
-      spherical::direction::EquatorialMeanJ2000{279.23_deg, 38.78_deg}};
+  EquatorialMeanJ2000Target vega{spherical::direction::EquatorialMeanJ2000{279.23_deg, 38.78_deg}};
   qtty::Degree alt = vega.altitude_at(obs, start);
   EXPECT_GT(alt.value(), -90.0);
   EXPECT_LT(alt.value(), 90.0);

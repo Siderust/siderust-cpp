@@ -25,7 +25,8 @@ template <typename C> constexpr SiderustOrbitRefCenter orbit_ref_center_id() {
   } else if constexpr (std::is_same_v<C, centers::Geocentric>) {
     return 2;
   } else {
-    static_assert(!sizeof(C), "kepler_position only supports barycentric, heliocentric, or geocentric centers");
+    static_assert(!sizeof(C),
+                  "kepler_position only supports barycentric, heliocentric, or geocentric centers");
     return 1;
   }
 }
@@ -72,15 +73,12 @@ using Orbit = KeplerianOrbit;
 template <typename C = centers::Heliocentric>
 inline cartesian::Position<C, frames::EclipticMeanJ2000, qtty::AstronomicalUnit>
 kepler_position(const KeplerianOrbit &orbit, const JulianDate &jd) {
-  static_assert(centers::is_center_v<C>,
-                "C must be a valid center tag (default: Heliocentric)");
+  static_assert(centers::is_center_v<C>, "C must be a valid center tag (default: Heliocentric)");
   siderust_cartesian_pos_t c_out{};
-  check_status(
-      siderust_kepler_position_ex(orbit.to_c(), detail::orbit_ref_center_id<C>(),
-                                  jd.value(), &c_out),
-      "kepler_position");
-  return cartesian::Position<C, frames::EclipticMeanJ2000,
-                             qtty::AstronomicalUnit>(
+  check_status(siderust_kepler_position_ex(orbit.to_c(), detail::orbit_ref_center_id<C>(),
+                                           jd.value(), &c_out),
+               "kepler_position");
+  return cartesian::Position<C, frames::EclipticMeanJ2000, qtty::AstronomicalUnit>(
       qtty::AstronomicalUnit(c_out.x), qtty::AstronomicalUnit(c_out.y),
       qtty::AstronomicalUnit(c_out.z));
 }
@@ -114,8 +112,7 @@ struct MeanMotionOrbit {
             epoch_jd};
   }
 
-  cartesian::Position<centers::Heliocentric, frames::EclipticMeanJ2000,
-                      qtty::AstronomicalUnit>
+  cartesian::Position<centers::Heliocentric, frames::EclipticMeanJ2000, qtty::AstronomicalUnit>
   position_at(const JulianDate &jd) const {
     siderust_cartesian_pos_t out{};
     check_status(siderust_mean_motion_position(to_c(), jd.value(), &out),
@@ -158,12 +155,10 @@ struct ConicOrbit {
     return eccentricity < 1.0 ? ConicKind::Elliptic : ConicKind::Hyperbolic;
   }
 
-  cartesian::Position<centers::Heliocentric, frames::EclipticMeanJ2000,
-                      qtty::AstronomicalUnit>
+  cartesian::Position<centers::Heliocentric, frames::EclipticMeanJ2000, qtty::AstronomicalUnit>
   position_at(const JulianDate &jd) const {
     siderust_cartesian_pos_t out{};
-    check_status(siderust_conic_position(to_c(), jd.value(), &out),
-                 "ConicOrbit::position_at");
+    check_status(siderust_conic_position(to_c(), jd.value(), &out), "ConicOrbit::position_at");
     return {qtty::AstronomicalUnit(out.x), qtty::AstronomicalUnit(out.y),
             qtty::AstronomicalUnit(out.z)};
   }
@@ -176,8 +171,7 @@ public:
   PreparedOrbit() = default;
 
   explicit PreparedOrbit(const KeplerianOrbit &orbit) {
-    check_status(siderust_prepared_orbit_create(orbit.to_c(), &handle_),
-                 "PreparedOrbit");
+    check_status(siderust_prepared_orbit_create(orbit.to_c(), &handle_), "PreparedOrbit");
   }
 
   ~PreparedOrbit() {
@@ -206,8 +200,7 @@ public:
 
   explicit operator bool() const { return handle_ != nullptr; }
 
-  cartesian::Position<centers::Heliocentric, frames::EclipticMeanJ2000,
-                      qtty::AstronomicalUnit>
+  cartesian::Position<centers::Heliocentric, frames::EclipticMeanJ2000, qtty::AstronomicalUnit>
   position_at(const JulianDate &jd) const {
     siderust_cartesian_pos_t out{};
     check_status(siderust_prepared_orbit_position(handle_, jd.value(), &out),

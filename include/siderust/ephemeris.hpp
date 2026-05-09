@@ -26,10 +26,8 @@ namespace ephemeris {
 inline cartesian::position::HelioBarycentric<qtty::AstronomicalUnit>
 sun_barycentric(const JulianDate &jd) {
   siderust_cartesian_pos_t out;
-  check_status(siderust_vsop87_sun_barycentric(jd.value(), &out),
-               "ephemeris::sun_barycentric");
-  return cartesian::position::HelioBarycentric<qtty::AstronomicalUnit>::from_c(
-      out);
+  check_status(siderust_vsop87_sun_barycentric(jd.value(), &out), "ephemeris::sun_barycentric");
+  return cartesian::position::HelioBarycentric<qtty::AstronomicalUnit>::from_c(out);
 }
 
 /**
@@ -38,10 +36,8 @@ sun_barycentric(const JulianDate &jd) {
 inline cartesian::position::GeoBarycentric<qtty::AstronomicalUnit>
 earth_barycentric(const JulianDate &jd) {
   siderust_cartesian_pos_t out;
-  check_status(siderust_vsop87_earth_barycentric(jd.value(), &out),
-               "ephemeris::earth_barycentric");
-  return cartesian::position::GeoBarycentric<qtty::AstronomicalUnit>::from_c(
-      out);
+  check_status(siderust_vsop87_earth_barycentric(jd.value(), &out), "ephemeris::earth_barycentric");
+  return cartesian::position::GeoBarycentric<qtty::AstronomicalUnit>::from_c(out);
 }
 
 /**
@@ -52,8 +48,7 @@ earth_heliocentric(const JulianDate &jd) {
   siderust_cartesian_pos_t out;
   check_status(siderust_vsop87_earth_heliocentric(jd.value(), &out),
                "ephemeris::earth_heliocentric");
-  return cartesian::position::EclipticMeanJ2000<qtty::AstronomicalUnit>::from_c(
-      out);
+  return cartesian::position::EclipticMeanJ2000<qtty::AstronomicalUnit>::from_c(out);
 }
 
 /**
@@ -62,10 +57,8 @@ earth_heliocentric(const JulianDate &jd) {
 inline cartesian::position::EclipticMeanJ2000<qtty::AstronomicalUnit>
 mars_heliocentric(const JulianDate &jd) {
   siderust_cartesian_pos_t out;
-  check_status(siderust_vsop87_mars_heliocentric(jd.value(), &out),
-               "ephemeris::mars_heliocentric");
-  return cartesian::position::EclipticMeanJ2000<qtty::AstronomicalUnit>::from_c(
-      out);
+  check_status(siderust_vsop87_mars_heliocentric(jd.value(), &out), "ephemeris::mars_heliocentric");
+  return cartesian::position::EclipticMeanJ2000<qtty::AstronomicalUnit>::from_c(out);
 }
 
 /**
@@ -74,10 +67,8 @@ mars_heliocentric(const JulianDate &jd) {
 inline cartesian::position::HelioBarycentric<qtty::AstronomicalUnit>
 mars_barycentric(const JulianDate &jd) {
   siderust_cartesian_pos_t out;
-  check_status(siderust_vsop87_mars_barycentric(jd.value(), &out),
-               "ephemeris::mars_barycentric");
-  return cartesian::position::HelioBarycentric<qtty::AstronomicalUnit>::from_c(
-      out);
+  check_status(siderust_vsop87_mars_barycentric(jd.value(), &out), "ephemeris::mars_barycentric");
+  return cartesian::position::HelioBarycentric<qtty::AstronomicalUnit>::from_c(out);
 }
 
 /**
@@ -88,8 +79,7 @@ venus_heliocentric(const JulianDate &jd) {
   siderust_cartesian_pos_t out;
   check_status(siderust_vsop87_venus_heliocentric(jd.value(), &out),
                "ephemeris::venus_heliocentric");
-  return cartesian::position::EclipticMeanJ2000<qtty::AstronomicalUnit>::from_c(
-      out);
+  return cartesian::position::EclipticMeanJ2000<qtty::AstronomicalUnit>::from_c(out);
 }
 
 /**
@@ -100,8 +90,7 @@ mercury_heliocentric(const JulianDate &jd) {
   siderust_cartesian_pos_t out;
   check_status(siderust_vsop87_mercury_heliocentric(jd.value(), &out),
                "ephemeris::mercury_heliocentric");
-  return cartesian::position::EclipticMeanJ2000<qtty::AstronomicalUnit>::from_c(
-      out);
+  return cartesian::position::EclipticMeanJ2000<qtty::AstronomicalUnit>::from_c(out);
 }
 
 /**
@@ -112,8 +101,7 @@ mercury_barycentric(const JulianDate &jd) {
   siderust_cartesian_pos_t out;
   check_status(siderust_vsop87_mercury_barycentric(jd.value(), &out),
                "ephemeris::mercury_barycentric");
-  return cartesian::position::HelioBarycentric<qtty::AstronomicalUnit>::from_c(
-      out);
+  return cartesian::position::HelioBarycentric<qtty::AstronomicalUnit>::from_c(out);
 }
 
 /**
@@ -122,10 +110,8 @@ mercury_barycentric(const JulianDate &jd) {
 inline cartesian::position::HelioBarycentric<qtty::AstronomicalUnit>
 venus_barycentric(const JulianDate &jd) {
   siderust_cartesian_pos_t out;
-  check_status(siderust_vsop87_venus_barycentric(jd.value(), &out),
-               "ephemeris::venus_barycentric");
-  return cartesian::position::HelioBarycentric<qtty::AstronomicalUnit>::from_c(
-      out);
+  check_status(siderust_vsop87_venus_barycentric(jd.value(), &out), "ephemeris::venus_barycentric");
+  return cartesian::position::HelioBarycentric<qtty::AstronomicalUnit>::from_c(out);
 }
 
 /**
@@ -136,8 +122,7 @@ jupiter_heliocentric(const JulianDate &jd) {
   siderust_cartesian_pos_t out;
   check_status(siderust_vsop87_jupiter_heliocentric(jd.value(), &out),
                "ephemeris::jupiter_heliocentric");
-  return cartesian::position::EclipticMeanJ2000<qtty::AstronomicalUnit>::from_c(
-      out);
+  return cartesian::position::EclipticMeanJ2000<qtty::AstronomicalUnit>::from_c(out);
 }
 
 /**
@@ -148,8 +133,7 @@ jupiter_barycentric(const JulianDate &jd) {
   siderust_cartesian_pos_t out;
   check_status(siderust_vsop87_jupiter_barycentric(jd.value(), &out),
                "ephemeris::jupiter_barycentric");
-  return cartesian::position::HelioBarycentric<qtty::AstronomicalUnit>::from_c(
-      out);
+  return cartesian::position::HelioBarycentric<qtty::AstronomicalUnit>::from_c(out);
 }
 
 /**
@@ -160,8 +144,7 @@ saturn_heliocentric(const JulianDate &jd) {
   siderust_cartesian_pos_t out;
   check_status(siderust_vsop87_saturn_heliocentric(jd.value(), &out),
                "ephemeris::saturn_heliocentric");
-  return cartesian::position::EclipticMeanJ2000<qtty::AstronomicalUnit>::from_c(
-      out);
+  return cartesian::position::EclipticMeanJ2000<qtty::AstronomicalUnit>::from_c(out);
 }
 
 /**
@@ -172,8 +155,7 @@ saturn_barycentric(const JulianDate &jd) {
   siderust_cartesian_pos_t out;
   check_status(siderust_vsop87_saturn_barycentric(jd.value(), &out),
                "ephemeris::saturn_barycentric");
-  return cartesian::position::HelioBarycentric<qtty::AstronomicalUnit>::from_c(
-      out);
+  return cartesian::position::HelioBarycentric<qtty::AstronomicalUnit>::from_c(out);
 }
 
 /**
@@ -184,8 +166,7 @@ uranus_heliocentric(const JulianDate &jd) {
   siderust_cartesian_pos_t out;
   check_status(siderust_vsop87_uranus_heliocentric(jd.value(), &out),
                "ephemeris::uranus_heliocentric");
-  return cartesian::position::EclipticMeanJ2000<qtty::AstronomicalUnit>::from_c(
-      out);
+  return cartesian::position::EclipticMeanJ2000<qtty::AstronomicalUnit>::from_c(out);
 }
 
 /**
@@ -196,8 +177,7 @@ uranus_barycentric(const JulianDate &jd) {
   siderust_cartesian_pos_t out;
   check_status(siderust_vsop87_uranus_barycentric(jd.value(), &out),
                "ephemeris::uranus_barycentric");
-  return cartesian::position::HelioBarycentric<qtty::AstronomicalUnit>::from_c(
-      out);
+  return cartesian::position::HelioBarycentric<qtty::AstronomicalUnit>::from_c(out);
 }
 
 /**
@@ -208,8 +188,7 @@ neptune_heliocentric(const JulianDate &jd) {
   siderust_cartesian_pos_t out;
   check_status(siderust_vsop87_neptune_heliocentric(jd.value(), &out),
                "ephemeris::neptune_heliocentric");
-  return cartesian::position::EclipticMeanJ2000<qtty::AstronomicalUnit>::from_c(
-      out);
+  return cartesian::position::EclipticMeanJ2000<qtty::AstronomicalUnit>::from_c(out);
 }
 
 /**
@@ -220,18 +199,15 @@ neptune_barycentric(const JulianDate &jd) {
   siderust_cartesian_pos_t out;
   check_status(siderust_vsop87_neptune_barycentric(jd.value(), &out),
                "ephemeris::neptune_barycentric");
-  return cartesian::position::HelioBarycentric<qtty::AstronomicalUnit>::from_c(
-      out);
+  return cartesian::position::HelioBarycentric<qtty::AstronomicalUnit>::from_c(out);
 }
 
 /**
  * @brief Moon's geocentric position (EclipticMeanJ2000, km) via ELP2000.
  */
-inline cartesian::position::MoonGeocentric<qtty::Kilometer>
-moon_geocentric(const JulianDate &jd) {
+inline cartesian::position::MoonGeocentric<qtty::Kilometer> moon_geocentric(const JulianDate &jd) {
   siderust_cartesian_pos_t out;
-  check_status(siderust_vsop87_moon_geocentric(jd.value(), &out),
-               "ephemeris::moon_geocentric");
+  check_status(siderust_vsop87_moon_geocentric(jd.value(), &out), "ephemeris::moon_geocentric");
   return cartesian::position::MoonGeocentric<qtty::Kilometer>::from_c(out);
 }
 
