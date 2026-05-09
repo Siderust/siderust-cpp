@@ -1,0 +1,111 @@
+name: CI Build Test Docs
+
+on:
+  workflow_call:
+
+jobs:
+  build-test-docs:
+    name: Build + Test + Docs
+    runs-on: ubuntu-22.04
+    env:
+      CARGO_TERM_COLOR: always
+      CMAKE_BUILD_PARALLEL_LEVEL: 2
+    steps:
+      - name: Checkout (with submodules)
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Show selected dependency revisions
+        shell: bash
+        run: |
+          set -euo pipefail
+          git submodule status --recursive
+          echo
+          echo "siderust:     $(git -C siderust rev-parse HEAD) ($(git -C siderust describe --tags --always 2>/dev/null || true))"
+          echo "siderust-ffi: $(git -C siderust/siderust-ffi rev-parse HEAD) ($(git -C siderust/siderust-ffi describe --tags --always 2>/dev/null || true))"
+          echo "tempoch:      $(git -C tempoch-cpp/tempoch rev-parse HEAD) ($(git -C tempoch-cpp/tempoch describe --tags --always 2>/dev/null || true))"
+          echo "tempoch-ffi:  $(git -C tempoch-cpp/tempoch/tempoch-ffi rev-parse HEAD) ($(git -C tempoch-cpp/tempoch/tempoch-ffi describe --tags --always 2>/dev/null || true))"
+          echo "qtty:         $(git -C tempoch-cpp/qtty-cpp/qtty rev-parse HEAD) ($(git -C tempoch-cpp/qtty-cpp/qtty describe --tags --always 2>/dev/null || true))"
+          echo "qtty-ffi:     $(git -C tempoch-cpp/qtty-cpp/qtty/qtty-ffi rev-parse HEAD) ($(git -C tempoch-cpp/qtty-cpp/qtty/qtty-ffi describe --tags --always 2>/dev/null || true))"
+
+      - name: Install system dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential \
+            cmake \
+            ninja-build \
+            pkg-config \
+            libssl-dev \
+            graphviz
+
+      - name: Install Doxygen 1.16.1
+        shell: bash
+        run: |
+          set -euo pipefail
+          DOXYGEN_VERSION="1.16.1"
+          curl -fsSL "https://github.com/doxygen/doxygen/releases/download/Release_1_16_1/doxygen-${DOXYGEN_VERSION}.linux.bin.tar.gz" -o /tmp/doxygen.tar.gz
+          sudo tar -xzf /tmp/doxygen.tar.gz -C /opt
+          sudo ln -sf "/opt/doxygen-${DOXYGEN_VERSION}/bin/doxygen" /usr/local/bin/doxygen
+          rm -f /tmp/doxygen.tar.gz
+          doxygen --version
+
+      - name: Set up Rust (stable)
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
+
+      - name: Cache cargo + build artifacts
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            siderust/target
+            siderust/siderust-ffi/target
+            tempoch-cpp/tempoch/target
+            tempoch-cpp/tempoch/tempoch-ffi/target
+            tempoch-cpp/qtty-cpp/qtty/target
+            tempoch-cpp/qtty-cpp/qtty/qtty-ffi/target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+
+      - name: Validate required submodules exist
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f siderust/Cargo.toml
+          test -f siderust/siderust-ffi/Cargo.toml
+          test -f tempoch-cpp/tempoch/Cargo.toml
+          test -f tempoch-cpp/tempoch/tempoch-ffi/Cargo.toml
+          test -f tempoch-cpp/qtty-cpp/qtty/Cargo.toml
+          test -f tempoch-cpp/qtty-cpp/qtty/qtty-ffi/Cargo.toml
+
+      - name: Configure (CMake)
+        shell: bash
+        run: |
+          set -euo pipefail
+          cmake -S . -B build -G Ninja -DSIDERUST_BUILD_DOCS=ON
+
+      - name: Build
+        shell: bash
+        run: |
+          set -euo pipefail
+          cmake --build build --target test_siderust
+
+      - name: Test (ctest)
+        shell: bash
+        run: |
+          set -euo pipefail
+          ctest --test-dir build --output-on-failure -L siderust_cpp
+
+      - name: Build docs (Doxygen)
+        shell: bash
+        run: |
+          set -euo pipefail
+          cmake --build build --target docs
