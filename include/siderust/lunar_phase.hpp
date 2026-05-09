@@ -62,8 +62,8 @@ struct MoonPhaseGeometry {
   bool waxing;                 ///< True when the Moon is waxing.
 
   static MoonPhaseGeometry from_c(const siderust_moon_phase_geometry_t &c) {
-    return {qtty::Radian(c.phase_angle_rad), c.illuminated_fraction,
-            qtty::Radian(c.elongation_rad), static_cast<bool>(c.waxing)};
+    return {qtty::Radian(c.phase_angle_rad), c.illuminated_fraction, qtty::Radian(c.elongation_rad),
+            static_cast<bool>(c.waxing)};
   }
 };
 
@@ -84,8 +84,7 @@ struct PhaseEvent {
 // ============================================================================
 namespace detail {
 
-inline std::vector<PhaseEvent> phase_events_from_c(siderust_phase_event_t *ptr,
-                                                   uintptr_t count) {
+inline std::vector<PhaseEvent> phase_events_from_c(siderust_phase_event_t *ptr, uintptr_t count) {
   std::vector<PhaseEvent> result;
   result.reserve(count);
   for (uintptr_t i = 0; i < count; ++i) {
@@ -97,8 +96,7 @@ inline std::vector<PhaseEvent> phase_events_from_c(siderust_phase_event_t *ptr,
 
 /// Like periods_from_c but for tempoch_period_mjd_t* pointers (freed with
 /// siderust_periods_free).
-inline std::vector<Period> illum_periods_from_c(tempoch_period_mjd_t *ptr,
-                                                uintptr_t count) {
+inline std::vector<Period> illum_periods_from_c(tempoch_period_mjd_t *ptr, uintptr_t count) {
   std::vector<Period> result;
   result.reserve(count);
   for (uintptr_t i = 0; i < count; ++i) {
@@ -123,8 +121,7 @@ namespace moon {
  */
 inline MoonPhaseGeometry phase_geocentric(const JulianDate &jd) {
   siderust_moon_phase_geometry_t out{};
-  check_status(siderust_moon_phase_geocentric(jd.value(), &out),
-               "moon::phase_geocentric");
+  check_status(siderust_moon_phase_geocentric(jd.value(), &out), "moon::phase_geocentric");
   return MoonPhaseGeometry::from_c(out);
 }
 
@@ -134,8 +131,7 @@ inline MoonPhaseGeometry phase_geocentric(const JulianDate &jd) {
  * @param jd    Julian Date.
  * @param site  Observer geodetic coordinates.
  */
-inline MoonPhaseGeometry phase_topocentric(const JulianDate &jd,
-                                           const Geodetic &site) {
+inline MoonPhaseGeometry phase_topocentric(const JulianDate &jd, const Geodetic &site) {
   siderust_moon_phase_geometry_t out{};
   check_status(siderust_moon_phase_topocentric(jd.value(), site.to_c(), &out),
                "moon::phase_topocentric");
@@ -149,9 +145,8 @@ inline MoonPhaseGeometry phase_topocentric(const JulianDate &jd,
  * phase_topocentric).
  */
 inline MoonPhaseLabel phase_label(const MoonPhaseGeometry &geom) {
-  siderust_moon_phase_geometry_t c{
-      geom.phase_angle.value(), geom.illuminated_fraction,
-      geom.elongation.value(), static_cast<uint8_t>(geom.waxing)};
+  siderust_moon_phase_geometry_t c{geom.phase_angle.value(), geom.illuminated_fraction,
+                                   geom.elongation.value(), static_cast<uint8_t>(geom.waxing)};
   siderust_moon_phase_label_t out{};
   check_status(siderust_moon_phase_label(c, &out), "moon::phase_label");
   return static_cast<MoonPhaseLabel>(out);
@@ -164,22 +159,20 @@ inline MoonPhaseLabel phase_label(const MoonPhaseGeometry &geom) {
  * @param window  MJD search window.
  * @param opts    Search tolerances (optional).
  */
-inline std::vector<PhaseEvent>
-find_phase_events(const Period &window, const SearchOptions &opts = {}) {
+inline std::vector<PhaseEvent> find_phase_events(const Period &window,
+                                                 const SearchOptions &opts = {}) {
   siderust_phase_event_t *ptr = nullptr;
   uintptr_t count = 0;
-  check_status(
-      siderust_find_phase_events(window.c_inner(), opts.to_c(), &ptr, &count),
-      "moon::find_phase_events");
+  check_status(siderust_find_phase_events(window.c_inner(), opts.to_c(), &ptr, &count),
+               "moon::find_phase_events");
   return detail::phase_events_from_c(ptr, count);
 }
 
 /**
  * @brief Backward-compatible [start, end] overload.
  */
-inline std::vector<PhaseEvent>
-find_phase_events(const MJD &start, const MJD &end,
-                  const SearchOptions &opts = {}) {
+inline std::vector<PhaseEvent> find_phase_events(const MJD &start, const MJD &end,
+                                                 const SearchOptions &opts = {}) {
   return find_phase_events(Period(start, end), opts);
 }
 
@@ -190,13 +183,11 @@ find_phase_events(const MJD &start, const MJD &end,
  * @param k_min   Minimum illuminated fraction in [0, 1].
  * @param opts    Search tolerances (optional).
  */
-inline std::vector<Period> illumination_above(const Period &window,
-                                              double k_min,
+inline std::vector<Period> illumination_above(const Period &window, double k_min,
                                               const SearchOptions &opts = {}) {
   tempoch_period_mjd_t *ptr = nullptr;
   uintptr_t count = 0;
-  check_status(siderust_moon_illumination_above(window.c_inner(), k_min,
-                                                opts.to_c(), &ptr, &count),
+  check_status(siderust_moon_illumination_above(window.c_inner(), k_min, opts.to_c(), &ptr, &count),
                "moon::illumination_above");
   return detail::illum_periods_from_c(ptr, count);
 }
@@ -204,8 +195,7 @@ inline std::vector<Period> illumination_above(const Period &window,
 /**
  * @brief Backward-compatible [start, end] overload.
  */
-inline std::vector<Period> illumination_above(const MJD &start, const MJD &end,
-                                              double k_min,
+inline std::vector<Period> illumination_above(const MJD &start, const MJD &end, double k_min,
                                               const SearchOptions &opts = {}) {
   return illumination_above(Period(start, end), k_min, opts);
 }
@@ -217,13 +207,11 @@ inline std::vector<Period> illumination_above(const MJD &start, const MJD &end,
  * @param k_max   Maximum illuminated fraction in [0, 1].
  * @param opts    Search tolerances (optional).
  */
-inline std::vector<Period> illumination_below(const Period &window,
-                                              double k_max,
+inline std::vector<Period> illumination_below(const Period &window, double k_max,
                                               const SearchOptions &opts = {}) {
   tempoch_period_mjd_t *ptr = nullptr;
   uintptr_t count = 0;
-  check_status(siderust_moon_illumination_below(window.c_inner(), k_max,
-                                                opts.to_c(), &ptr, &count),
+  check_status(siderust_moon_illumination_below(window.c_inner(), k_max, opts.to_c(), &ptr, &count),
                "moon::illumination_below");
   return detail::illum_periods_from_c(ptr, count);
 }
@@ -231,8 +219,7 @@ inline std::vector<Period> illumination_below(const Period &window,
 /**
  * @brief Backward-compatible [start, end] overload.
  */
-inline std::vector<Period> illumination_below(const MJD &start, const MJD &end,
-                                              double k_max,
+inline std::vector<Period> illumination_below(const MJD &start, const MJD &end, double k_max,
                                               const SearchOptions &opts = {}) {
   return illumination_below(Period(start, end), k_max, opts);
 }
@@ -245,23 +232,21 @@ inline std::vector<Period> illumination_below(const MJD &start, const MJD &end,
  * @param k_max   Maximum illuminated fraction in [0, 1].
  * @param opts    Search tolerances (optional).
  */
-inline std::vector<Period> illumination_range(const Period &window,
-                                              double k_min, double k_max,
+inline std::vector<Period> illumination_range(const Period &window, double k_min, double k_max,
                                               const SearchOptions &opts = {}) {
   tempoch_period_mjd_t *ptr = nullptr;
   uintptr_t count = 0;
-  check_status(siderust_moon_illumination_range(window.c_inner(), k_min, k_max,
-                                                opts.to_c(), &ptr, &count),
-               "moon::illumination_range");
+  check_status(
+      siderust_moon_illumination_range(window.c_inner(), k_min, k_max, opts.to_c(), &ptr, &count),
+      "moon::illumination_range");
   return detail::illum_periods_from_c(ptr, count);
 }
 
 /**
  * @brief Backward-compatible [start, end] overload.
  */
-inline std::vector<Period> illumination_range(const MJD &start, const MJD &end,
-                                              double k_min, double k_max,
-                                              const SearchOptions &opts = {}) {
+inline std::vector<Period> illumination_range(const MJD &start, const MJD &end, double k_min,
+                                              double k_max, const SearchOptions &opts = {}) {
   return illumination_range(Period(start, end), k_min, k_max, opts);
 }
 

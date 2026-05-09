@@ -64,8 +64,7 @@ public:
    */
   explicit RuntimeEphemeris(const std::string &path) : handle_(nullptr) {
     siderust_runtime_ephemeris_t *h = nullptr;
-    check_status(siderust_runtime_ephemeris_load_bsp(path.c_str(), &h),
-                 "RuntimeEphemeris(path)");
+    check_status(siderust_runtime_ephemeris_load_bsp(path.c_str(), &h), "RuntimeEphemeris(path)");
     handle_ = h;
   }
 
@@ -77,8 +76,7 @@ public:
    */
   RuntimeEphemeris(const uint8_t *data, size_t len) : handle_(nullptr) {
     siderust_runtime_ephemeris_t *h = nullptr;
-    check_status(siderust_runtime_ephemeris_load_bytes(data, len, &h),
-                 "RuntimeEphemeris(bytes)");
+    check_status(siderust_runtime_ephemeris_load_bytes(data, len, &h), "RuntimeEphemeris(bytes)");
     handle_ = h;
   }
 
@@ -113,11 +111,9 @@ public:
   cartesian::position::HelioBarycentric<qtty::AstronomicalUnit>
   sun_barycentric(const JulianDate &jd) const {
     siderust_cartesian_pos_t out;
-    check_status(
-        siderust_runtime_ephemeris_sun_barycentric(handle_, jd.value(), &out),
-        "RuntimeEphemeris::sun_barycentric");
-    return cartesian::position::HelioBarycentric<
-        qtty::AstronomicalUnit>::from_c(out);
+    check_status(siderust_runtime_ephemeris_sun_barycentric(handle_, jd.value(), &out),
+                 "RuntimeEphemeris::sun_barycentric");
+    return cartesian::position::HelioBarycentric<qtty::AstronomicalUnit>::from_c(out);
   }
 
   /**
@@ -126,11 +122,9 @@ public:
   cartesian::position::GeoBarycentric<qtty::AstronomicalUnit>
   earth_barycentric(const JulianDate &jd) const {
     siderust_cartesian_pos_t out;
-    check_status(
-        siderust_runtime_ephemeris_earth_barycentric(handle_, jd.value(), &out),
-        "RuntimeEphemeris::earth_barycentric");
-    return cartesian::position::GeoBarycentric<qtty::AstronomicalUnit>::from_c(
-        out);
+    check_status(siderust_runtime_ephemeris_earth_barycentric(handle_, jd.value(), &out),
+                 "RuntimeEphemeris::earth_barycentric");
+    return cartesian::position::GeoBarycentric<qtty::AstronomicalUnit>::from_c(out);
   }
 
   /**
@@ -139,22 +133,18 @@ public:
   cartesian::position::EclipticMeanJ2000<qtty::AstronomicalUnit>
   earth_heliocentric(const JulianDate &jd) const {
     siderust_cartesian_pos_t out;
-    check_status(siderust_runtime_ephemeris_earth_heliocentric(
-                     handle_, jd.value(), &out),
+    check_status(siderust_runtime_ephemeris_earth_heliocentric(handle_, jd.value(), &out),
                  "RuntimeEphemeris::earth_heliocentric");
-    return cartesian::position::EclipticMeanJ2000<
-        qtty::AstronomicalUnit>::from_c(out);
+    return cartesian::position::EclipticMeanJ2000<qtty::AstronomicalUnit>::from_c(out);
   }
 
   /**
    * @brief Moon's geocentric position (EclipticMeanJ2000, km).
    */
-  cartesian::position::MoonGeocentric<qtty::Kilometer>
-  moon_geocentric(const JulianDate &jd) const {
+  cartesian::position::MoonGeocentric<qtty::Kilometer> moon_geocentric(const JulianDate &jd) const {
     siderust_cartesian_pos_t out;
-    check_status(
-        siderust_runtime_ephemeris_moon_geocentric(handle_, jd.value(), &out),
-        "RuntimeEphemeris::moon_geocentric");
+    check_status(siderust_runtime_ephemeris_moon_geocentric(handle_, jd.value(), &out),
+                 "RuntimeEphemeris::moon_geocentric");
     return cartesian::position::MoonGeocentric<qtty::Kilometer>::from_c(out);
   }
 
@@ -166,8 +156,7 @@ public:
    */
   CartesianVelocity earth_barycentric_velocity(const JulianDate &jd) const {
     siderust_cartesian_vel_t out{};
-    check_status(siderust_runtime_ephemeris_earth_barycentric_velocity(
-                     handle_, jd.value(), &out),
+    check_status(siderust_runtime_ephemeris_earth_barycentric_velocity(handle_, jd.value(), &out),
                  "RuntimeEphemeris::earth_barycentric_velocity");
     return CartesianVelocity::from_c(out);
   }

@@ -49,8 +49,7 @@ TEST(Bodies, StarCreate) {
 
 TEST(Bodies, StarCreateWithProperMotion) {
   ProperMotion pm(0.001, -0.002, RaConvention::MuAlphaStar);
-  auto s =
-      Star::create("PMStar", 50.0, 1.0, 1.0, 1.0, 100.0, 30.0, 2451545.0, pm);
+  auto s = Star::create("PMStar", 50.0, 1.0, 1.0, 1.0, 100.0, 30.0, 2451545.0, pm);
   EXPECT_EQ(s.name(), "PMStar");
 }
 
@@ -110,9 +109,8 @@ TEST(Bodies, BodyTargetMarsAltitude) {
 TEST(Bodies, BodyTargetAllBodiesAltitude) {
   auto obs = geodetic(-17.89, 28.76, 2326.0); // ORM
   auto mjd = MJD(60000.5);
-  std::vector<Body> all = {Body::Sun,    Body::Moon,   Body::Mercury,
-                           Body::Venus,  Body::Mars,   Body::Jupiter,
-                           Body::Saturn, Body::Uranus, Body::Neptune};
+  std::vector<Body> all = {Body::Sun,     Body::Moon,   Body::Mercury, Body::Venus,  Body::Mars,
+                           Body::Jupiter, Body::Saturn, Body::Uranus,  Body::Neptune};
   for (auto b : all) {
     BodyTarget bt(b);
     auto alt = bt.altitude_at(obs, mjd);

@@ -31,16 +31,14 @@ using U = qtty::AstronomicalUnit;
 
 /// Show a center conversion C1→C2, round-trip C1→C2→C1, and the error.
 template <typename C1, typename C2>
-void show_center_conversion(const JulianDate &jd,
-                            const cartesian::Position<C1, F, U> &src) {
+void show_center_conversion(const JulianDate &jd, const cartesian::Position<C1, F, U> &src) {
   auto out = src.template to_center<C2>(jd);
   auto back = out.template to_center<C1>(jd);
   auto err = (src - back).magnitude();
 
-  std::cout << std::left << std::setw(12) << CenterTraits<C1>::name() << " -> "
-            << std::setw(12) << CenterTraits<C2>::name() << " out=("
-            << std::showpos << std::fixed << std::setprecision(9) << out
-            << std::noshowpos << ")  roundtrip=" << std::scientific
+  std::cout << std::left << std::setw(12) << CenterTraits<C1>::name() << " -> " << std::setw(12)
+            << CenterTraits<C2>::name() << " out=(" << std::showpos << std::fixed
+            << std::setprecision(9) << out << std::noshowpos << ")  roundtrip=" << std::scientific
             << std::setprecision(3) << err << std::fixed << std::endl;
 }
 
@@ -58,12 +56,10 @@ void show_bodycentric_conversion(const char *label, const JulianDate &jd,
   auto recovered = recovered_geo.template to_center<C>(jd);
   auto err = (src - recovered).magnitude();
 
-  std::cout << std::left << std::setw(12) << label << " -> " << std::setw(12)
-            << "Bodycentric";
-  std::cout << " dist=" << std::fixed << std::setprecision(6)
-            << bary.distance();
-  std::cout << "  roundtrip=" << std::scientific << std::setprecision(3) << err
-            << std::fixed << std::endl;
+  std::cout << std::left << std::setw(12) << label << " -> " << std::setw(12) << "Bodycentric";
+  std::cout << " dist=" << std::fixed << std::setprecision(6) << bary.distance();
+  std::cout << "  roundtrip=" << std::scientific << std::setprecision(3) << err << std::fixed
+            << std::endl;
 }
 
 // ─── main
@@ -71,8 +67,8 @@ void show_bodycentric_conversion(const char *label, const JulianDate &jd,
 
 int main() {
   JulianDate jd(2460000.5);
-  std::cout << "Center conversion demo at JD(TT) = " << std::fixed
-            << std::setprecision(1) << jd << "\n"
+  std::cout << "Center conversion demo at JD(TT) = " << std::fixed << std::setprecision(1) << jd
+            << "\n"
             << std::endl;
 
   cartesian::Position<Barycentric, F, U> p_bary(0.40, -0.10, 1.20);

@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-05-09
+
+### Added
+
+- `outside_azimuth_range` C++ wrappers in `include/siderust/azimuth.hpp` for Sun, Moon, and Star subjects, mirroring the existing `in_azimuth_range` surface and backed by the new `siderust_outside_azimuth_range` FFI function.
+- `cheby` and `qtty` as git submodules, required by the `siderust` Rust workspace patch overrides when building the FFI from source.
+
+### Changed
+
+- Advance `siderust` submodule to `v0.6.1`: brings `siderust_outside_azimuth_range` FFI function, `SIDERUST_STATUS_T_OUT_OF_RANGE` (13) and `SIDERUST_STATUS_T_NO_EOP_DATA` (14) enum values, and all upstream dependency updates (qtty 0.7.0, affn 0.6.2).
+- Updated `tempoch::*Scale` type references in examples `07_moon_properties.cpp`, `10_time_periods.cpp`, and `11_serde_serialization.cpp` to the new `tempoch::scales::*` namespace introduced in tempoch-cpp v0.2.1.
+- `CMakeLists.txt`: set `INSTALL_GTEST=OFF` and `INSTALL_GMOCK=OFF` before `FetchContent_MakeAvailable(googletest)` to fix `cmake --install` / CPack failures caused by GoogleTest adding spurious install rules.
+
+### Fixed
+
+- `.value()` removed from `Displacement` arithmetic operators (`+`, `-`, unary `-`, `*`) and `Position` arithmetic operators in `include/siderust/coordinates/cartesian.hpp`; qtty's own operator overloads are used instead.
+- clang-format violations across `examples/` and `tests/` (automated via `clang-format -i`).
+
 ## [0.2.0] - 2026-05-08
 
 ### Added

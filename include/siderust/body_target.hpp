@@ -67,9 +67,8 @@ namespace body {
  */
 inline qtty::Radian altitude_at(Body b, const Geodetic &obs, const MJD &mjd) {
   double out;
-  check_status(siderust_altitude_at(
-                   detail::make_body_subject(static_cast<SiderustBody>(b)),
-                   obs.to_c(), mjd.value(), &out),
+  check_status(siderust_altitude_at(detail::make_body_subject(static_cast<SiderustBody>(b)),
+                                    obs.to_c(), mjd.value(), &out),
                "body::altitude_at");
   return qtty::Radian(out);
 }
@@ -77,16 +76,13 @@ inline qtty::Radian altitude_at(Body b, const Geodetic &obs, const MJD &mjd) {
 /**
  * @brief Find periods when a body is above a threshold altitude.
  */
-inline std::vector<Period> above_threshold(Body b, const Geodetic &obs,
-                                           const Period &window,
-                                           qtty::Degree threshold,
-                                           const SearchOptions &opts = {}) {
+inline std::vector<Period> above_threshold(Body b, const Geodetic &obs, const Period &window,
+                                           qtty::Degree threshold, const SearchOptions &opts = {}) {
   tempoch_period_mjd_t *ptr = nullptr;
   uintptr_t count = 0;
-  check_status(siderust_above_threshold(
-                   detail::make_body_subject(static_cast<SiderustBody>(b)),
-                   obs.to_c(), window.c_inner(), threshold.value(),
-                   opts.to_c(), &ptr, &count),
+  check_status(siderust_above_threshold(detail::make_body_subject(static_cast<SiderustBody>(b)),
+                                        obs.to_c(), window.c_inner(), threshold.value(),
+                                        opts.to_c(), &ptr, &count),
                "body::above_threshold");
   return detail::periods_from_c(ptr, count);
 }
@@ -94,16 +90,13 @@ inline std::vector<Period> above_threshold(Body b, const Geodetic &obs,
 /**
  * @brief Find periods when a body is below a threshold altitude.
  */
-inline std::vector<Period> below_threshold(Body b, const Geodetic &obs,
-                                           const Period &window,
-                                           qtty::Degree threshold,
-                                           const SearchOptions &opts = {}) {
+inline std::vector<Period> below_threshold(Body b, const Geodetic &obs, const Period &window,
+                                           qtty::Degree threshold, const SearchOptions &opts = {}) {
   tempoch_period_mjd_t *ptr = nullptr;
   uintptr_t count = 0;
-  check_status(siderust_below_threshold(
-                   detail::make_body_subject(static_cast<SiderustBody>(b)),
-                   obs.to_c(), window.c_inner(), threshold.value(),
-                   opts.to_c(), &ptr, &count),
+  check_status(siderust_below_threshold(detail::make_body_subject(static_cast<SiderustBody>(b)),
+                                        obs.to_c(), window.c_inner(), threshold.value(),
+                                        opts.to_c(), &ptr, &count),
                "body::below_threshold");
   return detail::periods_from_c(ptr, count);
 }
@@ -111,16 +104,14 @@ inline std::vector<Period> below_threshold(Body b, const Geodetic &obs,
 /**
  * @brief Find threshold-crossing events for a body.
  */
-inline std::vector<CrossingEvent> crossings(Body b, const Geodetic &obs,
-                                            const Period &window,
+inline std::vector<CrossingEvent> crossings(Body b, const Geodetic &obs, const Period &window,
                                             qtty::Degree threshold,
                                             const SearchOptions &opts = {}) {
   siderust_crossing_event_t *ptr = nullptr;
   uintptr_t count = 0;
-  check_status(siderust_crossings(
-                   detail::make_body_subject(static_cast<SiderustBody>(b)),
-                   obs.to_c(), window.c_inner(), threshold.value(),
-                   opts.to_c(), &ptr, &count),
+  check_status(siderust_crossings(detail::make_body_subject(static_cast<SiderustBody>(b)),
+                                  obs.to_c(), window.c_inner(), threshold.value(), opts.to_c(),
+                                  &ptr, &count),
                "body::crossings");
   return detail::crossings_from_c(ptr, count);
 }
@@ -128,14 +119,12 @@ inline std::vector<CrossingEvent> crossings(Body b, const Geodetic &obs,
 /**
  * @brief Find culmination events for a body.
  */
-inline std::vector<CulminationEvent>
-culminations(Body b, const Geodetic &obs, const Period &window,
-             const SearchOptions &opts = {}) {
+inline std::vector<CulminationEvent> culminations(Body b, const Geodetic &obs, const Period &window,
+                                                  const SearchOptions &opts = {}) {
   siderust_culmination_event_t *ptr = nullptr;
   uintptr_t count = 0;
-  check_status(siderust_culminations(
-                   detail::make_body_subject(static_cast<SiderustBody>(b)),
-                   obs.to_c(), window.c_inner(), opts.to_c(), &ptr, &count),
+  check_status(siderust_culminations(detail::make_body_subject(static_cast<SiderustBody>(b)),
+                                     obs.to_c(), window.c_inner(), opts.to_c(), &ptr, &count),
                "body::culminations");
   return detail::culminations_from_c(ptr, count);
 }
@@ -143,18 +132,14 @@ culminations(Body b, const Geodetic &obs, const Period &window,
 /**
  * @brief Find periods when a body's altitude is within [min, max].
  */
-inline std::vector<Period> altitude_periods(Body b, const Geodetic &obs,
-                                            const Period &window,
-                                            qtty::Degree min_alt,
-                                            qtty::Degree max_alt) {
-  siderust_altitude_query_t q = {obs.to_c(), window.start().value(),
-                                 window.end().value(), min_alt.value(),
-                                 max_alt.value()};
+inline std::vector<Period> altitude_periods(Body b, const Geodetic &obs, const Period &window,
+                                            qtty::Degree min_alt, qtty::Degree max_alt) {
+  siderust_altitude_query_t q = {obs.to_c(), window.start().value(), window.end().value(),
+                                 min_alt.value(), max_alt.value()};
   tempoch_period_mjd_t *ptr = nullptr;
   uintptr_t count = 0;
-  check_status(siderust_altitude_periods(
-                   detail::make_body_subject(static_cast<SiderustBody>(b)), q,
-                   &ptr, &count),
+  check_status(siderust_altitude_periods(detail::make_body_subject(static_cast<SiderustBody>(b)), q,
+                                         &ptr, &count),
                "body::altitude_periods");
   return detail::periods_from_c(ptr, count);
 }
@@ -170,9 +155,8 @@ namespace body {
  */
 inline qtty::Radian azimuth_at(Body b, const Geodetic &obs, const MJD &mjd) {
   double out;
-  check_status(siderust_azimuth_at(
-                   detail::make_body_subject(static_cast<SiderustBody>(b)),
-                   obs.to_c(), mjd.value(), &out),
+  check_status(siderust_azimuth_at(detail::make_body_subject(static_cast<SiderustBody>(b)),
+                                   obs.to_c(), mjd.value(), &out),
                "body::azimuth_at");
   return qtty::Radian(out);
 }
@@ -180,15 +164,15 @@ inline qtty::Radian azimuth_at(Body b, const Geodetic &obs, const MJD &mjd) {
 /**
  * @brief Find azimuth-bearing crossing events for a body.
  */
-inline std::vector<AzimuthCrossingEvent>
-azimuth_crossings(Body b, const Geodetic &obs, const Period &window,
-                  qtty::Degree bearing, const SearchOptions &opts = {}) {
+inline std::vector<AzimuthCrossingEvent> azimuth_crossings(Body b, const Geodetic &obs,
+                                                           const Period &window,
+                                                           qtty::Degree bearing,
+                                                           const SearchOptions &opts = {}) {
   siderust_azimuth_crossing_event_t *ptr = nullptr;
   uintptr_t count = 0;
-  check_status(siderust_azimuth_crossings(
-                   detail::make_body_subject(static_cast<SiderustBody>(b)),
-                   obs.to_c(), window.c_inner(), bearing.value(), opts.to_c(),
-                   &ptr, &count),
+  check_status(siderust_azimuth_crossings(detail::make_body_subject(static_cast<SiderustBody>(b)),
+                                          obs.to_c(), window.c_inner(), bearing.value(),
+                                          opts.to_c(), &ptr, &count),
                "body::azimuth_crossings");
   return detail::az_crossings_from_c(ptr, count);
 }
@@ -197,13 +181,11 @@ azimuth_crossings(Body b, const Geodetic &obs, const Period &window,
  * @brief Find azimuth extrema (northernmost/southernmost bearing) for a body.
  */
 inline std::vector<AzimuthExtremum>
-azimuth_extrema(Body b, const Geodetic &obs, const Period &window,
-                const SearchOptions &opts = {}) {
+azimuth_extrema(Body b, const Geodetic &obs, const Period &window, const SearchOptions &opts = {}) {
   siderust_azimuth_extremum_t *ptr = nullptr;
   uintptr_t count = 0;
-  check_status(siderust_azimuth_extrema(
-                   detail::make_body_subject(static_cast<SiderustBody>(b)),
-                   obs.to_c(), window.c_inner(), opts.to_c(), &ptr, &count),
+  check_status(siderust_azimuth_extrema(detail::make_body_subject(static_cast<SiderustBody>(b)),
+                                        obs.to_c(), window.c_inner(), opts.to_c(), &ptr, &count),
                "body::azimuth_extrema");
   return detail::az_extrema_from_c(ptr, count);
 }
@@ -211,16 +193,14 @@ azimuth_extrema(Body b, const Geodetic &obs, const Period &window,
 /**
  * @brief Find periods when a body's azimuth is within [min, max].
  */
-inline std::vector<Period> in_azimuth_range(Body b, const Geodetic &obs,
-                                            const Period &window,
+inline std::vector<Period> in_azimuth_range(Body b, const Geodetic &obs, const Period &window,
                                             qtty::Degree min, qtty::Degree max,
                                             const SearchOptions &opts = {}) {
   tempoch_period_mjd_t *ptr = nullptr;
   uintptr_t count = 0;
-  check_status(siderust_in_azimuth_range(
-                   detail::make_body_subject(static_cast<SiderustBody>(b)),
-                   obs.to_c(), window.c_inner(), min.value(), max.value(),
-                   opts.to_c(), &ptr, &count),
+  check_status(siderust_in_azimuth_range(detail::make_body_subject(static_cast<SiderustBody>(b)),
+                                         obs.to_c(), window.c_inner(), min.value(), max.value(),
+                                         opts.to_c(), &ptr, &count),
                "body::in_azimuth_range");
   return detail::periods_from_c(ptr, count);
 }
@@ -290,29 +270,26 @@ public:
     return qtty::Degree(rad.value() * 180.0 / 3.14159265358979323846);
   }
 
-  std::vector<Period>
-  above_threshold(const Geodetic &obs, const Period &window,
-                  qtty::Degree threshold,
-                  const SearchOptions &opts = {}) const override {
+  std::vector<Period> above_threshold(const Geodetic &obs, const Period &window,
+                                      qtty::Degree threshold,
+                                      const SearchOptions &opts = {}) const override {
     return body::above_threshold(body_, obs, window, threshold, opts);
   }
 
-  std::vector<Period>
-  below_threshold(const Geodetic &obs, const Period &window,
-                  qtty::Degree threshold,
-                  const SearchOptions &opts = {}) const override {
+  std::vector<Period> below_threshold(const Geodetic &obs, const Period &window,
+                                      qtty::Degree threshold,
+                                      const SearchOptions &opts = {}) const override {
     return body::below_threshold(body_, obs, window, threshold, opts);
   }
 
-  std::vector<CrossingEvent>
-  crossings(const Geodetic &obs, const Period &window, qtty::Degree threshold,
-            const SearchOptions &opts = {}) const override {
+  std::vector<CrossingEvent> crossings(const Geodetic &obs, const Period &window,
+                                       qtty::Degree threshold,
+                                       const SearchOptions &opts = {}) const override {
     return body::crossings(body_, obs, window, threshold, opts);
   }
 
-  std::vector<CulminationEvent>
-  culminations(const Geodetic &obs, const Period &window,
-               const SearchOptions &opts = {}) const override {
+  std::vector<CulminationEvent> culminations(const Geodetic &obs, const Period &window,
+                                             const SearchOptions &opts = {}) const override {
     return body::culminations(body_, obs, window, opts);
   }
 
@@ -326,8 +303,7 @@ public:
   }
 
   std::vector<AzimuthCrossingEvent>
-  azimuth_crossings(const Geodetic &obs, const Period &window,
-                    qtty::Degree bearing,
+  azimuth_crossings(const Geodetic &obs, const Period &window, qtty::Degree bearing,
                     const SearchOptions &opts = {}) const override {
     return body::azimuth_crossings(body_, obs, window, bearing, opts);
   }
