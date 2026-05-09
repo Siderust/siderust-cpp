@@ -31,21 +31,17 @@ struct Geodetic {
   qtty::Degree lat;   ///< Latitude (north positive).
   qtty::Meter height; ///< Height above ellipsoid.
 
-  Geodetic()
-      : lon(qtty::Degree(0)), lat(qtty::Degree(0)), height(qtty::Meter(0)) {}
+  Geodetic() : lon(qtty::Degree(0)), lat(qtty::Degree(0)), height(qtty::Meter(0)) {}
 
   Geodetic(qtty::Degree lon_, qtty::Degree lat_, qtty::Meter h = qtty::Meter(0))
       : lon(lon_), lat(lat_), height(h) {}
 
   /// Raw-double convenience constructor (degrees, metres).
   Geodetic(double lon_deg, double lat_deg, double height_m = 0.0)
-      : lon(qtty::Degree(lon_deg)), lat(qtty::Degree(lat_deg)),
-        height(qtty::Meter(height_m)) {}
+      : lon(qtty::Degree(lon_deg)), lat(qtty::Degree(lat_deg)), height(qtty::Meter(height_m)) {}
 
   /// Convert to C FFI struct.
-  siderust_geodetic_t to_c() const {
-    return {lon.value(), lat.value(), height.value()};
-  }
+  siderust_geodetic_t to_c() const { return {lon.value(), lat.value(), height.value()}; }
 
   /// Create from C FFI struct.
   static Geodetic from_c(const siderust_geodetic_t &c) {
@@ -58,8 +54,7 @@ struct Geodetic {
    * @tparam U Output length unit (default: meter).
    */
   template <typename U = qtty::Meter>
-  cartesian::Position<centers::Geocentric, frames::ECEF, U>
-  to_cartesian() const;
+  cartesian::Position<centers::Geocentric, frames::ECEF, U> to_cartesian() const;
 };
 
 // ============================================================================

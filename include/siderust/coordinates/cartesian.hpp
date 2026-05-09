@@ -6,8 +6,8 @@
  * @brief Typed cartesian coordinate templates.
  */
 
-#include "../centers.hpp"
 #include "../astro_context.hpp"
+#include "../centers.hpp"
 #include "../ffi_core.hpp"
 #include "../frames.hpp"
 #include "../time.hpp"
@@ -46,9 +46,7 @@ template <typename F> struct Direction {
   Direction() : x(0), y(0), z(0) {}
   Direction(double x_, double y_, double z_) : x(x_), y(y_), z(z_) {}
 
-  static constexpr siderust_frame_t frame_id() {
-    return frames::FrameTraits<F>::ffi_id;
-  }
+  static constexpr siderust_frame_t frame_id() { return frames::FrameTraits<F>::ffi_id; }
 
   /**
    * @brief Dot product of two unit-direction vectors.
@@ -56,9 +54,7 @@ template <typename F> struct Direction {
    * Returns cos(θ) where θ is the angle between the two directions.
    * Result is in [-1, 1].
    */
-  double dot(const Direction &other) const {
-    return x * other.x + y * other.y + z * other.z;
-  }
+  double dot(const Direction &other) const { return x * other.x + y * other.y + z * other.z; }
 
   /**
    * @brief Angle between this direction and another, in radians.
@@ -95,9 +91,9 @@ template <typename F> struct Direction {
       return Direction<Target>(x, y, z);
     } else {
       siderust_cartesian_pos_t out{};
-      check_status(siderust_cartesian_dir_transform_frame(
-                       x, y, z, frames::FrameTraits<F>::ffi_id,
-                       frames::FrameTraits<Target>::ffi_id, jd.value(), &out),
+      check_status(siderust_cartesian_dir_transform_frame(x, y, z, frames::FrameTraits<F>::ffi_id,
+                                                          frames::FrameTraits<Target>::ffi_id,
+                                                          jd.value(), &out),
                    "cartesian::Direction::to_frame");
       return Direction<Target>(out.x, out.y, out.z);
     }
@@ -115,9 +111,8 @@ template <typename F> struct Direction {
       siderust_cartesian_pos_t out{};
       detail::OwnedFfiContext fctx(ctx);
       check_status(siderust_cartesian_dir_transform_frame_with_context(
-                       x, y, z, frames::FrameTraits<F>::ffi_id,
-                       frames::FrameTraits<Target>::ffi_id, jd.value(),
-                       fctx.get(), &out),
+                       x, y, z, frames::FrameTraits<F>::ffi_id, frames::FrameTraits<Target>::ffi_id,
+                       jd.value(), fctx.get(), &out),
                    "cartesian::Direction::to_frame_with");
       return Direction<Target>(out.x, out.y, out.z);
     }
@@ -127,8 +122,7 @@ template <typename F> struct Direction {
    * @brief Shorthand: `.to<Target>(jd)` (calls `to_frame`).
    */
   template <typename Target>
-  auto to(const JulianDate &jd) const
-      -> decltype(this->template to_frame<Target>(jd)) {
+  auto to(const JulianDate &jd) const -> decltype(this->template to_frame<Target>(jd)) {
     return to_frame<Target>(jd);
   }
 };
@@ -164,8 +158,7 @@ template <typename F, typename U> struct Displacement {
 
   Displacement(U x_, U y_, U z_) : comp_x(x_), comp_y(y_), comp_z(z_) {}
 
-  Displacement(double x_, double y_, double z_)
-      : comp_x(U(x_)), comp_y(U(y_)), comp_z(U(z_)) {}
+  Displacement(double x_, double y_, double z_) : comp_x(U(x_)), comp_y(U(y_)), comp_z(U(z_)) {}
 
   U x() const { return comp_x; }
   U y() const { return comp_y; }
@@ -182,42 +175,32 @@ template <typename F, typename U> struct Displacement {
     return U(sqrt(vx * vx + vy * vy + vz * vz));
   }
 
-  static constexpr siderust_frame_t frame_id() {
-    return frames::FrameTraits<F>::ffi_id;
-  }
+  static constexpr siderust_frame_t frame_id() { return frames::FrameTraits<F>::ffi_id; }
 
   /**
    * @brief Add two displacements.
    */
   Displacement operator+(const Displacement &other) const {
-    return Displacement(U(comp_x.value() + other.comp_x.value()),
-                        U(comp_y.value() + other.comp_y.value()),
-                        U(comp_z.value() + other.comp_z.value()));
+    return Displacement(comp_x + other.comp_x, comp_y + other.comp_y, comp_z + other.comp_z);
   }
 
   /**
    * @brief Subtract two displacements.
    */
   Displacement operator-(const Displacement &other) const {
-    return Displacement(U(comp_x.value() - other.comp_x.value()),
-                        U(comp_y.value() - other.comp_y.value()),
-                        U(comp_z.value() - other.comp_z.value()));
+    return Displacement(comp_x - other.comp_x, comp_y - other.comp_y, comp_z - other.comp_z);
   }
 
   /**
    * @brief Negate a displacement.
    */
-  Displacement operator-() const {
-    return Displacement(U(-comp_x.value()), U(-comp_y.value()),
-                        U(-comp_z.value()));
-  }
+  Displacement operator-() const { return Displacement(-comp_x, -comp_y, -comp_z); }
 
   /**
    * @brief Scale a displacement by a scalar.
    */
   Displacement operator*(double scalar) const {
-    return Displacement(U(comp_x.value() * scalar), U(comp_y.value() * scalar),
-                        U(comp_z.value() * scalar));
+    return Displacement(comp_x * scalar, comp_y * scalar, comp_z * scalar);
   }
 
   /**
@@ -227,8 +210,7 @@ template <typename F, typename U> struct Displacement {
    * @param  jd      Julian Date (TT) for time-dependent rotations.
    */
   template <typename Target>
-  std::enable_if_t<frames::has_frame_transform_v<F, Target>,
-                   Displacement<Target, U>>
+  std::enable_if_t<frames::has_frame_transform_v<F, Target>, Displacement<Target, U>>
   to_frame(const JulianDate &jd) const {
     if constexpr (std::is_same_v<F, Target>) {
       return Displacement<Target, U>(comp_x, comp_y, comp_z);
@@ -236,8 +218,8 @@ template <typename F, typename U> struct Displacement {
       siderust_cartesian_pos_t out{};
       check_status(siderust_cartesian_dir_transform_frame(
                        comp_x.value(), comp_y.value(), comp_z.value(),
-                       frames::FrameTraits<F>::ffi_id,
-                       frames::FrameTraits<Target>::ffi_id, jd.value(), &out),
+                       frames::FrameTraits<F>::ffi_id, frames::FrameTraits<Target>::ffi_id,
+                       jd.value(), &out),
                    "cartesian::Displacement::to_frame");
       return Displacement<Target, U>(out.x, out.y, out.z);
     }
@@ -247,8 +229,7 @@ template <typename F, typename U> struct Displacement {
    * @brief Transform this displacement with an explicit astronomical context.
    */
   template <typename Target>
-  std::enable_if_t<frames::has_frame_transform_v<F, Target>,
-                   Displacement<Target, U>>
+  std::enable_if_t<frames::has_frame_transform_v<F, Target>, Displacement<Target, U>>
   to_frame_with(const JulianDate &jd, const AstroContext &ctx) const {
     if constexpr (std::is_same_v<F, Target>) {
       return Displacement<Target, U>(comp_x, comp_y, comp_z);
@@ -257,9 +238,8 @@ template <typename F, typename U> struct Displacement {
       detail::OwnedFfiContext fctx(ctx);
       check_status(siderust_cartesian_dir_transform_frame_with_context(
                        comp_x.value(), comp_y.value(), comp_z.value(),
-                       frames::FrameTraits<F>::ffi_id,
-                       frames::FrameTraits<Target>::ffi_id, jd.value(),
-                       fctx.get(), &out),
+                       frames::FrameTraits<F>::ffi_id, frames::FrameTraits<Target>::ffi_id,
+                       jd.value(), fctx.get(), &out),
                    "cartesian::Displacement::to_frame_with");
       return Displacement<Target, U>(out.x, out.y, out.z);
     }
@@ -278,8 +258,7 @@ inline std::ostream &operator<<(std::ostream &os, const Displacement<F, U> &d) {
  * @brief Scale a displacement by a scalar (scalar on left).
  */
 template <typename F, typename U>
-inline Displacement<F, U> operator*(double scalar,
-                                    const Displacement<F, U> &d) {
+inline Displacement<F, U> operator*(double scalar, const Displacement<F, U> &d) {
   return d * scalar;
 }
 
@@ -305,8 +284,7 @@ template <typename C, typename F, typename U> struct Position {
 
   Position(U x_, U y_, U z_) : comp_x(x_), comp_y(y_), comp_z(z_) {}
 
-  Position(double x_, double y_, double z_)
-      : comp_x(U(x_)), comp_y(U(y_)), comp_z(U(z_)) {}
+  Position(double x_, double y_, double z_) : comp_x(U(x_)), comp_y(U(y_)), comp_z(U(z_)) {}
 
   U x() const { return comp_x; }
   U y() const { return comp_y; }
@@ -333,23 +311,16 @@ template <typename C, typename F, typename U> struct Position {
     return U(sqrt(dx * dx + dy * dy + dz * dz));
   }
 
-  static constexpr siderust_frame_t frame_id() {
-    return frames::FrameTraits<F>::ffi_id;
-  }
-  static constexpr siderust_center_t center_id() {
-    return centers::CenterTraits<C>::ffi_id;
-  }
+  static constexpr siderust_frame_t frame_id() { return frames::FrameTraits<F>::ffi_id; }
+  static constexpr siderust_center_t center_id() { return centers::CenterTraits<C>::ffi_id; }
 
   /// Convert to C FFI struct.
   siderust_cartesian_pos_t to_c() const {
-    return {comp_x.value(), comp_y.value(), comp_z.value(), frame_id(),
-            center_id()};
+    return {comp_x.value(), comp_y.value(), comp_z.value(), frame_id(), center_id()};
   }
 
   /// Create from C FFI struct (ignoring runtime frame/center - trust the type).
-  static Position from_c(const siderust_cartesian_pos_t &c) {
-    return Position(c.x, c.y, c.z);
-  }
+  static Position from_c(const siderust_cartesian_pos_t &c) { return Position(c.x, c.y, c.z); }
 
   /**
    * @brief Transform this position to a different reference frame (same
@@ -363,17 +334,15 @@ template <typename C, typename F, typename U> struct Position {
    * @param  jd      Julian Date (TT) for time-dependent rotations.
    */
   template <typename Target>
-  std::enable_if_t<frames::has_frame_transform_v<F, Target>,
-                   Position<C, Target, U>>
+  std::enable_if_t<frames::has_frame_transform_v<F, Target>, Position<C, Target, U>>
   to_frame(const JulianDate &jd) const {
     if constexpr (std::is_same_v<F, Target>) {
       return *this;
     } else {
       siderust_cartesian_pos_t out{};
-      check_status(
-          siderust_cartesian_pos_transform_frame(
-              to_c(), frames::FrameTraits<Target>::ffi_id, jd.value(), &out),
-          "cartesian::Position::to_frame");
+      check_status(siderust_cartesian_pos_transform_frame(
+                       to_c(), frames::FrameTraits<Target>::ffi_id, jd.value(), &out),
+                   "cartesian::Position::to_frame");
       return Position<C, Target, U>(out.x, out.y, out.z);
     }
   }
@@ -382,19 +351,16 @@ template <typename C, typename F, typename U> struct Position {
    * @brief Transform this position with an explicit astronomical context.
    */
   template <typename Target>
-  std::enable_if_t<frames::has_frame_transform_v<F, Target>,
-                   Position<C, Target, U>>
+  std::enable_if_t<frames::has_frame_transform_v<F, Target>, Position<C, Target, U>>
   to_frame_with(const JulianDate &jd, const AstroContext &ctx) const {
     if constexpr (std::is_same_v<F, Target>) {
       return *this;
     } else {
       siderust_cartesian_pos_t out{};
       detail::OwnedFfiContext fctx(ctx);
-      check_status(
-          siderust_cartesian_pos_transform_frame_with_context(
-              to_c(), frames::FrameTraits<Target>::ffi_id, jd.value(),
-              fctx.get(), &out),
-          "cartesian::Position::to_frame_with");
+      check_status(siderust_cartesian_pos_transform_frame_with_context(
+                       to_c(), frames::FrameTraits<Target>::ffi_id, jd.value(), fctx.get(), &out),
+                   "cartesian::Position::to_frame_with");
       return Position<C, Target, U>(out.x, out.y, out.z);
     }
   }
@@ -403,8 +369,7 @@ template <typename C, typename F, typename U> struct Position {
    * @brief Shorthand: `.to<Target>(jd)` (calls `to_frame`).
    */
   template <typename Target>
-  auto to(const JulianDate &jd) const
-      -> decltype(this->template to_frame<Target>(jd)) {
+  auto to(const JulianDate &jd) const -> decltype(this->template to_frame<Target>(jd)) {
     return to_frame<Target>(jd);
   }
 
@@ -421,18 +386,16 @@ template <typename C, typename F, typename U> struct Position {
    * @param  jd       Julian Date (TT) for the ephemeris evaluation.
    */
   template <typename TargetC>
-  std::enable_if_t<centers::has_center_transform_v<C, TargetC>,
-                   Position<TargetC, F, U>>
+  std::enable_if_t<centers::has_center_transform_v<C, TargetC>, Position<TargetC, F, U>>
   to_center(const JulianDate &jd) const {
     if constexpr (std::is_same_v<C, TargetC>) {
       return *this;
     } else if constexpr (std::is_same_v<F, frames::EclipticMeanJ2000>) {
       // Direct FFI call — shift vectors and position are both in ecliptic.
       siderust_cartesian_pos_t out{};
-      check_status(
-          siderust_cartesian_pos_transform_center(
-              to_c(), centers::CenterTraits<TargetC>::ffi_id, jd.value(), &out),
-          "cartesian::Position::to_center");
+      check_status(siderust_cartesian_pos_transform_center(
+                       to_c(), centers::CenterTraits<TargetC>::ffi_id, jd.value(), &out),
+                   "cartesian::Position::to_center");
       return Position<TargetC, F, U>(out.x, out.y, out.z);
     } else {
       // Route through ecliptic so the shift vectors match the frame.
@@ -483,9 +446,8 @@ template <typename C, typename F, typename U> struct Position {
    * Returns a new Position offset by the displacement vector.
    */
   Position operator+(const Displacement<F, U> &displacement) const {
-    return Position(U(comp_x.value() + displacement.comp_x.value()),
-                    U(comp_y.value() + displacement.comp_y.value()),
-                    U(comp_z.value() + displacement.comp_z.value()));
+    return Position(comp_x + displacement.comp_x, comp_y + displacement.comp_y,
+                    comp_z + displacement.comp_z);
   }
 
   /**
@@ -494,9 +456,8 @@ template <typename C, typename F, typename U> struct Position {
    * Returns a new Position offset by the negated displacement vector.
    */
   Position operator-(const Displacement<F, U> &displacement) const {
-    return Position(U(comp_x.value() - displacement.comp_x.value()),
-                    U(comp_y.value() - displacement.comp_y.value()),
-                    U(comp_z.value() - displacement.comp_z.value()));
+    return Position(comp_x - displacement.comp_x, comp_y - displacement.comp_y,
+                    comp_z - displacement.comp_z);
   }
 
   /**
@@ -513,8 +474,7 @@ template <typename C, typename F, typename U> struct Position {
  * @brief Stream operator for Position.
  */
 template <typename C, typename F, typename U>
-inline std::ostream &operator<<(std::ostream &os,
-                                const Position<C, F, U> &pos) {
+inline std::ostream &operator<<(std::ostream &os, const Position<C, F, U> &pos) {
   return os << pos.x() << ", " << pos.y() << ", " << pos.z();
 }
 

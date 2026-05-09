@@ -28,8 +28,7 @@ template <typename C> struct CenterTraits; // primary — intentionally undefine
 template <typename C, typename = void> struct is_center : std::false_type {};
 
 template <typename C>
-struct is_center<C, std::void_t<decltype(CenterTraits<C>::ffi_id)>>
-    : std::true_type {};
+struct is_center<C, std::void_t<decltype(CenterTraits<C>::ffi_id)>> : std::true_type {};
 
 template <typename C> inline constexpr bool is_center_v = is_center<C>::value;
 
@@ -95,13 +94,12 @@ template <> struct CenterTraits<Bodycentric> {
  * Hub = Barycentric.  Supported shifts: Barycentric ↔ Heliocentric,
  * Barycentric ↔ Geocentric, and the composed Heliocentric ↔ Geocentric.
  */
-template <typename From, typename To>
-struct has_center_transform : std::false_type {};
+template <typename From, typename To> struct has_center_transform : std::false_type {};
 
 template <typename C> struct has_center_transform<C, C> : std::true_type {};
 
-#define SIDERUST_CENTER_TRANSFORM_PAIR(A, B)                                   \
-  template <> struct has_center_transform<A, B> : std::true_type {};           \
+#define SIDERUST_CENTER_TRANSFORM_PAIR(A, B)                                                       \
+  template <> struct has_center_transform<A, B> : std::true_type {};                               \
   template <> struct has_center_transform<B, A> : std::true_type {}
 
 SIDERUST_CENTER_TRANSFORM_PAIR(Barycentric, Heliocentric);
@@ -111,8 +109,7 @@ SIDERUST_CENTER_TRANSFORM_PAIR(Heliocentric, Geocentric);
 #undef SIDERUST_CENTER_TRANSFORM_PAIR
 
 template <typename From, typename To>
-inline constexpr bool has_center_transform_v =
-    has_center_transform<From, To>::value;
+inline constexpr bool has_center_transform_v = has_center_transform<From, To>::value;
 
 } // namespace centers
 } // namespace siderust

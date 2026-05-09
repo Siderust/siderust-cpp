@@ -6,8 +6,8 @@
  * @brief Typed spherical coordinate templates.
  */
 
-#include "../centers.hpp"
 #include "../astro_context.hpp"
+#include "../centers.hpp"
 #include "../frames.hpp"
 #include "../time.hpp"
 #include "geodetic.hpp"
@@ -54,29 +54,22 @@ private:
 public:
   Direction() : azimuth_(qtty::Degree(0)), polar_(qtty::Degree(0)) {}
 
-  Direction(qtty::Degree azimuth, qtty::Degree polar)
-      : azimuth_(azimuth), polar_(polar) {}
+  Direction(qtty::Degree azimuth, qtty::Degree polar) : azimuth_(azimuth), polar_(polar) {}
 
   /// @name Frame info
   /// @{
-  static constexpr siderust_frame_t frame_id() {
-    return frames::FrameTraits<F>::ffi_id;
-  }
-  static constexpr const char *frame_name() {
-    return frames::FrameTraits<F>::name();
-  }
+  static constexpr siderust_frame_t frame_id() { return frames::FrameTraits<F>::ffi_id; }
+  static constexpr const char *frame_name() { return frames::FrameTraits<F>::name(); }
   /// @}
 
   /// @name RA / Dec (equatorial frames only)
   /// @{
-  template <typename F_ = F,
-            std::enable_if_t<frames::has_ra_dec_v<F_>, int> = 0>
+  template <typename F_ = F, std::enable_if_t<frames::has_ra_dec_v<F_>, int> = 0>
   qtty::Degree ra() const {
     return azimuth_;
   }
 
-  template <typename F_ = F,
-            std::enable_if_t<frames::has_ra_dec_v<F_>, int> = 0>
+  template <typename F_ = F, std::enable_if_t<frames::has_ra_dec_v<F_>, int> = 0>
   qtty::Degree dec() const {
     return polar_;
   }
@@ -84,26 +77,22 @@ public:
 
   /// @name Azimuth / Altitude (Horizontal frame only)
   /// @{
-  template <typename F_ = F,
-            std::enable_if_t<frames::has_az_alt_v<F_>, int> = 0>
+  template <typename F_ = F, std::enable_if_t<frames::has_az_alt_v<F_>, int> = 0>
   qtty::Degree az() const {
     return azimuth_;
   }
 
-  template <typename F_ = F,
-            std::enable_if_t<frames::has_az_alt_v<F_>, int> = 0>
+  template <typename F_ = F, std::enable_if_t<frames::has_az_alt_v<F_>, int> = 0>
   qtty::Degree al() const {
     return polar_;
   }
 
-  template <typename F_ = F,
-            std::enable_if_t<frames::has_az_alt_v<F_>, int> = 0>
+  template <typename F_ = F, std::enable_if_t<frames::has_az_alt_v<F_>, int> = 0>
   qtty::Degree alt() const {
     return polar_;
   }
 
-  template <typename F_ = F,
-            std::enable_if_t<frames::has_az_alt_v<F_>, int> = 0>
+  template <typename F_ = F, std::enable_if_t<frames::has_az_alt_v<F_>, int> = 0>
   qtty::Degree altitude() const {
     return polar_;
   }
@@ -111,26 +100,22 @@ public:
 
   /// @name Longitude / Latitude (lon/lat frames)
   /// @{
-  template <typename F_ = F,
-            std::enable_if_t<frames::has_lon_lat_v<F_>, int> = 0>
+  template <typename F_ = F, std::enable_if_t<frames::has_lon_lat_v<F_>, int> = 0>
   qtty::Degree lon() const {
     return azimuth_;
   }
 
-  template <typename F_ = F,
-            std::enable_if_t<frames::has_lon_lat_v<F_>, int> = 0>
+  template <typename F_ = F, std::enable_if_t<frames::has_lon_lat_v<F_>, int> = 0>
   qtty::Degree lat() const {
     return polar_;
   }
 
-  template <typename F_ = F,
-            std::enable_if_t<frames::has_lon_lat_v<F_>, int> = 0>
+  template <typename F_ = F, std::enable_if_t<frames::has_lon_lat_v<F_>, int> = 0>
   qtty::Degree longitude() const {
     return azimuth_;
   }
 
-  template <typename F_ = F,
-            std::enable_if_t<frames::has_lon_lat_v<F_>, int> = 0>
+  template <typename F_ = F, std::enable_if_t<frames::has_lon_lat_v<F_>, int> = 0>
   qtty::Degree latitude() const {
     return polar_;
   }
@@ -138,9 +123,7 @@ public:
 
   /// @name FFI interop
   /// @{
-  siderust_spherical_dir_t to_c() const {
-    return {polar_.value(), azimuth_.value(), frame_id()};
-  }
+  siderust_spherical_dir_t to_c() const { return {polar_.value(), azimuth_.value(), frame_id()}; }
 
   static Direction from_c(const siderust_spherical_dir_t &c) {
     return Direction(qtty::Degree(c.azimuth_deg), qtty::Degree(c.polar_deg));
@@ -162,11 +145,11 @@ public:
     const double po1 = polar_.value() * DEG2RAD;
     const double az2 = other.azimuth_.value() * DEG2RAD;
     const double po2 = other.polar_.value() * DEG2RAD;
-    const double x = std::cos(po1) * std::sin(po2) -
-                     std::sin(po1) * std::cos(po2) * std::cos(az2 - az1);
+    const double x =
+        std::cos(po1) * std::sin(po2) - std::sin(po1) * std::cos(po2) * std::cos(az2 - az1);
     const double y = std::cos(po2) * std::sin(az2 - az1);
-    const double z = std::sin(po1) * std::sin(po2) +
-                     std::cos(po1) * std::cos(po2) * std::cos(az2 - az1);
+    const double z =
+        std::sin(po1) * std::sin(po2) + std::cos(po1) * std::cos(po2) * std::cos(az2 - az1);
     return qtty::Degree(std::atan2(std::sqrt(x * x + y * y), z) * RAD2DEG);
   }
 
@@ -186,8 +169,7 @@ public:
     } else {
       siderust_spherical_dir_t out;
       check_status(siderust_spherical_dir_transform_frame(
-                       polar_.value(), azimuth_.value(),
-                       frames::FrameTraits<F>::ffi_id,
+                       polar_.value(), azimuth_.value(), frames::FrameTraits<F>::ffi_id,
                        frames::FrameTraits<Target>::ffi_id, jd.value(), &out),
                    "Direction::to_frame");
       return Direction<Target>::from_c(out);
@@ -206,10 +188,8 @@ public:
       siderust_spherical_dir_t out;
       detail::OwnedFfiContext fctx(ctx);
       check_status(siderust_spherical_dir_transform_frame_with_context(
-                       polar_.value(), azimuth_.value(),
-                       frames::FrameTraits<F>::ffi_id,
-                       frames::FrameTraits<Target>::ffi_id, jd.value(),
-                       fctx.get(), &out),
+                       polar_.value(), azimuth_.value(), frames::FrameTraits<F>::ffi_id,
+                       frames::FrameTraits<Target>::ffi_id, jd.value(), fctx.get(), &out),
                    "Direction::to_frame_with");
       return Direction<Target>::from_c(out);
     }
@@ -219,8 +199,7 @@ public:
    * @brief Shorthand: `.to<Target>(jd)` (calls `to_frame`).
    */
   template <typename Target>
-  auto to(const JulianDate &jd) const
-      -> decltype(this->template to_frame<Target>(jd)) {
+  auto to(const JulianDate &jd) const -> decltype(this->template to_frame<Target>(jd)) {
     return to_frame<Target>(jd);
   }
 
@@ -235,23 +214,20 @@ public:
     const double az = azimuth_.value() * DEG2RAD;
     const double po = polar_.value() * DEG2RAD;
     const double cp = std::cos(po);
-    return cartesian::Direction<F>(std::cos(az) * cp, std::sin(az) * cp,
-                                   std::sin(po));
+    return cartesian::Direction<F>(std::cos(az) * cp, std::sin(az) * cp, std::sin(po));
   }
 
   /**
    * @brief Transform to the horizontal (alt-az) frame.
    */
   template <typename F_ = F>
-  std::enable_if_t<frames::has_horizontal_transform_v<F_>,
-                   Direction<frames::Horizontal>>
+  std::enable_if_t<frames::has_horizontal_transform_v<F_>, Direction<frames::Horizontal>>
   to_horizontal(const JulianDate &jd, const Geodetic &observer) const {
     siderust_spherical_dir_t out;
-    check_status(
-        siderust_spherical_dir_to_horizontal(polar_.value(), azimuth_.value(),
-                                             frames::FrameTraits<F>::ffi_id,
-                                             jd.value(), observer.to_c(), &out),
-        "Direction::to_horizontal");
+    check_status(siderust_spherical_dir_to_horizontal(polar_.value(), azimuth_.value(),
+                                                      frames::FrameTraits<F>::ffi_id, jd.value(),
+                                                      observer.to_c(), &out),
+                 "Direction::to_horizontal");
     return Direction<frames::Horizontal>::from_c(out);
   }
 
@@ -259,17 +235,15 @@ public:
    * @brief Transform to the horizontal frame with an explicit context.
    */
   template <typename F_ = F>
-  std::enable_if_t<frames::has_horizontal_transform_v<F_>,
-                   Direction<frames::Horizontal>>
+  std::enable_if_t<frames::has_horizontal_transform_v<F_>, Direction<frames::Horizontal>>
   to_horizontal_with(const JulianDate &jd, const Geodetic &observer,
                      const AstroContext &ctx) const {
     siderust_spherical_dir_t out;
     detail::OwnedFfiContext fctx(ctx);
-    check_status(
-        siderust_spherical_dir_to_horizontal_precise_with_context(
-            polar_.value(), azimuth_.value(), frames::FrameTraits<F>::ffi_id,
-            jd.value(), jd.value(), observer.to_c(), fctx.get(), &out),
-        "Direction::to_horizontal_with");
+    check_status(siderust_spherical_dir_to_horizontal_precise_with_context(
+                     polar_.value(), azimuth_.value(), frames::FrameTraits<F>::ffi_id, jd.value(),
+                     jd.value(), observer.to_c(), fctx.get(), &out),
+                 "Direction::to_horizontal_with");
     return Direction<frames::Horizontal>::from_c(out);
   }
 
@@ -285,16 +259,14 @@ public:
    * @param observer  Observer geodetic position.
    */
   template <typename F_ = F>
-  std::enable_if_t<frames::has_horizontal_transform_v<F_>,
-                   Direction<frames::Horizontal>>
+  std::enable_if_t<frames::has_horizontal_transform_v<F_>, Direction<frames::Horizontal>>
   to_horizontal_precise(const JulianDate &jd_tt, const JulianDate &jd_ut1,
                         const Geodetic &observer) const {
     siderust_spherical_dir_t out;
-    check_status(
-        siderust_spherical_dir_to_horizontal_precise(
-            polar_.value(), azimuth_.value(), frames::FrameTraits<F>::ffi_id,
-            jd_tt.value(), jd_ut1.value(), observer.to_c(), &out),
-        "Direction::to_horizontal_precise");
+    check_status(siderust_spherical_dir_to_horizontal_precise(
+                     polar_.value(), azimuth_.value(), frames::FrameTraits<F>::ffi_id,
+                     jd_tt.value(), jd_ut1.value(), observer.to_c(), &out),
+                 "Direction::to_horizontal_precise");
     return Direction<frames::Horizontal>::from_c(out);
   }
 };
@@ -330,55 +302,44 @@ public:
 
   /// @name Component accessors by frame convention
   /// @{
-  template <typename F_ = F,
-            std::enable_if_t<frames::has_ra_dec_v<F_>, int> = 0>
+  template <typename F_ = F, std::enable_if_t<frames::has_ra_dec_v<F_>, int> = 0>
   qtty::Degree ra() const {
     return azimuth_;
   }
 
-  template <typename F_ = F,
-            std::enable_if_t<frames::has_ra_dec_v<F_>, int> = 0>
+  template <typename F_ = F, std::enable_if_t<frames::has_ra_dec_v<F_>, int> = 0>
   qtty::Degree dec() const {
     return polar_;
   }
 
-  template <typename F_ = F,
-            std::enable_if_t<frames::has_az_alt_v<F_>, int> = 0>
+  template <typename F_ = F, std::enable_if_t<frames::has_az_alt_v<F_>, int> = 0>
   qtty::Degree az() const {
     return azimuth_;
   }
 
-  template <typename F_ = F,
-            std::enable_if_t<frames::has_az_alt_v<F_>, int> = 0>
+  template <typename F_ = F, std::enable_if_t<frames::has_az_alt_v<F_>, int> = 0>
   qtty::Degree al() const {
     return polar_;
   }
 
-  template <typename F_ = F,
-            std::enable_if_t<frames::has_az_alt_v<F_>, int> = 0>
+  template <typename F_ = F, std::enable_if_t<frames::has_az_alt_v<F_>, int> = 0>
   qtty::Degree alt() const {
     return polar_;
   }
 
-  template <typename F_ = F,
-            std::enable_if_t<frames::has_lon_lat_v<F_>, int> = 0>
+  template <typename F_ = F, std::enable_if_t<frames::has_lon_lat_v<F_>, int> = 0>
   qtty::Degree lon() const {
     return azimuth_;
   }
 
-  template <typename F_ = F,
-            std::enable_if_t<frames::has_lon_lat_v<F_>, int> = 0>
+  template <typename F_ = F, std::enable_if_t<frames::has_lon_lat_v<F_>, int> = 0>
   qtty::Degree lat() const {
     return polar_;
   }
   /// @}
 
-  static constexpr siderust_frame_t frame_id() {
-    return frames::FrameTraits<F>::ffi_id;
-  }
-  static constexpr siderust_center_t center_id() {
-    return centers::CenterTraits<C>::ffi_id;
-  }
+  static constexpr siderust_frame_t frame_id() { return frames::FrameTraits<F>::ffi_id; }
+  static constexpr siderust_center_t center_id() { return centers::CenterTraits<C>::ffi_id; }
 
   U distance() const { return dist_; }
   /**
@@ -398,21 +359,18 @@ public:
    * @param  jd      Julian Date (TT) for time-dependent rotations.
    */
   template <typename Target>
-  std::enable_if_t<frames::has_frame_transform_v<F, Target>,
-                   Position<C, Target, U>>
+  std::enable_if_t<frames::has_frame_transform_v<F, Target>, Position<C, Target, U>>
   to_frame(const JulianDate &jd) const;
 
   template <typename Target>
-  std::enable_if_t<frames::has_frame_transform_v<F, Target>,
-                   Position<C, Target, U>>
+  std::enable_if_t<frames::has_frame_transform_v<F, Target>, Position<C, Target, U>>
   to_frame_with(const JulianDate &jd, const AstroContext &ctx) const;
 
   /**
    * @brief Shorthand: `.to<Target>(jd)` (calls `to_frame`).
    */
   template <typename Target>
-  auto to(const JulianDate &jd) const
-      -> decltype(this->template to_frame<Target>(jd)) {
+  auto to(const JulianDate &jd) const -> decltype(this->template to_frame<Target>(jd)) {
     return to_frame<Target>(jd);
   }
 
@@ -445,8 +403,7 @@ public:
     // dot product of unit direction vectors (spherical -> cartesian)
     double cos_p1 = std::cos(p1);
     double cos_p2 = std::cos(p2);
-    double dot =
-        cos_p1 * cos_p2 * std::cos(a1 - a2) + std::sin(p1) * std::sin(p2);
+    double dot = cos_p1 * cos_p2 * std::cos(a1 - a2) + std::sin(p1) * std::sin(p2);
     if (dot > 1.0)
       dot = 1.0;
     if (dot < -1.0)

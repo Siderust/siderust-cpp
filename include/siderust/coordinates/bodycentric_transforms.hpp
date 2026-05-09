@@ -69,8 +69,7 @@ namespace siderust {
  *
  * @ingroup coordinates_cartesian
  */
-template <typename F, typename U = qtty::AstronomicalUnit>
-struct BodycentricPos {
+template <typename F, typename U = qtty::AstronomicalUnit> struct BodycentricPos {
   static_assert(frames::is_frame_v<F>, "F must be a valid frame tag");
 
   /// Raw Cartesian position tagged with the Bodycentric center.
@@ -89,9 +88,7 @@ struct BodycentricPos {
   U distance() const { return pos.distance(); }
 
   /// Distance to another body-centric position.
-  U distance_to(const BodycentricPos &other) const {
-    return pos.distance_to(other.pos);
-  }
+  U distance_to(const BodycentricPos &other) const { return pos.distance_to(other.pos); }
 
   /// Access the embedded orbital parameters of the body.
   const BodycentricParams &center_params() const { return params; }
@@ -107,8 +104,7 @@ struct BodycentricPos {
    * @param jd  Julian Date (same as the forward transform).
    * @return Geocentric position in the same frame and unit.
    */
-  cartesian::Position<centers::Geocentric, F, U>
-  to_geocentric(const JulianDate &jd) const;
+  cartesian::Position<centers::Geocentric, F, U> to_geocentric(const JulianDate &jd) const;
 };
 
 // ============================================================================
@@ -137,20 +133,17 @@ struct BodycentricPos {
  * @throws InvalidCenterError if the source center is not supported.
  */
 template <typename C, typename F, typename U>
-inline BodycentricPos<F, U>
-to_bodycentric(const cartesian::Position<C, F, U> &pos,
-               const BodycentricParams &params, const JulianDate &jd) {
+inline BodycentricPos<F, U> to_bodycentric(const cartesian::Position<C, F, U> &pos,
+                                           const BodycentricParams &params, const JulianDate &jd) {
   static_assert(centers::is_center_v<C>, "C must be a valid center tag");
 
   siderust_cartesian_pos_t c_pos = pos.to_c();
   SiderustBodycentricParams c_params = params.to_c();
   siderust_cartesian_pos_t c_out{};
 
-  check_status(siderust_to_bodycentric(c_pos, c_params, jd.value(), &c_out),
-               "to_bodycentric");
+  check_status(siderust_to_bodycentric(c_pos, c_params, jd.value(), &c_out), "to_bodycentric");
 
-  cartesian::Position<centers::Bodycentric, F, U> result_pos(
-      U(c_out.x), U(c_out.y), U(c_out.z));
+  cartesian::Position<centers::Bodycentric, F, U> result_pos(U(c_out.x), U(c_out.y), U(c_out.z));
   return BodycentricPos<F, U>{result_pos, params};
 }
 
@@ -165,11 +158,9 @@ BodycentricPos<F, U>::to_geocentric(const JulianDate &jd) const {
   SiderustBodycentricParams c_params = params.to_c();
   siderust_cartesian_pos_t c_out{};
 
-  check_status(siderust_from_bodycentric(c_pos, c_params, jd.value(), &c_out),
-               "from_bodycentric");
+  check_status(siderust_from_bodycentric(c_pos, c_params, jd.value(), &c_out), "from_bodycentric");
 
-  return cartesian::Position<centers::Geocentric, F, U>(U(c_out.x), U(c_out.y),
-                                                        U(c_out.z));
+  return cartesian::Position<centers::Geocentric, F, U>(U(c_out.x), U(c_out.y), U(c_out.z));
 }
 
 } // namespace siderust
