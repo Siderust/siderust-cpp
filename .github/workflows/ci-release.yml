@@ -2,6 +2,9 @@ name: CI Release
 
 on:
   workflow_call:
+    secrets:
+      PAGES_DEPLOY_TOKEN:
+        required: true
 
 jobs:
   release:
@@ -31,3 +34,41 @@ jobs:
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install repository tools
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            dpkg-dev \
+            createrepo-c
+
+      - name: Generate APT repository
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p site/apt
+          cp dist/*.deb site/apt/
+
+          cd site/apt
+          dpkg-scanpackages . /dev/null | gzip -9c > Packages.gz
+
+      - name: Generate RPM repository
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p site/rpm
+          cp dist/*.rpm site/rpm/
+
+          createrepo_c site/rpm
+
+      - name: Publish repositories to siderust.github.io
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          personal_token: ${{ secrets.PAGES_DEPLOY_TOKEN }}
+          external_repository: Siderust/siderust.github.io
+          publish_branch: main
+          publish_dir: ./site
+          destination_dir: .
+          keep_files: true
