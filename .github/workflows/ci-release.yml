@@ -35,40 +35,52 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Checkout Pages repository
+        uses: actions/checkout@v4
+        with:
+          repository: Siderust/siderust.github.io
+          token: ${{ secrets.PAGES_DEPLOY_TOKEN }}
+          path: pages
+          ref: main
+
       - name: Install repository tools
         shell: bash
         run: |
           set -euo pipefail
           sudo apt-get update
-          sudo apt-get install -y --no-install-recommends \
-            dpkg-dev \
-            createrepo-c
+          sudo apt-get install -y --no-install-recommends dpkg-dev createrepo-c
 
-      - name: Generate APT repository
+      - name: Update APT/RPM repositories
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p site/apt
-          cp dist/*.deb site/apt/
 
-          cd site/apt
+          mkdir -p pages/apt
+          mkdir -p pages/rpm
+
+          cp dist/*.deb pages/apt/
+          cp dist/*.rpm pages/rpm/
+
+          cd pages/apt
           dpkg-scanpackages . /dev/null | gzip -9c > Packages.gz
 
-      - name: Generate RPM repository
+          cd ../rpm
+          createrepo_c .
+
+      - name: Commit package repository updates
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p site/rpm
-          cp dist/*.rpm site/rpm/
+          cd pages
 
-          createrepo_c site/rpm
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Publish repositories to siderust.github.io
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          personal_token: ${{ secrets.PAGES_DEPLOY_TOKEN }}
-          external_repository: Siderust/siderust.github.io
-          publish_branch: main
-          publish_dir: ./site
-          destination_dir: .
-          keep_files: true
+          git add apt rpm
+
+          if git diff --cached --quiet; then
+            echo "No package repository changes"
+          else
+            git commit -m "Update package repositories"
+            git push origin main
+          fi
