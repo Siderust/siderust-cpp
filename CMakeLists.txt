@@ -218,16 +218,19 @@ gtest_discover_tests(test_siderust
 # ---------------------------------------------------------------------------
 install(DIRECTORY include/siderust
     DESTINATION include
+    COMPONENT siderust-cpp
     FILES_MATCHING PATTERN "*.hpp"
 )
 
 install(DIRECTORY ${SIDERUST_FFI_INCLUDE_DIR}/
     DESTINATION include
+    COMPONENT siderust-cpp
     FILES_MATCHING PATTERN "*.h"
 )
 
 install(FILES ${SIDERUST_LIBRARY_PATH}
     DESTINATION lib
+    COMPONENT siderust-cpp
 )
 
 include(CMakePackageConfigHelpers)
@@ -248,6 +251,7 @@ install(FILES
     ${CMAKE_CURRENT_BINARY_DIR}/siderust_cppConfig.cmake
     ${CMAKE_CURRENT_BINARY_DIR}/siderust_cppConfigVersion.cmake
     DESTINATION lib/cmake/siderust_cpp
+    COMPONENT siderust-cpp
 )
 
 install(TARGETS siderust_cpp
@@ -259,6 +263,7 @@ install(EXPORT siderust_cppTargets
     FILE siderust_cppTargets.cmake
     NAMESPACE siderust::
     DESTINATION lib/cmake/siderust_cpp
+    COMPONENT siderust-cpp
 )
 
 # ---------------------------------------------------------------------------
@@ -272,22 +277,24 @@ set(CPACK_PACKAGE_DESCRIPTION_SUMMARY
     "C++ wrapper for the siderust high-precision astronomy library")
 set(CPACK_PACKAGE_DESCRIPTION
     "siderust-cpp provides a header-only C++17 API over the siderust Rust\n"
-    "astronomy library via the siderust-ffi C ABI.  It bundles pre-built\n"
-    "shared libraries (siderust_ffi, tempoch_ffi, qtty_ffi) together with\n"
-    "the C++ headers and CMake package config.")
+    "astronomy library via the siderust-ffi C ABI.  It bundles the pre-built\n"
+    "siderust_ffi shared library together with the C++ headers and CMake\n"
+    "package config. Requires qtty-cpp and tempoch-cpp.")
 set(CPACK_RESOURCE_FILE_LICENSE    "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
 set(CPACK_PACKAGE_HOMEPAGE_URL     "https://github.com/Siderust/siderust-cpp")
+
+set(CPACK_COMPONENTS_ALL "siderust-cpp")
 
 # -- DEB -----------------------------------------------------------------------
 set(CPACK_DEBIAN_PACKAGE_MAINTAINER "VPRamon <vallespuigramon@gmail.com>")
 set(CPACK_DEBIAN_PACKAGE_SECTION    "libs")
-set(CPACK_DEBIAN_PACKAGE_DEPENDS    "libc6 (>= 2.17), libstdc++6 (>= 9)")
+set(CPACK_DEBIAN_PACKAGE_DEPENDS    "libc6 (>= 2.17), libstdc++6 (>= 9), qtty-cpp, tempoch-cpp")
 set(CPACK_DEBIAN_FILE_NAME          DEB-DEFAULT)
 
 # -- RPM -----------------------------------------------------------------------
 set(CPACK_RPM_PACKAGE_LICENSE    "AGPL-3.0")
 set(CPACK_RPM_PACKAGE_GROUP      "Development/Libraries")
-set(CPACK_RPM_PACKAGE_REQUIRES   "glibc >= 2.17, libstdc++ >= 9")
+set(CPACK_RPM_PACKAGE_REQUIRES   "glibc >= 2.17, libstdc++ >= 9, qtty-cpp, tempoch-cpp")
 set(CPACK_RPM_FILE_NAME          RPM-DEFAULT)
 
 set(CPACK_GENERATOR "DEB;RPM")
