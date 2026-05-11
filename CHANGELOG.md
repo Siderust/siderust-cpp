@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-05-11
+
+### Fixed
+
+- `CMakeLists.txt`: guarded all `install()` rules, `CMakePackageConfigHelpers`
+  calls, tests, examples, and GoogleTest integration inside
+  `if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)` so that siderust-cpp
+  artifacts are no longer included in parent packages when siderust-cpp is used
+  as a CMake subdirectory.  This eliminates file-conflict errors such as
+  `trying to overwrite '/usr/include/siderust/ffi_core.hpp'` when multiple
+  packages are installed simultaneously.
+
+### Changed
+
+- CPack DEB dependencies now carry minimum version constraints:
+  `qtty-cpp (>= 0.4.2)` and `tempoch-cpp (>= 0.3.1)`.
+- CPack RPM dependencies updated to `qtty-cpp >= 0.4.2, tempoch-cpp >= 0.3.1`.
+
 ## [0.3.0] - 2026-05-09
 
 ### Added

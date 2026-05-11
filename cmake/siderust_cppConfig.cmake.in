@@ -2,6 +2,9 @@
 
 include(CMakeFindDependencyMacro)
 
+find_dependency(qtty_cpp REQUIRED)
+find_dependency(tempoch_cpp REQUIRED)
+
 include("${CMAKE_CURRENT_LIST_DIR}/siderust_cppTargets.cmake")
 
 set(SIDERUST_FFI_LIBRARY "@PACKAGE_CMAKE_INSTALL_PREFIX@/lib/@CMAKE_SHARED_LIBRARY_PREFIX@siderust_ffi@CMAKE_SHARED_LIBRARY_SUFFIX@")
