@@ -353,6 +353,37 @@ TEST(TypedCoordinates, SphericalPosToFrameShorthand) {
 }
 
 // ============================================================================
+// Cartesian → spherical longitude normalization to [0°, 360°)
+// ============================================================================
+
+TEST(TypedCoordinates, CartesianToSphericalLonNormalization) {
+  // A point in the −x half of the XY plane has atan2(y, x) < 0.
+  // to_spherical() must normalize to [0°, 360°) — not return a negative angle.
+  using AU = qtty::AstronomicalUnit;
+  using namespace siderust::frames;
+
+  // lon = 270°: x=0, y=-1, z=0 → atan2(-1,0) = -π/2 → -90° → should give 270°
+  cartesian::Position<centers::Heliocentric, EclipticMeanJ2000, AU> p270(AU(0.0), AU(-1.0),
+                                                                          AU(0.0));
+  auto sph270 = p270.to_spherical();
+  EXPECT_GE(sph270.lon().value(), 0.0);
+  EXPECT_NEAR(sph270.lon().value(), 270.0, 1e-9);
+
+  // lon = 180°: x=-1, y=0, z=0 → atan2(0,-1) = π → 180° — already in range, must stay.
+  cartesian::Position<centers::Heliocentric, EclipticMeanJ2000, AU> p180(AU(-1.0), AU(0.0),
+                                                                          AU(0.0));
+  auto sph180 = p180.to_spherical();
+  EXPECT_GE(sph180.lon().value(), 0.0);
+  EXPECT_NEAR(sph180.lon().value(), 180.0, 1e-9);
+
+  // lon = 90°: x=0, y=1, z=0 → atan2(1,0) = π/2 → 90° — already positive.
+  cartesian::Position<centers::Heliocentric, EclipticMeanJ2000, AU> p90(AU(0.0), AU(1.0), AU(0.0));
+  auto sph90 = p90.to_spherical();
+  EXPECT_GE(sph90.lon().value(), 0.0);
+  EXPECT_NEAR(sph90.lon().value(), 90.0, 1e-9);
+}
+
+// ============================================================================
 // High-precision horizontal transform (to_horizontal_precise)
 // ============================================================================
 

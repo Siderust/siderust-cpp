@@ -18,7 +18,9 @@ spherical::Position<C, F, U> cartesian::Position<C, F, U>::to_spherical() const 
   const double y = comp_y.value();
   const double z = comp_z.value();
   const double r = std::sqrt(x * x + y * y + z * z);
-  const double lon = std::atan2(y, x) * 180.0 / M_PI;
+  double lon = std::atan2(y, x) * 180.0 / M_PI;
+  if (lon < 0.0)
+    lon += 360.0;
   const double lat = std::atan2(z, std::sqrt(x * x + y * y)) * 180.0 / M_PI;
   return spherical::Position<C, F, U>(qtty::Degree(lon), qtty::Degree(lat), U(r));
 }
