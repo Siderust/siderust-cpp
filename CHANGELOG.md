@@ -5,14 +5,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.5.0] - 2026-05-18
+
+### Removed
+
+- Dropped the C++ satellite/dynamics adapter surface, including
+  `include/siderust/dynamics.hpp`, the vendored `siderust-ffi` dynamics
+  exports, and the associated C++ dynamics tests (`tests/test_dynamics.cpp`).
+  Specifying the `satellite` CMake feature now produces a `FATAL_ERROR`.
+- Removed backward-compatible `(start, end)` two-argument overloads from
+  `altitude.hpp`, `azimuth.hpp`, `lunar_phase.hpp`, `subject.hpp`, and
+  `target.hpp`.  Callers must construct a `Period(start, end)` explicitly and
+  pass it to the `Period`-taking overload.
+- Removed `#include <siderust/dynamics.hpp>` from the umbrella
+  `include/siderust/siderust.hpp` header.
+
+### Changed
+
+- Submodule `siderust` advanced to v0.8.0 (from v0.7.0): brings qtty 0.8,
+  tempoch 0.6, `siderust::JulianDate` / `ModifiedJulianDate` crate-root
+  re-exports, and removal of the FFI dynamics layer.
+- Submodule `tempoch-cpp` advanced to v0.5.0 (from v0.4.x).
 
 ## [0.4.0] - 2026-05-15
 
 ### Added
 
 - `include/siderust/constops.hpp` and generated `include/siderust/constops.h` with JSON-oriented wrappers for the constops FFI surface, including route constants and ground-asset ID helpers.
-- `include/siderust/dynamics.hpp` with RAII wrappers for the dynamics FFI, including `DynamicsContext`, `OrbitState`, and two-body propagation support.
 
 ### Changed
 

@@ -130,8 +130,7 @@ void section_target_snapshots(const TTJD &jd, const TTJD &jd_next) {
 /// Computes: RA' = RA + μα* · Δt / cos(dec),  Dec' = Dec + μδ · Δt
 /// where Δt is in Julian years since the reference epoch.
 inline spherical::direction::ICRS apply_proper_motion(const spherical::direction::ICRS &pos,
-                                                      const ProperMotion &pm,
-                                                      const TTJD &epoch,
+                                                      const ProperMotion &pm, const TTJD &epoch,
                                                       const TTJD &target_epoch) {
   constexpr double JULIAN_YEAR = 365.25; // days
   double dt_years = (target_epoch.value() - epoch.value()) / JULIAN_YEAR;

@@ -51,8 +51,8 @@ inline std::string call_json(ConstopsEntryPoint entrypoint, const std::string &r
   if (rc != CONSTOPS_OK) {
     const char *last = constops_last_error();
     std::string detail = (last == nullptr) ? "unknown constops error" : last;
-    throw ConstopsError(std::string(operation_name) + " failed (" + std::to_string(rc) + "): " +
-                        detail);
+    throw ConstopsError(std::string(operation_name) + " failed (" + std::to_string(rc) +
+                        "): " + detail);
   }
 
   std::string response;

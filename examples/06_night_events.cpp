@@ -64,8 +64,7 @@ static void print_events_for_type(const Geodetic &site, const TTMjdPeriod &week,
   std::cout << "  summary: down=" << downs << " raise=" << raises << std::endl;
 }
 
-static void print_periods_for_type(const Geodetic &site, const TTMjdPeriod &week,
-                                   const char *name,
+static void print_periods_for_type(const Geodetic &site, const TTMjdPeriod &week, const char *name,
                                    qtty::Degree threshold) {
   auto periods = sun::below_threshold(site, week, threshold);
   std::cout << std::left << std::setw(18) << name << " night periods (Sun < " << std::fixed

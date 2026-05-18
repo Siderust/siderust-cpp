@@ -265,13 +265,6 @@ public:
     return detail_periods_from_c(ptr, count);
   }
 
-  /// Backward-compatible [start, end] overload.
-  std::vector<Period> above_threshold(const Geodetic &obs, const ModifiedJulianDate &start, const ModifiedJulianDate &end,
-                                      qtty::Degree threshold,
-                                      const SearchOptions &opts = {}) const {
-    return above_threshold(obs, Period(start, end), threshold, opts);
-  }
-
   /**
    * @brief Find periods when the target is below a threshold altitude.
    */
@@ -285,13 +278,6 @@ public:
                                           &count),
                  "Target::below_threshold");
     return detail_periods_from_c(ptr, count);
-  }
-
-  /// Backward-compatible [start, end] overload.
-  std::vector<Period> below_threshold(const Geodetic &obs, const ModifiedJulianDate &start, const ModifiedJulianDate &end,
-                                      qtty::Degree threshold,
-                                      const SearchOptions &opts = {}) const {
-    return below_threshold(obs, Period(start, end), threshold, opts);
   }
 
   /**
@@ -308,13 +294,6 @@ public:
     return detail::crossings_from_c(ptr, count);
   }
 
-  /// Backward-compatible [start, end] overload.
-  std::vector<CrossingEvent> crossings(const Geodetic &obs, const ModifiedJulianDate &start, const ModifiedJulianDate &end,
-                                       qtty::Degree threshold,
-                                       const SearchOptions &opts = {}) const {
-    return crossings(obs, Period(start, end), threshold, opts);
-  }
-
   /**
    * @brief Find culmination (local altitude extremum) events.
    */
@@ -326,12 +305,6 @@ public:
                                        window.c_inner(), opts.to_c(), &ptr, &count),
                  "Target::culminations");
     return detail::culminations_from_c(ptr, count);
-  }
-
-  /// Backward-compatible [start, end] overload.
-  std::vector<CulminationEvent> culminations(const Geodetic &obs, const ModifiedJulianDate &start, const ModifiedJulianDate &end,
-                                             const SearchOptions &opts = {}) const {
-    return culminations(obs, Period(start, end), opts);
   }
 
   // ------------------------------------------------------------------
@@ -364,13 +337,6 @@ public:
     return detail::az_crossings_from_c(ptr, count);
   }
 
-  /// Backward-compatible [start, end] overload.
-  std::vector<AzimuthCrossingEvent> azimuth_crossings(const Geodetic &obs, const ModifiedJulianDate &start,
-                                                      const ModifiedJulianDate &end, qtty::Degree bearing,
-                                                      const SearchOptions &opts = {}) const {
-    return azimuth_crossings(obs, Period(start, end), bearing, opts);
-  }
-
   /// Access the underlying C handle (advanced use).
   const SiderustGenericTarget *c_handle() const { return handle_; }
 
@@ -400,7 +366,8 @@ private:
     std::vector<Period> result;
     result.reserve(count);
     for (uintptr_t i = 0; i < count; ++i) {
-      result.push_back(Period(ModifiedJulianDate(ptr[i].start_mjd), ModifiedJulianDate(ptr[i].end_mjd)));
+      result.push_back(
+          Period(ModifiedJulianDate(ptr[i].start_mjd), ModifiedJulianDate(ptr[i].end_mjd)));
     }
     siderust_periods_free(ptr, count);
     return result;
@@ -625,7 +592,8 @@ private:
     std::vector<Period> result;
     result.reserve(count);
     for (uintptr_t i = 0; i < count; ++i) {
-      result.push_back(Period(ModifiedJulianDate(ptr[i].start_mjd), ModifiedJulianDate(ptr[i].end_mjd)));
+      result.push_back(
+          Period(ModifiedJulianDate(ptr[i].start_mjd), ModifiedJulianDate(ptr[i].end_mjd)));
     }
     siderust_periods_free(ptr, count);
     return result;

@@ -7,8 +7,8 @@ using namespace siderust;
 
 TEST(Time, ReexportsExposeExplicitScaleTypes) {
   static_assert(std::is_same_v<JulianDate, tempoch::JulianDate<tempoch::scale::TT>>);
-  static_assert(std::is_same_v<ModifiedJulianDate,
-                               tempoch::ModifiedJulianDate<tempoch::scale::TT>>);
+  static_assert(
+      std::is_same_v<ModifiedJulianDate, tempoch::ModifiedJulianDate<tempoch::scale::TT>>);
 }
 
 TEST(Time, TtJulianDateRoundtripsThroughUtcConvenience) {

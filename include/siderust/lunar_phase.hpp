@@ -71,8 +71,8 @@ struct MoonPhaseGeometry {
  * @brief A principal lunar phase event (new moon, first quarter, etc.).
  */
 struct PhaseEvent {
-  ModifiedJulianDate time;       ///< Epoch of the event (ModifiedJulianDate).
-  PhaseKind kind; ///< Which principal phase occurred.
+  ModifiedJulianDate time; ///< Epoch of the event (ModifiedJulianDate).
+  PhaseKind kind;          ///< Which principal phase occurred.
 
   static PhaseEvent from_c(const siderust_phase_event_t &c) {
     return {ModifiedJulianDate(c.mjd), static_cast<PhaseKind>(c.kind)};
@@ -100,7 +100,8 @@ inline std::vector<Period> illum_periods_from_c(tempoch_period_mjd_t *ptr, uintp
   std::vector<Period> result;
   result.reserve(count);
   for (uintptr_t i = 0; i < count; ++i) {
-    result.push_back(Period(ModifiedJulianDate(ptr[i].start_mjd), ModifiedJulianDate(ptr[i].end_mjd)));
+    result.push_back(
+        Period(ModifiedJulianDate(ptr[i].start_mjd), ModifiedJulianDate(ptr[i].end_mjd)));
   }
   siderust_periods_free(ptr, count);
   return result;
@@ -169,14 +170,6 @@ inline std::vector<PhaseEvent> find_phase_events(const Period &window,
 }
 
 /**
- * @brief Backward-compatible [start, end] overload.
- */
-inline std::vector<PhaseEvent> find_phase_events(const ModifiedJulianDate &start, const ModifiedJulianDate &end,
-                                                 const SearchOptions &opts = {}) {
-  return find_phase_events(Period(start, end), opts);
-}
-
-/**
  * @brief Find periods when illuminated fraction is ≥ k_min.
  *
  * @param window  ModifiedJulianDate search window.
@@ -190,14 +183,6 @@ inline std::vector<Period> illumination_above(const Period &window, double k_min
   check_status(siderust_moon_illumination_above(window.c_inner(), k_min, opts.to_c(), &ptr, &count),
                "moon::illumination_above");
   return detail::illum_periods_from_c(ptr, count);
-}
-
-/**
- * @brief Backward-compatible [start, end] overload.
- */
-inline std::vector<Period> illumination_above(const ModifiedJulianDate &start, const ModifiedJulianDate &end, double k_min,
-                                              const SearchOptions &opts = {}) {
-  return illumination_above(Period(start, end), k_min, opts);
 }
 
 /**
@@ -217,14 +202,6 @@ inline std::vector<Period> illumination_below(const Period &window, double k_max
 }
 
 /**
- * @brief Backward-compatible [start, end] overload.
- */
-inline std::vector<Period> illumination_below(const ModifiedJulianDate &start, const ModifiedJulianDate &end, double k_max,
-                                              const SearchOptions &opts = {}) {
-  return illumination_below(Period(start, end), k_max, opts);
-}
-
-/**
  * @brief Find periods when illuminated fraction is within [k_min, k_max].
  *
  * @param window  ModifiedJulianDate search window.
@@ -240,14 +217,6 @@ inline std::vector<Period> illumination_range(const Period &window, double k_min
       siderust_moon_illumination_range(window.c_inner(), k_min, k_max, opts.to_c(), &ptr, &count),
       "moon::illumination_range");
   return detail::illum_periods_from_c(ptr, count);
-}
-
-/**
- * @brief Backward-compatible [start, end] overload.
- */
-inline std::vector<Period> illumination_range(const ModifiedJulianDate &start, const ModifiedJulianDate &end, double k_min,
-                                              double k_max, const SearchOptions &opts = {}) {
-  return illumination_range(Period(start, end), k_min, k_max, opts);
 }
 
 } // namespace moon

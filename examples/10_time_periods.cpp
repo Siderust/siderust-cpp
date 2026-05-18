@@ -73,8 +73,10 @@ int main() {
   CivilPeriod civil_window(to_utc_civil(jd_window.start()), to_utc_civil(jd_window.end()));
 
   std::cout << "Periods over the same half-day window:\n";
-  std::cout << "  JD(TT)   " << jd_window << "  duration=" << jd_window.duration<qtty::Hour>() << "\n";
-  std::cout << "  MJD(TT)  " << mjd_window << "  duration=" << mjd_window.duration<qtty::Hour>() << "\n";
+  std::cout << "  JD(TT)   " << jd_window << "  duration=" << jd_window.duration<qtty::Hour>()
+            << "\n";
+  std::cout << "  MJD(TT)  " << mjd_window << "  duration=" << mjd_window.duration<qtty::Hour>()
+            << "\n";
   std::cout << "  Civil    " << civil_window << "  duration=" << civil_window.duration<qtty::Hour>()
             << "\n";
 
