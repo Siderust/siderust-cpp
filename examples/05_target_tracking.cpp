@@ -27,15 +27,16 @@ using namespace siderust;
 using namespace siderust::frames;
 using namespace siderust::centers;
 using namespace qtty::literals;
+using TTJD = JulianDate;
 
 // ─── Helper: simple coordinate snapshot (mirrors Rust's Target<T>) ──────────
 
 /// A timestamped position snapshot, optionally with proper motion.
 template <typename P> struct Snapshot {
   P position;
-  JulianDate time;
+  TTJD time;
 
-  void update(P new_pos, JulianDate new_time) {
+  void update(P new_pos, TTJD new_time) {
     position = new_pos;
     time = new_time;
   }
@@ -51,7 +52,7 @@ inline Orbit halley_orbit() {
 
 // ─── Section 1: Trackable objects ───────────────────────────────────────────
 
-void section_trackable_objects(const JulianDate &jd, const JulianDate &jd_next) {
+void section_trackable_objects(const TTJD &jd, const TTJD &jd_next) {
   std::puts("1) Trackable objects (ICRS, star, Sun, planet, Moon)");
 
   // ICRS direction — time-invariant target
@@ -90,7 +91,7 @@ void section_trackable_objects(const JulianDate &jd, const JulianDate &jd_next) 
 
 // ─── Section 2: Target snapshots ────────────────────────────────────────────
 
-void section_target_snapshots(const JulianDate &jd, const JulianDate &jd_next) {
+void section_target_snapshots(const TTJD &jd, const TTJD &jd_next) {
   std::puts("2) Target snapshots for arbitrary sky objects");
 
   // Mars heliocentric snapshot (VSOP87 ephemeris)
@@ -130,8 +131,8 @@ void section_target_snapshots(const JulianDate &jd, const JulianDate &jd_next) {
 /// where Δt is in Julian years since the reference epoch.
 inline spherical::direction::ICRS apply_proper_motion(const spherical::direction::ICRS &pos,
                                                       const ProperMotion &pm,
-                                                      const JulianDate &epoch,
-                                                      const JulianDate &target_epoch) {
+                                                      const TTJD &epoch,
+                                                      const TTJD &target_epoch) {
   constexpr double JULIAN_YEAR = 365.25; // days
   double dt_years = (target_epoch.value() - epoch.value()) / JULIAN_YEAR;
 
@@ -148,7 +149,7 @@ inline spherical::direction::ICRS apply_proper_motion(const spherical::direction
   return spherical::direction::ICRS(qtty::Degree(ra_deg + dra), qtty::Degree(dec_deg + ddec));
 }
 
-void section_target_with_proper_motion(const JulianDate &jd) {
+void section_target_with_proper_motion(const TTJD &jd) {
   std::puts("3) Target with proper motion (stellar-style target)");
 
   // Betelgeuse approximate ICRS coordinates at J2000
@@ -165,7 +166,7 @@ void section_target_with_proper_motion(const JulianDate &jd) {
 
   // Propagate 25 years
   constexpr double JULIAN_YEAR = 365.25;
-  JulianDate jd_future(jd.value() + 25.0 * JULIAN_YEAR);
+  auto jd_future = jd + qtty::Day(25.0 * JULIAN_YEAR);
   auto moved = apply_proper_motion(betelgeuse_pos, pm, jd, jd_future);
 
   std::cout << "  After 25 years: RA " << std::fixed << std::setprecision(6) << moved.ra()
@@ -175,7 +176,7 @@ void section_target_with_proper_motion(const JulianDate &jd) {
 
 // ─── Section 4: Frame + center transforms ───────────────────────────────────
 
-void section_target_transform(const JulianDate &jd) {
+void section_target_transform(const TTJD &jd) {
   std::puts("4) Target conversion across frame + center");
 
   // Mars heliocentric ecliptic → geocentric equatorial
@@ -192,8 +193,8 @@ void section_target_transform(const JulianDate &jd) {
 // ─────────────────────────────────────────────────────────────────────
 
 int main() {
-  JulianDate jd = JulianDate::J2000();
-  JulianDate jd_next(jd.value() + 1.0);
+  auto jd = TTJD::J2000();
+  auto jd_next = jd + qtty::Day(1.0);
 
   std::puts("Target + Trackable examples");
   std::puts("===========================\n");

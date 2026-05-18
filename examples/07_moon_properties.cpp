@@ -19,14 +19,21 @@
 
 using namespace siderust;
 using namespace qtty::literals;
+using TTJD = JulianDate;
+using TTMJD = ModifiedJulianDate;
+using TTMjdPeriod = Period;
+
+template <typename T> static CivilTime to_utc_civil(const T &time) {
+  return time.template to<scale::UTC>().to_civil();
+}
 
 /// Helper: print a list of MJD periods with their durations.
-void print_periods(const std::string &label, const std::vector<Period> &periods) {
+void print_periods(const std::string &label, const std::vector<TTMjdPeriod> &periods) {
   std::cout << "\n" << label << ": " << periods.size() << " period(s)" << std::endl;
   for (const auto &p : periods) {
     auto dur_h = p.duration<qtty::Hour>();
-    auto s = p.start().to_utc();
-    auto e = p.end().to_utc();
+    auto s = to_utc_civil(p.start());
+    auto e = to_utc_civil(p.end());
     std::cout << "  - " << s << " -> " << e << " (" << dur_h << ")" << std::endl;
   }
 }
@@ -41,8 +48,8 @@ int main() {
 
   // Use a fixed date for reproducibility: 2026-03-01 00:00 UTC
   auto jd = JulianDate::from_utc({2026, 3, 1, 0, 0, 0});
-  auto mjd = jd.to<tempoch::scales::MJD>();
-  auto window = Period(mjd, MJD(mjd.value() + 35.0));
+  auto mjd = jd.to<format::MJD>();
+  auto window = TTMjdPeriod(mjd, mjd + qtty::Day(35.0));
   SearchOptions opts{};
 
   // =========================================================================
@@ -83,7 +90,7 @@ int main() {
   auto events = moon::find_phase_events(window, opts);
   std::cout << "\nPrincipal phase events in next 35 days: " << events.size() << std::endl;
   for (const auto &ev : events) {
-    auto utc = ev.time.to_utc();
+    auto utc = to_utc_civil(ev.time);
     std::cout << "  - " << std::setw(13) << std::right << ev.kind << " at " << utc << " UTC"
               << std::endl;
   }

@@ -50,7 +50,7 @@ public:
   // Altitude queries
   // ------------------------------------------------------------------
 
-  qtty::Degree altitude_at(const Geodetic &obs, const MJD &mjd) const override {
+  qtty::Degree altitude_at(const Geodetic &obs, const ModifiedJulianDate &mjd) const override {
     // star_altitude::altitude_at returns Radian; convert to Degree
     auto rad = star_altitude::altitude_at(star_, obs, mjd);
     return rad.to<qtty::Degree>();
@@ -83,7 +83,7 @@ public:
   // Azimuth queries
   // ------------------------------------------------------------------
 
-  qtty::Degree azimuth_at(const Geodetic &obs, const MJD &mjd) const override {
+  qtty::Degree azimuth_at(const Geodetic &obs, const ModifiedJulianDate &mjd) const override {
     return star_altitude::azimuth_at(star_, obs, mjd);
   }
 

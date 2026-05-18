@@ -238,11 +238,11 @@ public:
   // ------------------------------------------------------------------
 
   /**
-   * @brief Compute altitude (degrees) at a given MJD instant.
+   * @brief Compute altitude (degrees) at a given ModifiedJulianDate instant.
    *
    * @note The Rust FFI returns radians; this method converts to degrees.
    */
-  qtty::Degree altitude_at(const Geodetic &obs, const MJD &mjd) const override {
+  qtty::Degree altitude_at(const Geodetic &obs, const ModifiedJulianDate &mjd) const override {
     double out{};
     check_status(siderust_altitude_at(detail::make_generic_target_subject(handle_), obs.to_c(),
                                       mjd.value(), &out),
@@ -266,7 +266,7 @@ public:
   }
 
   /// Backward-compatible [start, end] overload.
-  std::vector<Period> above_threshold(const Geodetic &obs, const MJD &start, const MJD &end,
+  std::vector<Period> above_threshold(const Geodetic &obs, const ModifiedJulianDate &start, const ModifiedJulianDate &end,
                                       qtty::Degree threshold,
                                       const SearchOptions &opts = {}) const {
     return above_threshold(obs, Period(start, end), threshold, opts);
@@ -288,7 +288,7 @@ public:
   }
 
   /// Backward-compatible [start, end] overload.
-  std::vector<Period> below_threshold(const Geodetic &obs, const MJD &start, const MJD &end,
+  std::vector<Period> below_threshold(const Geodetic &obs, const ModifiedJulianDate &start, const ModifiedJulianDate &end,
                                       qtty::Degree threshold,
                                       const SearchOptions &opts = {}) const {
     return below_threshold(obs, Period(start, end), threshold, opts);
@@ -309,7 +309,7 @@ public:
   }
 
   /// Backward-compatible [start, end] overload.
-  std::vector<CrossingEvent> crossings(const Geodetic &obs, const MJD &start, const MJD &end,
+  std::vector<CrossingEvent> crossings(const Geodetic &obs, const ModifiedJulianDate &start, const ModifiedJulianDate &end,
                                        qtty::Degree threshold,
                                        const SearchOptions &opts = {}) const {
     return crossings(obs, Period(start, end), threshold, opts);
@@ -329,7 +329,7 @@ public:
   }
 
   /// Backward-compatible [start, end] overload.
-  std::vector<CulminationEvent> culminations(const Geodetic &obs, const MJD &start, const MJD &end,
+  std::vector<CulminationEvent> culminations(const Geodetic &obs, const ModifiedJulianDate &start, const ModifiedJulianDate &end,
                                              const SearchOptions &opts = {}) const {
     return culminations(obs, Period(start, end), opts);
   }
@@ -339,9 +339,9 @@ public:
   // ------------------------------------------------------------------
 
   /**
-   * @brief Compute azimuth (degrees, N-clockwise) at a given MJD instant.
+   * @brief Compute azimuth (degrees, N-clockwise) at a given ModifiedJulianDate instant.
    */
-  qtty::Degree azimuth_at(const Geodetic &obs, const MJD &mjd) const override {
+  qtty::Degree azimuth_at(const Geodetic &obs, const ModifiedJulianDate &mjd) const override {
     double out{};
     check_status(siderust_azimuth_at(detail::make_generic_target_subject(handle_), obs.to_c(),
                                      mjd.value(), &out),
@@ -365,8 +365,8 @@ public:
   }
 
   /// Backward-compatible [start, end] overload.
-  std::vector<AzimuthCrossingEvent> azimuth_crossings(const Geodetic &obs, const MJD &start,
-                                                      const MJD &end, qtty::Degree bearing,
+  std::vector<AzimuthCrossingEvent> azimuth_crossings(const Geodetic &obs, const ModifiedJulianDate &start,
+                                                      const ModifiedJulianDate &end, qtty::Degree bearing,
                                                       const SearchOptions &opts = {}) const {
     return azimuth_crossings(obs, Period(start, end), bearing, opts);
   }
@@ -400,7 +400,7 @@ private:
     std::vector<Period> result;
     result.reserve(count);
     for (uintptr_t i = 0; i < count; ++i) {
-      result.push_back(Period(MJD(ptr[i].start_mjd), MJD(ptr[i].end_mjd)));
+      result.push_back(Period(ModifiedJulianDate(ptr[i].start_mjd), ModifiedJulianDate(ptr[i].end_mjd)));
     }
     siderust_periods_free(ptr, count);
     return result;
@@ -541,7 +541,7 @@ public:
 
   // -- Altitude tracking (implements Trackable) ------------------------------
 
-  qtty::Degree altitude_at(const Geodetic &obs, const MJD &mjd) const override {
+  qtty::Degree altitude_at(const Geodetic &obs, const ModifiedJulianDate &mjd) const override {
     double out{};
     check_status(siderust_altitude_at(detail::make_generic_target_subject(handle_), obs.to_c(),
                                       mjd.value(), &out),
@@ -596,7 +596,7 @@ public:
 
   // -- Azimuth tracking (implements Trackable) -------------------------------
 
-  qtty::Degree azimuth_at(const Geodetic &obs, const MJD &mjd) const override {
+  qtty::Degree azimuth_at(const Geodetic &obs, const ModifiedJulianDate &mjd) const override {
     double out{};
     check_status(siderust_azimuth_at(detail::make_generic_target_subject(handle_), obs.to_c(),
                                      mjd.value(), &out),
@@ -625,7 +625,7 @@ private:
     std::vector<Period> result;
     result.reserve(count);
     for (uintptr_t i = 0; i < count; ++i) {
-      result.push_back(Period(MJD(ptr[i].start_mjd), MJD(ptr[i].end_mjd)));
+      result.push_back(Period(ModifiedJulianDate(ptr[i].start_mjd), ModifiedJulianDate(ptr[i].end_mjd)));
     }
     siderust_periods_free(ptr, count);
     return result;

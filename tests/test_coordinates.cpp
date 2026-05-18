@@ -364,14 +364,14 @@ TEST(TypedCoordinates, CartesianToSphericalLonNormalization) {
 
   // lon = 270°: x=0, y=-1, z=0 → atan2(-1,0) = -π/2 → -90° → should give 270°
   cartesian::Position<centers::Heliocentric, EclipticMeanJ2000, AU> p270(AU(0.0), AU(-1.0),
-                                                                          AU(0.0));
+                                                                         AU(0.0));
   auto sph270 = p270.to_spherical();
   EXPECT_GE(sph270.lon().value(), 0.0);
   EXPECT_NEAR(sph270.lon().value(), 270.0, 1e-9);
 
   // lon = 180°: x=-1, y=0, z=0 → atan2(0,-1) = π → 180° — already in range, must stay.
   cartesian::Position<centers::Heliocentric, EclipticMeanJ2000, AU> p180(AU(-1.0), AU(0.0),
-                                                                          AU(0.0));
+                                                                         AU(0.0));
   auto sph180 = p180.to_spherical();
   EXPECT_GE(sph180.lon().value(), 0.0);
   EXPECT_NEAR(sph180.lon().value(), 180.0, 1e-9);
@@ -394,10 +394,12 @@ TEST(TypedCoordinates, ToHorizontalPreciseConsistency) {
 
   spherical::Direction<ICRS> vega(qtty::Degree(279.2348), qtty::Degree(38.7836));
   auto jd = JulianDate::J2000();
+  auto ctx = TimeContext::with_builtin_eop();
+  auto jd_ut1 = Time<scale::TT>::from_encoded(jd).to_with<scale::UT1>(ctx).to<format::JD>();
   auto obs = ROQUE_DE_LOS_MUCHACHOS();
 
   auto hor_basic = vega.to_horizontal(jd, obs);
-  auto hor_precise = vega.to_horizontal_precise(jd, jd, obs);
+  auto hor_precise = vega.to_horizontal_precise(jd, jd_ut1, obs);
 
   // Results should be in the same ballpark; the two routines use different
   // internal algorithms (SOFA vs. simple), so up to ~1° difference is expected.
@@ -410,8 +412,10 @@ TEST(TypedCoordinates, ToHorizontalPreciseReturnType) {
 
   spherical::Direction<EquatorialMeanJ2000> dir(qtty::Degree(90.0), qtty::Degree(10.0));
   auto jd = JulianDate::J2000();
+  auto ctx = TimeContext::with_builtin_eop();
+  auto jd_ut1 = Time<scale::TT>::from_encoded(jd).to_with<scale::UT1>(ctx).to<format::JD>();
   auto obs = ROQUE_DE_LOS_MUCHACHOS();
 
-  [[maybe_unused]] auto hor = dir.to_horizontal_precise(jd, jd, obs);
+  [[maybe_unused]] auto hor = dir.to_horizontal_precise(jd, jd_ut1, obs);
   static_assert(std::is_same_v<decltype(hor), spherical::Direction<Horizontal>>);
 }

@@ -30,6 +30,7 @@ using namespace siderust;
 using namespace siderust::frames;
 using namespace siderust::centers;
 using namespace qtty::literals;
+using TTJD = JulianDate;
 
 // ─── Kepler's 3rd law: compute orbital period from semi-major axis ──────────
 
@@ -45,13 +46,12 @@ inline qtty::Day orbit_period(const Orbit &orb) {
 
 // ─── JulianDate from system clock ───────────────────────────────────────────
 
-/// Approximate JulianDate::now() using <chrono>.
-/// JD of the Unix epoch (1970-01-01T00:00:00 UTC) = 2440587.5
-inline JulianDate jd_now() {
+/// Approximate current TT Julian Date using the Unix encoding bridge.
+inline TTJD jd_now() {
   using namespace std::chrono;
   auto unix_sec =
       duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count() / 1000.0;
-  return JulianDate(2440587.5 + unix_sec / 86400.0);
+  return UnixTime(unix_sec).to<scale::TT>().to<format::JD>();
 }
 
 // ─── Sections ───────────────────────────────────────────────────────────────
@@ -80,7 +80,7 @@ void section_planet_constants_and_periods() {
   std::puts("");
 }
 
-void section_vsop87_positions(const JulianDate &jd) {
+void section_vsop87_positions(const TTJD &jd) {
   std::puts("2) VSOP87 EPHEMERIDES (HELIOCENTRIC + BARYCENTRIC)");
   std::puts("-----------------------------------------------");
 
@@ -108,7 +108,7 @@ void section_vsop87_positions(const JulianDate &jd) {
   std::puts("");
 }
 
-void section_center_transforms(const JulianDate &jd) {
+void section_center_transforms(const TTJD &jd) {
   std::puts("3) CENTER TRANSFORMS (HELIOCENTRIC -> GEOCENTRIC)");
   std::puts("-----------------------------------------------");
 
@@ -122,7 +122,7 @@ void section_center_transforms(const JulianDate &jd) {
   std::puts("");
 }
 
-void section_moon(const JulianDate &jd) {
+void section_moon(const TTJD &jd) {
   std::puts("4) MOON (ELP2000)");
   std::puts("-----------------");
 
@@ -133,7 +133,7 @@ void section_moon(const JulianDate &jd) {
   std::puts("");
 }
 
-void section_trait_dispatch(const JulianDate &jd) {
+void section_trait_dispatch(const TTJD &jd) {
   std::puts("5) EPHEMERIS DISPATCH (all inner planets)");
   std::puts("-----------------------------------------");
 
@@ -169,7 +169,7 @@ void section_custom_planet() {
   Planet demo_world{
       qtty::Kilogram(5.972e24 * 2.0), // mass: double the Earth
       qtty::Kilometer(6371.0 * 1.3),  // radius: 30% bigger
-      Orbit{1.4_au, 0.07, 4.0_deg, 120.0_deg, 80.0_deg, 10.0_deg, JulianDate::J2000().value()}};
+      Orbit{1.4_au, 0.07, 4.0_deg, 120.0_deg, 80.0_deg, 10.0_deg, TTJD::J2000().value()}};
 
   auto period = orbit_period(demo_world.orbit);
 
@@ -184,7 +184,7 @@ void section_custom_planet() {
             << std::endl;
 }
 
-void section_current_snapshot(const JulianDate &now) {
+void section_current_snapshot(const TTJD &now) {
   std::puts("7) CURRENT SNAPSHOT");
   std::puts("-------------------");
 
@@ -207,8 +207,8 @@ void section_current_snapshot(const JulianDate &now) {
 // ─────────────────────────────────────────────────────────────────────
 
 int main() {
-  JulianDate jd = JulianDate::J2000();
-  JulianDate now = jd_now();
+  auto jd = TTJD::J2000();
+  auto now = jd_now();
 
   std::puts("=== Siderust Solar System Module Tour ===\n");
   std::cout << "Epoch used for deterministic outputs: J2000 (JD " << std::fixed

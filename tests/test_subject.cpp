@@ -14,8 +14,8 @@ using namespace siderust;
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
 static Geodetic paris() { return Geodetic(2.35, 48.85, 35.0); }
-static MJD mid_day() { return MJD(60000.5); }
-static Period one_day() { return Period(MJD(60000.0), MJD(60001.0)); }
+static ModifiedJulianDate mid_day() { return ModifiedJulianDate(60000.5); }
+static Period one_day() { return Period(ModifiedJulianDate(60000.0), ModifiedJulianDate(60001.0)); }
 
 // ── altitude_at ──────────────────────────────────────────────────────────────
 

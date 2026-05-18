@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.15)
-project(siderust_cpp VERSION 0.3.1 LANGUAGES CXX)
+project(siderust_cpp VERSION 0.4.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -24,6 +24,12 @@ if("${_SIDERUST_FEATURES_UP}" STREQUAL "OFF" OR "${_SIDERUST_FEATURES_UP}" STREQ
     # No features
 elseif(NOT "${SIDERUST_FFI_FEATURES}" STREQUAL "")
     set(_SIDERUST_FEATURES_ARGS --features ${SIDERUST_FFI_FEATURES})
+endif()
+
+# Detect whether the satellite feature is enabled so C++ dynamics.hpp is armed.
+set(_SIDERUST_SATELLITE OFF)
+if(SIDERUST_FFI_FEATURES MATCHES "(^|,)satellite(,|$)")
+    set(_SIDERUST_SATELLITE ON)
 endif()
 
 # ---------------------------------------------------------------------------
@@ -98,6 +104,9 @@ target_link_libraries(siderust_cpp INTERFACE
     $<INSTALL_INTERFACE:tempoch::tempoch_cpp>
     $<INSTALL_INTERFACE:qtty::qtty_cpp>
 )
+if(_SIDERUST_SATELLITE)
+    target_compile_definitions(siderust_cpp INTERFACE SIDERUST_SATELLITE=1)
+endif()
 add_dependencies(siderust_cpp build_siderust_ffi)
 
 # ---------------------------------------------------------------------------
@@ -204,6 +213,9 @@ set(TEST_SOURCES
     tests/test_context.cpp
     tests/test_twilight.cpp
 )
+if(_SIDERUST_SATELLITE)
+    list(APPEND TEST_SOURCES tests/test_dynamics.cpp)
+endif()
 
 add_executable(test_siderust ${TEST_SOURCES})
 target_link_libraries(test_siderust PRIVATE siderust_cpp GTest::gtest)

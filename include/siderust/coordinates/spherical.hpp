@@ -260,7 +260,7 @@ public:
    */
   template <typename F_ = F>
   std::enable_if_t<frames::has_horizontal_transform_v<F_>, Direction<frames::Horizontal>>
-  to_horizontal_precise(const JulianDate &jd_tt, const JulianDate &jd_ut1,
+  to_horizontal_precise(const JulianDate &jd_tt, const UT1JulianDate &jd_ut1,
                         const Geodetic &observer) const {
     siderust_spherical_dir_t out;
     check_status(siderust_spherical_dir_to_horizontal_precise(

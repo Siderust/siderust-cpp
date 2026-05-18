@@ -20,10 +20,11 @@ using namespace siderust::centers;
 
 using C = Barycentric;
 using U = qtty::AstronomicalUnit;
+using TTJD = JulianDate;
 
 /// Show a frame conversion from F1→F2, round-trip F1→F2→F1, and the error.
 template <typename F1, typename F2>
-void show_frame_conversion(const JulianDate &jd, const cartesian::Position<C, F1, U> &src) {
+void show_frame_conversion(const TTJD &jd, const cartesian::Position<C, F1, U> &src) {
   auto out = src.template to_frame<F2>(jd);
   auto back = out.template to_frame<F1>(jd);
   auto err = (src - back).magnitude();
@@ -35,7 +36,7 @@ void show_frame_conversion(const JulianDate &jd, const cartesian::Position<C, F1
 }
 
 int main() {
-  JulianDate jd(2460000.5);
+  TTJD jd(2460000.5);
   std::cout << std::fixed;
   std::cout << "Frame conversion demo at JD(TT) = " << std::setprecision(1) << jd << std::endl;
 

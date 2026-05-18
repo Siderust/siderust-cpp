@@ -44,11 +44,11 @@ enum class AzimuthExtremumKind : int32_t {
  * @brief An azimuth bearing-crossing event.
  */
 struct AzimuthCrossingEvent {
-  MJD time;                    ///< Epoch of the crossing (MJD).
+  ModifiedJulianDate time;                    ///< Epoch of the crossing (ModifiedJulianDate).
   CrossingDirection direction; ///< Whether the azimuth is increasing or decreasing.
 
   static AzimuthCrossingEvent from_c(const siderust_azimuth_crossing_event_t &c) {
-    return {MJD(c.mjd), static_cast<CrossingDirection>(c.direction)};
+    return {ModifiedJulianDate(c.mjd), static_cast<CrossingDirection>(c.direction)};
   }
 };
 
@@ -56,12 +56,12 @@ struct AzimuthCrossingEvent {
  * @brief An azimuth extremum event.
  */
 struct AzimuthExtremum {
-  MJD time;                 ///< Epoch of the extremum (MJD).
+  ModifiedJulianDate time;                 ///< Epoch of the extremum (ModifiedJulianDate).
   qtty::Degree azimuth;     ///< Azimuth at the extremum (degrees, N-clockwise).
   AzimuthExtremumKind kind; ///< Maximum or minimum.
 
   static AzimuthExtremum from_c(const siderust_azimuth_extremum_t &c) {
-    return {MJD(c.mjd), qtty::Degree(c.azimuth_deg), static_cast<AzimuthExtremumKind>(c.kind)};
+    return {ModifiedJulianDate(c.mjd), qtty::Degree(c.azimuth_deg), static_cast<AzimuthExtremumKind>(c.kind)};
   }
 };
 
@@ -101,10 +101,10 @@ inline std::vector<AzimuthExtremum> az_extrema_from_c(siderust_azimuth_extremum_
 namespace sun {
 
 /**
- * @brief Compute the Sun's azimuth (degrees, N-clockwise) at a given MJD
+ * @brief Compute the Sun's azimuth (degrees, N-clockwise) at a given ModifiedJulianDate
  * instant.
  */
-inline qtty::Degree azimuth_at(const Geodetic &obs, const MJD &mjd) {
+inline qtty::Degree azimuth_at(const Geodetic &obs, const ModifiedJulianDate &mjd) {
   double out;
   check_status(siderust_azimuth_at(detail::make_body_subject(SIDERUST_BODY_SUN), obs.to_c(),
                                    mjd.value(), &out),
@@ -131,8 +131,8 @@ inline std::vector<AzimuthCrossingEvent> azimuth_crossings(const Geodetic &obs,
 /**
  * @brief Backward-compatible [start, end] overload.
  */
-inline std::vector<AzimuthCrossingEvent> azimuth_crossings(const Geodetic &obs, const MJD &start,
-                                                           const MJD &end, qtty::Degree bearing,
+inline std::vector<AzimuthCrossingEvent> azimuth_crossings(const Geodetic &obs, const ModifiedJulianDate &start,
+                                                           const ModifiedJulianDate &end, qtty::Degree bearing,
                                                            const SearchOptions &opts = {}) {
   return azimuth_crossings(obs, Period(start, end), bearing, opts);
 }
@@ -153,8 +153,8 @@ inline std::vector<AzimuthExtremum> azimuth_extrema(const Geodetic &obs, const P
 /**
  * @brief Backward-compatible [start, end] overload.
  */
-inline std::vector<AzimuthExtremum> azimuth_extrema(const Geodetic &obs, const MJD &start,
-                                                    const MJD &end,
+inline std::vector<AzimuthExtremum> azimuth_extrema(const Geodetic &obs, const ModifiedJulianDate &start,
+                                                    const ModifiedJulianDate &end,
                                                     const SearchOptions &opts = {}) {
   return azimuth_extrema(obs, Period(start, end), opts);
 }
@@ -178,7 +178,7 @@ inline std::vector<Period> in_azimuth_range(const Geodetic &obs, const Period &w
 /**
  * @brief Backward-compatible [start, end] overload.
  */
-inline std::vector<Period> in_azimuth_range(const Geodetic &obs, const MJD &start, const MJD &end,
+inline std::vector<Period> in_azimuth_range(const Geodetic &obs, const ModifiedJulianDate &start, const ModifiedJulianDate &end,
                                             qtty::Degree min_bearing, qtty::Degree max_bearing,
                                             const SearchOptions &opts = {}) {
   return in_azimuth_range(obs, Period(start, end), min_bearing, max_bearing, opts);
@@ -203,8 +203,8 @@ inline std::vector<Period> outside_azimuth_range(const Geodetic &obs, const Peri
 /**
  * @brief Backward-compatible [start, end] overload.
  */
-inline std::vector<Period> outside_azimuth_range(const Geodetic &obs, const MJD &start,
-                                                 const MJD &end, qtty::Degree min_bearing,
+inline std::vector<Period> outside_azimuth_range(const Geodetic &obs, const ModifiedJulianDate &start,
+                                                 const ModifiedJulianDate &end, qtty::Degree min_bearing,
                                                  qtty::Degree max_bearing,
                                                  const SearchOptions &opts = {}) {
   return outside_azimuth_range(obs, Period(start, end), min_bearing, max_bearing, opts);
@@ -219,10 +219,10 @@ inline std::vector<Period> outside_azimuth_range(const Geodetic &obs, const MJD 
 namespace moon {
 
 /**
- * @brief Compute the Moon's azimuth (degrees, N-clockwise) at a given MJD
+ * @brief Compute the Moon's azimuth (degrees, N-clockwise) at a given ModifiedJulianDate
  * instant.
  */
-inline qtty::Degree azimuth_at(const Geodetic &obs, const MJD &mjd) {
+inline qtty::Degree azimuth_at(const Geodetic &obs, const ModifiedJulianDate &mjd) {
   double out;
   check_status(siderust_azimuth_at(detail::make_body_subject(SIDERUST_BODY_MOON), obs.to_c(),
                                    mjd.value(), &out),
@@ -249,8 +249,8 @@ inline std::vector<AzimuthCrossingEvent> azimuth_crossings(const Geodetic &obs,
 /**
  * @brief Backward-compatible [start, end] overload.
  */
-inline std::vector<AzimuthCrossingEvent> azimuth_crossings(const Geodetic &obs, const MJD &start,
-                                                           const MJD &end, qtty::Degree bearing,
+inline std::vector<AzimuthCrossingEvent> azimuth_crossings(const Geodetic &obs, const ModifiedJulianDate &start,
+                                                           const ModifiedJulianDate &end, qtty::Degree bearing,
                                                            const SearchOptions &opts = {}) {
   return azimuth_crossings(obs, Period(start, end), bearing, opts);
 }
@@ -271,8 +271,8 @@ inline std::vector<AzimuthExtremum> azimuth_extrema(const Geodetic &obs, const P
 /**
  * @brief Backward-compatible [start, end] overload.
  */
-inline std::vector<AzimuthExtremum> azimuth_extrema(const Geodetic &obs, const MJD &start,
-                                                    const MJD &end,
+inline std::vector<AzimuthExtremum> azimuth_extrema(const Geodetic &obs, const ModifiedJulianDate &start,
+                                                    const ModifiedJulianDate &end,
                                                     const SearchOptions &opts = {}) {
   return azimuth_extrema(obs, Period(start, end), opts);
 }
@@ -296,7 +296,7 @@ inline std::vector<Period> in_azimuth_range(const Geodetic &obs, const Period &w
 /**
  * @brief Backward-compatible [start, end] overload.
  */
-inline std::vector<Period> in_azimuth_range(const Geodetic &obs, const MJD &start, const MJD &end,
+inline std::vector<Period> in_azimuth_range(const Geodetic &obs, const ModifiedJulianDate &start, const ModifiedJulianDate &end,
                                             qtty::Degree min_bearing, qtty::Degree max_bearing,
                                             const SearchOptions &opts = {}) {
   return in_azimuth_range(obs, Period(start, end), min_bearing, max_bearing, opts);
@@ -321,8 +321,8 @@ inline std::vector<Period> outside_azimuth_range(const Geodetic &obs, const Peri
 /**
  * @brief Backward-compatible [start, end] overload.
  */
-inline std::vector<Period> outside_azimuth_range(const Geodetic &obs, const MJD &start,
-                                                 const MJD &end, qtty::Degree min_bearing,
+inline std::vector<Period> outside_azimuth_range(const Geodetic &obs, const ModifiedJulianDate &start,
+                                                 const ModifiedJulianDate &end, qtty::Degree min_bearing,
                                                  qtty::Degree max_bearing,
                                                  const SearchOptions &opts = {}) {
   return outside_azimuth_range(obs, Period(start, end), min_bearing, max_bearing, opts);
@@ -337,10 +337,10 @@ inline std::vector<Period> outside_azimuth_range(const Geodetic &obs, const MJD 
 namespace star_altitude {
 
 /**
- * @brief Compute a star's azimuth (degrees, N-clockwise) at a given MJD
+ * @brief Compute a star's azimuth (degrees, N-clockwise) at a given ModifiedJulianDate
  * instant.
  */
-inline qtty::Degree azimuth_at(const Star &s, const Geodetic &obs, const MJD &mjd) {
+inline qtty::Degree azimuth_at(const Star &s, const Geodetic &obs, const ModifiedJulianDate &mjd) {
   double out;
   check_status(
       siderust_azimuth_at(detail::make_star_subject(s.c_handle()), obs.to_c(), mjd.value(), &out),
@@ -368,7 +368,7 @@ inline std::vector<AzimuthCrossingEvent> azimuth_crossings(const Star &s, const 
  * @brief Backward-compatible [start, end] overload.
  */
 inline std::vector<AzimuthCrossingEvent> azimuth_crossings(const Star &s, const Geodetic &obs,
-                                                           const MJD &start, const MJD &end,
+                                                           const ModifiedJulianDate &start, const ModifiedJulianDate &end,
                                                            qtty::Degree bearing,
                                                            const SearchOptions &opts = {}) {
   return azimuth_crossings(s, obs, Period(start, end), bearing, opts);
@@ -393,8 +393,8 @@ inline std::vector<Period> in_azimuth_range(const Star &s, const Geodetic &obs,
 /**
  * @brief Backward-compatible [start, end] overload.
  */
-inline std::vector<Period> in_azimuth_range(const Star &s, const Geodetic &obs, const MJD &start,
-                                            const MJD &end, qtty::Degree min_bearing,
+inline std::vector<Period> in_azimuth_range(const Star &s, const Geodetic &obs, const ModifiedJulianDate &start,
+                                            const ModifiedJulianDate &end, qtty::Degree min_bearing,
                                             qtty::Degree max_bearing,
                                             const SearchOptions &opts = {}) {
   return in_azimuth_range(s, obs, Period(start, end), min_bearing, max_bearing, opts);
@@ -420,7 +420,7 @@ inline std::vector<Period> outside_azimuth_range(const Star &s, const Geodetic &
  * @brief Backward-compatible [start, end] overload.
  */
 inline std::vector<Period> outside_azimuth_range(const Star &s, const Geodetic &obs,
-                                                 const MJD &start, const MJD &end,
+                                                 const ModifiedJulianDate &start, const ModifiedJulianDate &end,
                                                  qtty::Degree min_bearing, qtty::Degree max_bearing,
                                                  const SearchOptions &opts = {}) {
   return outside_azimuth_range(s, obs, Period(start, end), min_bearing, max_bearing, opts);
@@ -438,7 +438,7 @@ namespace icrs_altitude {
  * @brief Compute azimuth (degrees, N-clockwise) for a fixed ICRS direction.
  */
 inline qtty::Degree azimuth_at(const spherical::direction::ICRS &dir, const Geodetic &obs,
-                               const MJD &mjd) {
+                               const ModifiedJulianDate &mjd) {
   double out;
   check_status(
       siderust_azimuth_at(detail::make_icrs_subject(dir.to_c()), obs.to_c(), mjd.value(), &out),
@@ -450,7 +450,7 @@ inline qtty::Degree azimuth_at(const spherical::direction::ICRS &dir, const Geod
  * @brief Backward-compatible RA/Dec overload.
  */
 inline qtty::Degree azimuth_at(qtty::Degree ra, qtty::Degree dec, const Geodetic &obs,
-                               const MJD &mjd) {
+                               const ModifiedJulianDate &mjd) {
   return azimuth_at(spherical::direction::ICRS(ra, dec), obs, mjd);
 }
 
@@ -482,8 +482,8 @@ azimuth_crossings(qtty::Degree ra, qtty::Degree dec, const Geodetic &obs, const 
  * @brief Backward-compatible [start, end] overload.
  */
 inline std::vector<AzimuthCrossingEvent> azimuth_crossings(const spherical::direction::ICRS &dir,
-                                                           const Geodetic &obs, const MJD &start,
-                                                           const MJD &end, qtty::Degree bearing,
+                                                           const Geodetic &obs, const ModifiedJulianDate &start,
+                                                           const ModifiedJulianDate &end, qtty::Degree bearing,
                                                            const SearchOptions &opts = {}) {
   return azimuth_crossings(dir, obs, Period(start, end), bearing, opts);
 }

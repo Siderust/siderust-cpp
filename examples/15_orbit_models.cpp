@@ -10,9 +10,10 @@
 
 using namespace siderust;
 using namespace qtty::literals;
+using TTJD = JulianDate;
 
 int main() {
-  const JulianDate jd(2458850.0);
+  const TTJD jd(2458850.0);
 
   std::puts("=== Orbit Models ===\n");
   std::printf("Epoch: %.1f\n\n", jd.value());

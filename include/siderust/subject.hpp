@@ -145,7 +145,7 @@ private:
 /**
  * @brief Altitude at an instant (radians) for any subject.
  */
-inline qtty::Radian altitude_at(const Subject &subj, const Geodetic &obs, const MJD &mjd) {
+inline qtty::Radian altitude_at(const Subject &subj, const Geodetic &obs, const ModifiedJulianDate &mjd) {
   double out;
   check_status(siderust_altitude_at(subj.c_inner(), obs.to_c(), mjd.value(), &out),
                "altitude_at(Subject)");
@@ -228,7 +228,7 @@ inline std::vector<Period> altitude_periods(const Subject &subj, const Geodetic 
 /**
  * @brief Azimuth at an instant (degrees, N-clockwise) for any subject.
  */
-inline qtty::Degree azimuth_at(const Subject &subj, const Geodetic &obs, const MJD &mjd) {
+inline qtty::Degree azimuth_at(const Subject &subj, const Geodetic &obs, const ModifiedJulianDate &mjd) {
   double out;
   check_status(siderust_azimuth_at(subj.c_inner(), obs.to_c(), mjd.value(), &out),
                "azimuth_at(Subject)");

@@ -2,31 +2,38 @@
 
 /**
  * @file time.hpp
- * @brief Re-exports tempoch C++ types into the siderust namespace.
- *
- * The canonical implementations live in tempoch-cpp (namespace tempoch).
- * This header provides backward-compatible aliases so that existing code
- * using siderust::JulianDate, siderust::MJD, etc. continues to compile.
+ * @brief Re-exports tempoch time types into the siderust namespace.
  */
 
 #include <tempoch/tempoch.hpp>
 
 namespace siderust {
 
+namespace scale = tempoch::scale;
+namespace format = tempoch::format;
+
 using CivilTime = tempoch::CivilTime;
-using UTC = tempoch::UTC;                     // alias for CivilTime
-using JulianDate = tempoch::JulianDate;       // Time<JDScale>
-using MJD = tempoch::MJD;                     // Time<MJDScale>
-using TDB = tempoch::TDB;                     // Time<TDBScale>
-using TT = tempoch::TT;                       // Time<TTScale>
-using TAI = tempoch::TAI;                     // Time<TAIScale>
-using TCG = tempoch::TCG;                     // Time<TCGScale>
-using TCB = tempoch::TCB;                     // Time<TCBScale>
-using GPS = tempoch::GPS;                     // Time<GPSScale>
-using UT = tempoch::UT;                       // Time<UTScale>
-using UniversalTime = tempoch::UniversalTime; // alias for UT
-using JDE = tempoch::JDE;                     // Time<JDEScale>
-using UnixTime = tempoch::UnixTime;           // Time<UnixTimeScale>
-using Period = tempoch::Period<tempoch::MJD>;
+using UTC = CivilTime;
+using TimeContext = tempoch::TimeContext;
+
+template <typename S> using Time = tempoch::Time<S>;
+template <typename S> using J2000Seconds = tempoch::J2000Seconds<S>;
+
+using JulianDate = tempoch::JulianDate<scale::TT>;
+using MJD = tempoch::ModifiedJulianDate<scale::TT>;
+using ModifiedJulianDate = MJD;
+using Period = tempoch::TTMjdPeriod;
+
+using UT1JulianDate = tempoch::JulianDate<scale::UT1>;
+using TDBJulianDate = tempoch::JulianDate<scale::TDB>;
+using TCGJulianDate = tempoch::JulianDate<scale::TCG>;
+using TCBJulianDate = tempoch::JulianDate<scale::TCB>;
+using TAIJulianDate = tempoch::JulianDate<scale::TAI>;
+using UTCJulianDate = tempoch::JulianDate<scale::UTC>;
+using TTTime = tempoch::Time<scale::TT>;
+using UT1Time = tempoch::Time<scale::UT1>;
+
+using UnixTime = tempoch::UnixTime;
+using GpsTime = tempoch::GpsTime;
 
 } // namespace siderust

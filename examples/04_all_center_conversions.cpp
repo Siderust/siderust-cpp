@@ -26,12 +26,13 @@ using namespace qtty::literals;
 
 using F = EclipticMeanJ2000;
 using U = qtty::AstronomicalUnit;
+using TTJD = JulianDate;
 
 // ─── Standard center shifts ──────────────────────────────────────────────────
 
 /// Show a center conversion C1→C2, round-trip C1→C2→C1, and the error.
 template <typename C1, typename C2>
-void show_center_conversion(const JulianDate &jd, const cartesian::Position<C1, F, U> &src) {
+void show_center_conversion(const TTJD &jd, const cartesian::Position<C1, F, U> &src) {
   auto out = src.template to_center<C2>(jd);
   auto back = out.template to_center<C1>(jd);
   auto err = (src - back).magnitude();
@@ -48,7 +49,7 @@ void show_center_conversion(const JulianDate &jd, const cartesian::Position<C1, 
 ///
 /// Round-trip: C → Bodycentric → Geocentric → C.
 template <typename C>
-void show_bodycentric_conversion(const char *label, const JulianDate &jd,
+void show_bodycentric_conversion(const char *label, const TTJD &jd,
                                  const cartesian::Position<C, F, U> &src,
                                  const BodycentricParams &params) {
   auto bary = to_bodycentric(src, params, jd);
@@ -66,7 +67,7 @@ void show_bodycentric_conversion(const char *label, const JulianDate &jd,
 // ─────────────────────────────────────────────────────────────────────
 
 int main() {
-  JulianDate jd(2460000.5);
+  TTJD jd(2460000.5);
   std::cout << "Center conversion demo at JD(TT) = " << std::fixed << std::setprecision(1) << jd
             << "\n"
             << std::endl;

@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-05-15
+
+### Added
+
+- `include/siderust/constops.hpp` and generated `include/siderust/constops.h` with JSON-oriented wrappers for the constops FFI surface, including route constants and ground-asset ID helpers.
+- `include/siderust/dynamics.hpp` with RAII wrappers for the dynamics FFI, including `DynamicsContext`, `OrbitState`, and two-body propagation support.
+
+### Changed
+
+- `include/siderust/time.hpp` now exposes the v1 time surface: `UTC`, TT-default `JulianDate` / `MJD` / `Period`, explicit `Time<scale::S>`, and named mixed-scale aliases such as `UT1JulianDate`.
+- Public headers, examples, tests, README, and Doxygen docs now default to the astronomy-facing TT aliases and the direct civil-time constructors `JulianDate::from_utc(...)` / `MJD::from_utc(...)`.
+- Updated the vendored `siderust` and `tempoch-cpp` submodules to the current snapshots used by this branch, including the upstream typed-time ergonomics restored for v1.
+
+### Fixed
+
+- `cartesian::Position::to_spherical()` now normalizes longitude into `[0°, 360°)` instead of returning negative values for points in the negative-Y half-plane.
+
 ## [0.3.1] - 2026-05-11
 
 ### Fixed

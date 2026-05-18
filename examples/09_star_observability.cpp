@@ -15,18 +15,20 @@
 
 using namespace siderust;
 using namespace qtty::literals;
+using TTMJD = ModifiedJulianDate;
+using TTMjdPeriod = Period;
 
 /// Intersect two sorted vectors of periods.
 /// Returns every non-empty overlap between a period in `a` and a period in `b`.
-static std::vector<Period> intersect_periods(const std::vector<Period> &a,
-                                             const std::vector<Period> &b) {
-  std::vector<Period> result;
+static std::vector<TTMjdPeriod> intersect_periods(const std::vector<TTMjdPeriod> &a,
+                                                  const std::vector<TTMjdPeriod> &b) {
+  std::vector<TTMjdPeriod> result;
   size_t j = 0;
   for (size_t i = 0; i < a.size() && j < b.size();) {
     double lo = std::max(a[i].start().value(), b[j].start().value());
     double hi = std::min(a[i].end().value(), b[j].end().value());
     if (lo < hi) {
-      result.push_back(Period(MJD(lo), MJD(hi)));
+      result.push_back(TTMjdPeriod(TTMJD(lo), TTMJD(hi)));
     }
     // advance whichever period ends first
     if (a[i].end().value() < b[j].end().value())
@@ -44,8 +46,8 @@ int main() {
   const auto &target = SIRIUS();
 
   // One-night search window (MJD TT).
-  MJD t0(60000.0);
-  Period window(t0, t0 + 1.0_d);
+  TTMJD t0(60000.0);
+  TTMjdPeriod window(t0, t0 + 1.0_d);
 
   // Constraint 1: altitude between 25° and 65°.
   auto min_alt = 25.0_deg;

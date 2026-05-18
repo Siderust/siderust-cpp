@@ -10,13 +10,13 @@ static const double PI = 3.14159265358979323846;
 class AltitudeTest : public ::testing::Test {
 protected:
   Geodetic obs;
-  MJD start;
-  MJD end_;
-  Period window{MJD(0.0), MJD(1.0)};
+  ModifiedJulianDate start;
+  ModifiedJulianDate end_;
+  Period window{ModifiedJulianDate(0.0), ModifiedJulianDate(1.0)};
 
   void SetUp() override {
     obs = ROQUE_DE_LOS_MUCHACHOS();
-    start = MJD::from_jd(JulianDate::from_utc({2026, 7, 15, 18, 0, 0}));
+    start = ModifiedJulianDate::from_utc({2026, 7, 15, 18, 0, 0});
     end_ = start + 1.0_d; // 24 hours
     window = Period(start, end_);
   }

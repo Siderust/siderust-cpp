@@ -17,11 +17,12 @@ using namespace siderust;
 using namespace siderust::frames;
 using namespace siderust::centers;
 using AU = qtty::AstronomicalUnit;
+using TTJD = JulianDate;
 
 int main() {
   std::cout << "=== Coordinate Transformations Example ===\n" << std::endl;
 
-  auto jd = JulianDate::J2000();
+  auto jd = TTJD::J2000();
   std::cout << std::fixed << std::setprecision(1);
   std::cout << "Reference time: J2000.0 (JD " << jd << ")\n" << std::endl;
 

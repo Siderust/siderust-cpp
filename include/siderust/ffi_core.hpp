@@ -99,6 +99,11 @@ public:
   explicit NoEopDataError(const std::string &msg) : SiderustException(msg) {}
 };
 
+class InvalidDimensionError : public SiderustException {
+public:
+  explicit InvalidDimensionError(const std::string &msg) : SiderustException(msg) {}
+};
+
 // ============================================================================
 // Error Translation
 // ============================================================================
@@ -135,6 +140,8 @@ inline void check_status(siderust_status_t status, const char *operation) {
     throw OutOfRangeError(msg + "epoch outside covered data range");
   case SIDERUST_STATUS_T_NO_EOP_DATA:
     throw NoEopDataError(msg + "Earth Orientation Parameters unavailable for epoch");
+  case SIDERUST_STATUS_T_INVALID_DIMENSION:
+    throw InvalidDimensionError(msg + "invalid array dimension");
   default:
     throw SiderustException(msg + "unknown error (" + std::to_string(status) + ")");
   }

@@ -25,11 +25,11 @@ namespace siderust {
  * @brief A threshold-crossing event (rising or setting).
  */
 struct CrossingEvent {
-  MJD time;
+  ModifiedJulianDate time;
   CrossingDirection direction;
 
   static CrossingEvent from_c(const siderust_crossing_event_t &c) {
-    return {MJD(c.mjd), static_cast<CrossingDirection>(c.direction)};
+    return {ModifiedJulianDate(c.mjd), static_cast<CrossingDirection>(c.direction)};
   }
 };
 
@@ -37,12 +37,12 @@ struct CrossingEvent {
  * @brief A culmination (local altitude extremum) event.
  */
 struct CulminationEvent {
-  MJD time;
+  ModifiedJulianDate time;
   qtty::Degree altitude;
   CulminationKind kind;
 
   static CulminationEvent from_c(const siderust_culmination_event_t &c) {
-    return {MJD(c.mjd), qtty::Degree(c.altitude_deg), static_cast<CulminationKind>(c.kind)};
+    return {ModifiedJulianDate(c.mjd), qtty::Degree(c.altitude_deg), static_cast<CulminationKind>(c.kind)};
   }
 };
 
@@ -124,9 +124,9 @@ inline std::vector<CulminationEvent> culminations_from_c(siderust_culmination_ev
 namespace sun {
 
 /**
- * @brief Compute the Sun's altitude (radians) at a given MJD instant.
+ * @brief Compute the Sun's altitude (radians) at a given ModifiedJulianDate instant.
  */
-inline qtty::Radian altitude_at(const Geodetic &obs, const MJD &mjd) {
+inline qtty::Radian altitude_at(const Geodetic &obs, const ModifiedJulianDate &mjd) {
   double out;
   check_status(siderust_altitude_at(detail::make_body_subject(SIDERUST_BODY_SUN), obs.to_c(),
                                     mjd.value(), &out),
@@ -151,7 +151,7 @@ inline std::vector<Period> above_threshold(const Geodetic &obs, const Period &wi
 /**
  * @brief Backward-compatible [start, end] overload.
  */
-inline std::vector<Period> above_threshold(const Geodetic &obs, const MJD &start, const MJD &end,
+inline std::vector<Period> above_threshold(const Geodetic &obs, const ModifiedJulianDate &start, const ModifiedJulianDate &end,
                                            qtty::Degree threshold, const SearchOptions &opts = {}) {
   return above_threshold(obs, Period(start, end), threshold, opts);
 }
@@ -173,7 +173,7 @@ inline std::vector<Period> below_threshold(const Geodetic &obs, const Period &wi
 /**
  * @brief Backward-compatible [start, end] overload.
  */
-inline std::vector<Period> below_threshold(const Geodetic &obs, const MJD &start, const MJD &end,
+inline std::vector<Period> below_threshold(const Geodetic &obs, const ModifiedJulianDate &start, const ModifiedJulianDate &end,
                                            qtty::Degree threshold, const SearchOptions &opts = {}) {
   return below_threshold(obs, Period(start, end), threshold, opts);
 }
@@ -195,7 +195,7 @@ inline std::vector<CrossingEvent> crossings(const Geodetic &obs, const Period &w
 /**
  * @brief Backward-compatible [start, end] overload.
  */
-inline std::vector<CrossingEvent> crossings(const Geodetic &obs, const MJD &start, const MJD &end,
+inline std::vector<CrossingEvent> crossings(const Geodetic &obs, const ModifiedJulianDate &start, const ModifiedJulianDate &end,
                                             qtty::Degree threshold,
                                             const SearchOptions &opts = {}) {
   return crossings(obs, Period(start, end), threshold, opts);
@@ -217,8 +217,8 @@ inline std::vector<CulminationEvent> culminations(const Geodetic &obs, const Per
 /**
  * @brief Backward-compatible [start, end] overload.
  */
-inline std::vector<CulminationEvent> culminations(const Geodetic &obs, const MJD &start,
-                                                  const MJD &end, const SearchOptions &opts = {}) {
+inline std::vector<CulminationEvent> culminations(const Geodetic &obs, const ModifiedJulianDate &start,
+                                                  const ModifiedJulianDate &end, const SearchOptions &opts = {}) {
   return culminations(obs, Period(start, end), opts);
 }
 
@@ -240,7 +240,7 @@ inline std::vector<Period> altitude_periods(const Geodetic &obs, const Period &w
 /**
  * @brief Backward-compatible [start, end] overload.
  */
-inline std::vector<Period> altitude_periods(const Geodetic &obs, const MJD &start, const MJD &end,
+inline std::vector<Period> altitude_periods(const Geodetic &obs, const ModifiedJulianDate &start, const ModifiedJulianDate &end,
                                             qtty::Degree min_alt, qtty::Degree max_alt) {
   siderust_altitude_query_t q = {obs.to_c(), start.value(), end.value(), min_alt.value(),
                                  max_alt.value()};
@@ -261,9 +261,9 @@ inline std::vector<Period> altitude_periods(const Geodetic &obs, const MJD &star
 namespace moon {
 
 /**
- * @brief Compute the Moon's altitude (radians) at a given MJD instant.
+ * @brief Compute the Moon's altitude (radians) at a given ModifiedJulianDate instant.
  */
-inline qtty::Radian altitude_at(const Geodetic &obs, const MJD &mjd) {
+inline qtty::Radian altitude_at(const Geodetic &obs, const ModifiedJulianDate &mjd) {
   double out;
   check_status(siderust_altitude_at(detail::make_body_subject(SIDERUST_BODY_MOON), obs.to_c(),
                                     mjd.value(), &out),
@@ -288,7 +288,7 @@ inline std::vector<Period> above_threshold(const Geodetic &obs, const Period &wi
 /**
  * @brief Backward-compatible [start, end] overload.
  */
-inline std::vector<Period> above_threshold(const Geodetic &obs, const MJD &start, const MJD &end,
+inline std::vector<Period> above_threshold(const Geodetic &obs, const ModifiedJulianDate &start, const ModifiedJulianDate &end,
                                            qtty::Degree threshold, const SearchOptions &opts = {}) {
   return above_threshold(obs, Period(start, end), threshold, opts);
 }
@@ -310,7 +310,7 @@ inline std::vector<Period> below_threshold(const Geodetic &obs, const Period &wi
 /**
  * @brief Backward-compatible [start, end] overload.
  */
-inline std::vector<Period> below_threshold(const Geodetic &obs, const MJD &start, const MJD &end,
+inline std::vector<Period> below_threshold(const Geodetic &obs, const ModifiedJulianDate &start, const ModifiedJulianDate &end,
                                            qtty::Degree threshold, const SearchOptions &opts = {}) {
   return below_threshold(obs, Period(start, end), threshold, opts);
 }
@@ -332,7 +332,7 @@ inline std::vector<CrossingEvent> crossings(const Geodetic &obs, const Period &w
 /**
  * @brief Backward-compatible [start, end] overload.
  */
-inline std::vector<CrossingEvent> crossings(const Geodetic &obs, const MJD &start, const MJD &end,
+inline std::vector<CrossingEvent> crossings(const Geodetic &obs, const ModifiedJulianDate &start, const ModifiedJulianDate &end,
                                             qtty::Degree threshold,
                                             const SearchOptions &opts = {}) {
   return crossings(obs, Period(start, end), threshold, opts);
@@ -354,8 +354,8 @@ inline std::vector<CulminationEvent> culminations(const Geodetic &obs, const Per
 /**
  * @brief Backward-compatible [start, end] overload.
  */
-inline std::vector<CulminationEvent> culminations(const Geodetic &obs, const MJD &start,
-                                                  const MJD &end, const SearchOptions &opts = {}) {
+inline std::vector<CulminationEvent> culminations(const Geodetic &obs, const ModifiedJulianDate &start,
+                                                  const ModifiedJulianDate &end, const SearchOptions &opts = {}) {
   return culminations(obs, Period(start, end), opts);
 }
 
@@ -377,7 +377,7 @@ inline std::vector<Period> altitude_periods(const Geodetic &obs, const Period &w
 /**
  * @brief Backward-compatible [start, end] overload.
  */
-inline std::vector<Period> altitude_periods(const Geodetic &obs, const MJD &start, const MJD &end,
+inline std::vector<Period> altitude_periods(const Geodetic &obs, const ModifiedJulianDate &start, const ModifiedJulianDate &end,
                                             qtty::Degree min_alt, qtty::Degree max_alt) {
   siderust_altitude_query_t q = {obs.to_c(), start.value(), end.value(), min_alt.value(),
                                  max_alt.value()};
@@ -398,9 +398,9 @@ inline std::vector<Period> altitude_periods(const Geodetic &obs, const MJD &star
 namespace star_altitude {
 
 /**
- * @brief Compute a star's altitude (radians) at a given MJD instant.
+ * @brief Compute a star's altitude (radians) at a given ModifiedJulianDate instant.
  */
-inline qtty::Radian altitude_at(const Star &s, const Geodetic &obs, const MJD &mjd) {
+inline qtty::Radian altitude_at(const Star &s, const Geodetic &obs, const ModifiedJulianDate &mjd) {
   double out;
   check_status(
       siderust_altitude_at(detail::make_star_subject(s.c_handle()), obs.to_c(), mjd.value(), &out),
@@ -425,8 +425,8 @@ inline std::vector<Period> above_threshold(const Star &s, const Geodetic &obs, c
 /**
  * @brief Backward-compatible [start, end] overload.
  */
-inline std::vector<Period> above_threshold(const Star &s, const Geodetic &obs, const MJD &start,
-                                           const MJD &end, qtty::Degree threshold,
+inline std::vector<Period> above_threshold(const Star &s, const Geodetic &obs, const ModifiedJulianDate &start,
+                                           const ModifiedJulianDate &end, qtty::Degree threshold,
                                            const SearchOptions &opts = {}) {
   return above_threshold(s, obs, Period(start, end), threshold, opts);
 }
@@ -448,8 +448,8 @@ inline std::vector<Period> below_threshold(const Star &s, const Geodetic &obs, c
 /**
  * @brief Backward-compatible [start, end] overload.
  */
-inline std::vector<Period> below_threshold(const Star &s, const Geodetic &obs, const MJD &start,
-                                           const MJD &end, qtty::Degree threshold,
+inline std::vector<Period> below_threshold(const Star &s, const Geodetic &obs, const ModifiedJulianDate &start,
+                                           const ModifiedJulianDate &end, qtty::Degree threshold,
                                            const SearchOptions &opts = {}) {
   return below_threshold(s, obs, Period(start, end), threshold, opts);
 }
@@ -471,8 +471,8 @@ inline std::vector<CrossingEvent> crossings(const Star &s, const Geodetic &obs,
 /**
  * @brief Backward-compatible [start, end] overload.
  */
-inline std::vector<CrossingEvent> crossings(const Star &s, const Geodetic &obs, const MJD &start,
-                                            const MJD &end, qtty::Degree threshold,
+inline std::vector<CrossingEvent> crossings(const Star &s, const Geodetic &obs, const ModifiedJulianDate &start,
+                                            const ModifiedJulianDate &end, qtty::Degree threshold,
                                             const SearchOptions &opts = {}) {
   return crossings(s, obs, Period(start, end), threshold, opts);
 }
@@ -495,7 +495,7 @@ inline std::vector<CulminationEvent> culminations(const Star &s, const Geodetic 
  * @brief Backward-compatible [start, end] overload.
  */
 inline std::vector<CulminationEvent> culminations(const Star &s, const Geodetic &obs,
-                                                  const MJD &start, const MJD &end,
+                                                  const ModifiedJulianDate &start, const ModifiedJulianDate &end,
                                                   const SearchOptions &opts = {}) {
   return culminations(s, obs, Period(start, end), opts);
 }
@@ -512,7 +512,7 @@ namespace icrs_altitude {
  * @brief Compute altitude (radians) for a fixed ICRS direction.
  */
 inline qtty::Radian altitude_at(const spherical::direction::ICRS &dir, const Geodetic &obs,
-                                const MJD &mjd) {
+                                const ModifiedJulianDate &mjd) {
   double out;
   check_status(
       siderust_altitude_at(detail::make_icrs_subject(dir.to_c()), obs.to_c(), mjd.value(), &out),
@@ -524,7 +524,7 @@ inline qtty::Radian altitude_at(const spherical::direction::ICRS &dir, const Geo
  * @brief Backward-compatible RA/Dec overload.
  */
 inline qtty::Radian altitude_at(qtty::Degree ra, qtty::Degree dec, const Geodetic &obs,
-                                const MJD &mjd) {
+                                const ModifiedJulianDate &mjd) {
   return altitude_at(spherical::direction::ICRS(ra, dec), obs, mjd);
 }
 
@@ -547,7 +547,7 @@ inline std::vector<Period> above_threshold(const spherical::direction::ICRS &dir
  * @brief Backward-compatible RA/Dec + [start, end] overload.
  */
 inline std::vector<Period> above_threshold(qtty::Degree ra, qtty::Degree dec, const Geodetic &obs,
-                                           const MJD &start, const MJD &end, qtty::Degree threshold,
+                                           const ModifiedJulianDate &start, const ModifiedJulianDate &end, qtty::Degree threshold,
                                            const SearchOptions &opts = {}) {
   return above_threshold(spherical::direction::ICRS(ra, dec), obs, Period(start, end), threshold,
                          opts);
@@ -572,7 +572,7 @@ inline std::vector<Period> below_threshold(const spherical::direction::ICRS &dir
  * @brief Backward-compatible RA/Dec + [start, end] overload.
  */
 inline std::vector<Period> below_threshold(qtty::Degree ra, qtty::Degree dec, const Geodetic &obs,
-                                           const MJD &start, const MJD &end, qtty::Degree threshold,
+                                           const ModifiedJulianDate &start, const ModifiedJulianDate &end, qtty::Degree threshold,
                                            const SearchOptions &opts = {}) {
   return below_threshold(spherical::direction::ICRS(ra, dec), obs, Period(start, end), threshold,
                          opts);

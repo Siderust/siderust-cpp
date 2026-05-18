@@ -63,9 +63,9 @@ enum class Body : int32_t {
 namespace body {
 
 /**
- * @brief Compute a body's altitude (radians) at a given MJD instant.
+ * @brief Compute a body's altitude (radians) at a given ModifiedJulianDate instant.
  */
-inline qtty::Radian altitude_at(Body b, const Geodetic &obs, const MJD &mjd) {
+inline qtty::Radian altitude_at(Body b, const Geodetic &obs, const ModifiedJulianDate &mjd) {
   double out;
   check_status(siderust_altitude_at(detail::make_body_subject(static_cast<SiderustBody>(b)),
                                     obs.to_c(), mjd.value(), &out),
@@ -151,9 +151,9 @@ namespace body {
 // ── Azimuth free functions ──────────────────────────────────────────────
 
 /**
- * @brief Compute a body's azimuth (radians) at a given MJD instant.
+ * @brief Compute a body's azimuth (radians) at a given ModifiedJulianDate instant.
  */
-inline qtty::Radian azimuth_at(Body b, const Geodetic &obs, const MJD &mjd) {
+inline qtty::Radian azimuth_at(Body b, const Geodetic &obs, const ModifiedJulianDate &mjd) {
   double out;
   check_status(siderust_azimuth_at(detail::make_body_subject(static_cast<SiderustBody>(b)),
                                    obs.to_c(), mjd.value(), &out),
@@ -265,7 +265,7 @@ public:
   // Altitude queries
   // ------------------------------------------------------------------
 
-  qtty::Degree altitude_at(const Geodetic &obs, const MJD &mjd) const override {
+  qtty::Degree altitude_at(const Geodetic &obs, const ModifiedJulianDate &mjd) const override {
     auto rad = body::altitude_at(body_, obs, mjd);
     return qtty::Degree(rad.value() * 180.0 / 3.14159265358979323846);
   }
@@ -297,7 +297,7 @@ public:
   // Azimuth queries
   // ------------------------------------------------------------------
 
-  qtty::Degree azimuth_at(const Geodetic &obs, const MJD &mjd) const override {
+  qtty::Degree azimuth_at(const Geodetic &obs, const ModifiedJulianDate &mjd) const override {
     auto rad = body::azimuth_at(body_, obs, mjd);
     return qtty::Degree(rad.value() * 180.0 / 3.14159265358979323846);
   }

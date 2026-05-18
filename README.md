@@ -8,7 +8,7 @@ Modern, header-only C++17 wrapper for **siderust** — a high-precision astronom
 
 | Module | What you get |
 |--------|-------------|
-| **Time** (`time.hpp`) | `JulianDate`, `MJD`, `UTC`, `Period` — value types with arithmetic and UTC round-trips |
+| **Time** (`time.hpp`) | `UTC`, `CivilTime`, TT-default `JulianDate` / `MJD` / `Period`, plus explicit `Time<scale::S>` and `TimeContext` |
 | **Coordinates** (`coordinates.hpp`) | Modular typed API (`coordinates/{geodetic,spherical,cartesian,types}.hpp`) plus selective alias headers under `coordinates/types/{spherical,cartesian}/...` |
 | **Frames & Centers** (`frames.hpp`, `centers.hpp`) | Compile-time frame/center tags and transform capability traits |
 | **Orbits** (`orbit.hpp`) | `KeplerianOrbit`, `MeanMotionOrbit`, `ConicOrbit`, `PreparedOrbit`, plus compatibility alias `Orbit` |
@@ -29,23 +29,20 @@ Modern, header-only C++17 wrapper for **siderust** — a high-precision astronom
 int main() {
     using namespace siderust;
 
-    auto obs  = ROQUE_DE_LOS_MUCHACHOS;
-    auto jd   = JulianDate::from_utc({2026, 7, 15, 22, 0, 0});
-    auto mjd  = MJD::from_jd(jd);
-    auto win  = Period(mjd, mjd + qtty::Day(1.0));
+    auto obs = ROQUE_DE_LOS_MUCHACHOS;
+    auto mjd = MJD::from_utc({2026, 7, 15, 22, 0, 0});
+    Period win(mjd, mjd + qtty::Day(1.0));
 
     qtty::Degree sun_alt = sun::altitude_at(obs, mjd).to<qtty::Degree>();
-    qtty::Degree sun_az  = sun::azimuth_at(obs, mjd);
+    qtty::Degree sun_az = sun::azimuth_at(obs, mjd);
     std::cout << "Sun alt=" << sun_alt.value() << " deg"
               << " az=" << sun_az.value() << " deg\n";
 
-    Target fixed(279.23473, 38.78369); // Vega-like ICRS target
+    Target fixed(279.23473, 38.78369);
     std::cout << "Target alt=" << fixed.altitude_at(obs, mjd).value() << " deg\n";
 
     auto nights = sun::below_threshold(obs, win, qtty::Degree(-18.0));
     std::cout << "Astronomical-night periods in next 24h: " << nights.size() << "\n";
-
-    return 0;
 }
 ```
 
@@ -203,7 +200,7 @@ siderust-cpp/
 ├── include/siderust/
 │   ├── siderust.hpp          ← umbrella header
 │   ├── ffi_core.hpp          ← error handling, enums
-│   ├── time.hpp              ← JulianDate, MJD, Period, UTC
+│   ├── time.hpp              ← UTC, CivilTime, TT-default encoded dates, explicit `Time<scale::S>`
 │   ├── coordinates.hpp       ← coordinate umbrella header
 │   ├── coordinates/
 │   │   ├── geodetic.hpp
@@ -233,6 +230,12 @@ siderust-cpp/
 ├── siderust-ffi/             ← git submodule (contains `siderust` as nested submodule)
 └── tempoch-cpp/qtty-cpp/     ← nested git submodule
 ```
+
+## Time API
+
+- Default astronomy-facing code should use `JulianDate`, `MJD`, and `Period`, all pinned to TT.
+- Civil construction is available directly through `JulianDate::from_utc(...)` and `MJD::from_utc(...)`.
+- Advanced mixed-scale work stays explicit with `Time<scale::S>` and named aliases such as `UT1JulianDate`.
 
 ## Architecture
 

@@ -31,6 +31,7 @@ using namespace siderust;
 using namespace siderust::frames;
 using namespace siderust::centers;
 using namespace qtty::literals;
+using TTJD = JulianDate;
 // ─── JSON formatting helpers ────────────────────────────────────────────────
 
 inline std::string json_number(double v, int prec = 6) {
@@ -47,10 +48,10 @@ void section_times() {
   std::puts("1) TIME OBJECTS");
   std::puts("---------------");
 
-  JulianDate jd = JulianDate::J2000();
-  auto mjd = jd.to<tempoch::scales::MJD>();
-  JulianDate jd_plus1(jd.value() + 1.0);
-  JulianDate jd_plus7(jd.value() + 7.0);
+  auto jd = TTJD::J2000();
+  auto mjd = jd.to<format::MJD>();
+  auto jd_plus1 = jd + qtty::Day(1.0);
+  auto jd_plus7 = jd + qtty::Day(7.0);
 
   // Pretty-print a TimeBundle-like JSON
   std::puts("{");
@@ -110,7 +111,7 @@ void section_coordinates() {
 
 struct BodySnapshotJSON {
   std::string name;
-  JulianDate epoch;
+  TTJD epoch;
   Orbit orbit;
   cartesian::position::EclipticMeanJ2000<qtty::AstronomicalUnit> helio_ecl;
 
@@ -140,7 +141,7 @@ struct BodySnapshotJSON {
   }
 };
 
-void section_body_objects(const JulianDate &jd) {
+void section_body_objects(const TTJD &jd) {
   std::puts("3) BODY-RELATED OBJECTS");
   std::puts("-----------------------");
 
@@ -164,7 +165,7 @@ void section_body_objects(const JulianDate &jd) {
 
 // ─── Section 4: Target objects ──────────────────────────────────────────────
 
-void section_targets(const JulianDate &jd) {
+void section_targets(const TTJD &jd) {
   std::puts("4) TARGET OBJECTS");
   std::puts("-----------------");
 
@@ -196,7 +197,7 @@ void section_targets(const JulianDate &jd) {
 
 // ─── Section 5: File I/O ────────────────────────────────────────────────────
 
-void section_file_io(const JulianDate &jd) {
+void section_file_io(const TTJD &jd) {
   std::puts("5) FILE I/O");
   std::puts("----------");
 
@@ -245,7 +246,7 @@ void section_file_io(const JulianDate &jd) {
 int main() {
   std::puts("=== Siderust Manual Serialization Examples ===\n");
 
-  JulianDate jd = JulianDate::J2000();
+  auto jd = TTJD::J2000();
 
   section_times();
   section_coordinates();

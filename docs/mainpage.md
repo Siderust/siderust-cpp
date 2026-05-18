@@ -15,7 +15,7 @@ codebase without writing a single line of Rust.
 
 | Module | What you get |
 |--------|-------------|
-| **Time** (`time.hpp`) | `JulianDate`, `MJD`, `UTC`, `Period` — value types with arithmetic and UTC round-trips |
+| **Time** (`time.hpp`) | `UTC`, `CivilTime`, TT-default `JulianDate` / `MJD` / `Period`, plus explicit `Time<scale::S>` and `TimeContext` |
 | **Coordinates** (`coordinates.hpp`) | Modular typed API (`coordinates/{geodetic,spherical,cartesian,types}.hpp`) plus selective alias headers under `coordinates/types/{spherical,cartesian}/...` |
 | **Frames & Centers** (`frames.hpp`, `centers.hpp`) | Compile-time frame/center tags, `FrameTraits`/`CenterTraits`, transform concept checks |
 | **Orbits** (`orbit.hpp`) | `KeplerianOrbit`, `MeanMotionOrbit`, `ConicOrbit`, `PreparedOrbit`, plus compatibility alias `Orbit` |
@@ -34,28 +34,24 @@ codebase without writing a single line of Rust.
 ```cpp
 #include <siderust/siderust.hpp>
 #include <iostream>
-#include <iomanip>
 
 int main() {
     using namespace siderust;
 
     auto obs = ROQUE_DE_LOS_MUCHACHOS;
-    auto jd  = JulianDate::from_utc({2026, 7, 15, 22, 0, 0});
-    auto mjd = MJD::from_jd(jd);
-    auto win = Period(mjd, mjd + qtty::Day(1.0));
+    auto mjd = MJD::from_utc({2026, 7, 15, 22, 0, 0});
+    Period win(mjd, mjd + qtty::Day(1.0));
 
     qtty::Degree sun_alt = sun::altitude_at(obs, mjd).to<qtty::Degree>();
-    qtty::Degree sun_az  = sun::azimuth_at(obs, mjd);
+    qtty::Degree sun_az = sun::azimuth_at(obs, mjd);
     std::cout << "Sun alt=" << sun_alt.value() << " deg"
               << " az=" << sun_az.value() << " deg\n";
 
-    Target fixed(279.23473, 38.78369); // Vega-like fixed ICRS target
+    Target fixed(279.23473, 38.78369);
     std::cout << "Target alt=" << fixed.altitude_at(obs, mjd).value() << " deg\n";
 
     auto nights = sun::below_threshold(obs, win, qtty::Degree(-18.0));
     std::cout << "Astronomical-night periods in next 24h: " << nights.size() << "\n";
-
-    return 0;
 }
 ```
 
@@ -108,14 +104,11 @@ mkdir build && cd build
 cmake ..
 cmake --build .
 
-# Run bundled examples
-./siderust_demo
-./coordinates_examples
-./coordinate_systems_example
-./solar_system_bodies_example
-./altitude_events_example
-./trackable_targets_example
-./azimuth_lunar_phase_example
+# Run examples
+./01_basic_coordinates_example
+./10_time_periods_example
+./14_nutation_models_example
+./15_orbit_models_example
 
 # Run tests
 ctest --output-on-failure
@@ -126,7 +119,13 @@ ctest --output-on-failure
 ## API Modules
 
 - `siderust/siderust.hpp` — umbrella include for the full public API
-- `siderust/time.hpp` — `UTC`, `JulianDate`, `MJD`, and `Period`
+- `siderust/time.hpp` — `UTC`, `CivilTime`, TT-default `JulianDate` / `MJD` / `Period`, explicit `Time<scale::S>`, and `TimeContext`
+
+## Time API
+
+- Default astronomy-facing code should use `JulianDate`, `MJD`, and `Period`, all pinned to TT.
+- Civil construction is available directly through `JulianDate::from_utc(...)` and `MJD::from_utc(...)`.
+- Advanced mixed-scale work stays explicit with `Time<scale::S>` and named aliases such as `UT1JulianDate`.
 - `siderust/coordinates.hpp` — modular coordinate API (`coordinates/geodetic.hpp`, `coordinates/spherical.hpp`, `coordinates/cartesian.hpp`, `coordinates/types.hpp`)
 - \ref coordinate_types — quick reference for coordinate types and their main methods
 - `siderust/frames.hpp` — compile-time frame tags and transform traits

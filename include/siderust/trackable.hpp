@@ -70,9 +70,9 @@ public:
   // ------------------------------------------------------------------
 
   /**
-   * @brief Compute altitude (degrees) at a given MJD instant.
+   * @brief Compute altitude (degrees) at a given ModifiedJulianDate instant.
    */
-  virtual qtty::Degree altitude_at(const Geodetic &obs, const MJD &mjd) const = 0;
+  virtual qtty::Degree altitude_at(const Geodetic &obs, const ModifiedJulianDate &mjd) const = 0;
 
   /**
    * @brief Find periods when the object is above a threshold altitude.
@@ -106,9 +106,9 @@ public:
   // ------------------------------------------------------------------
 
   /**
-   * @brief Compute azimuth (degrees, N-clockwise) at a given MJD instant.
+   * @brief Compute azimuth (degrees, N-clockwise) at a given ModifiedJulianDate instant.
    */
-  virtual qtty::Degree azimuth_at(const Geodetic &obs, const MJD &mjd) const = 0;
+  virtual qtty::Degree azimuth_at(const Geodetic &obs, const ModifiedJulianDate &mjd) const = 0;
 
   /**
    * @brief Find epochs when the object crosses a given azimuth bearing.
