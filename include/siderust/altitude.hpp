@@ -42,7 +42,8 @@ struct CulminationEvent {
   CulminationKind kind;
 
   static CulminationEvent from_c(const siderust_culmination_event_t &c) {
-    return {ModifiedJulianDate(c.mjd), qtty::Degree(c.altitude_deg), static_cast<CulminationKind>(c.kind)};
+    return {ModifiedJulianDate(c.mjd), qtty::Degree(c.altitude_deg),
+            static_cast<CulminationKind>(c.kind)};
   }
 };
 
@@ -151,8 +152,9 @@ inline std::vector<Period> above_threshold(const Geodetic &obs, const Period &wi
 /**
  * @brief Backward-compatible [start, end] overload.
  */
-inline std::vector<Period> above_threshold(const Geodetic &obs, const ModifiedJulianDate &start, const ModifiedJulianDate &end,
-                                           qtty::Degree threshold, const SearchOptions &opts = {}) {
+inline std::vector<Period> above_threshold(const Geodetic &obs, const ModifiedJulianDate &start,
+                                           const ModifiedJulianDate &end, qtty::Degree threshold,
+                                           const SearchOptions &opts = {}) {
   return above_threshold(obs, Period(start, end), threshold, opts);
 }
 
@@ -173,8 +175,9 @@ inline std::vector<Period> below_threshold(const Geodetic &obs, const Period &wi
 /**
  * @brief Backward-compatible [start, end] overload.
  */
-inline std::vector<Period> below_threshold(const Geodetic &obs, const ModifiedJulianDate &start, const ModifiedJulianDate &end,
-                                           qtty::Degree threshold, const SearchOptions &opts = {}) {
+inline std::vector<Period> below_threshold(const Geodetic &obs, const ModifiedJulianDate &start,
+                                           const ModifiedJulianDate &end, qtty::Degree threshold,
+                                           const SearchOptions &opts = {}) {
   return below_threshold(obs, Period(start, end), threshold, opts);
 }
 
@@ -195,8 +198,8 @@ inline std::vector<CrossingEvent> crossings(const Geodetic &obs, const Period &w
 /**
  * @brief Backward-compatible [start, end] overload.
  */
-inline std::vector<CrossingEvent> crossings(const Geodetic &obs, const ModifiedJulianDate &start, const ModifiedJulianDate &end,
-                                            qtty::Degree threshold,
+inline std::vector<CrossingEvent> crossings(const Geodetic &obs, const ModifiedJulianDate &start,
+                                            const ModifiedJulianDate &end, qtty::Degree threshold,
                                             const SearchOptions &opts = {}) {
   return crossings(obs, Period(start, end), threshold, opts);
 }
@@ -217,8 +220,10 @@ inline std::vector<CulminationEvent> culminations(const Geodetic &obs, const Per
 /**
  * @brief Backward-compatible [start, end] overload.
  */
-inline std::vector<CulminationEvent> culminations(const Geodetic &obs, const ModifiedJulianDate &start,
-                                                  const ModifiedJulianDate &end, const SearchOptions &opts = {}) {
+inline std::vector<CulminationEvent> culminations(const Geodetic &obs,
+                                                  const ModifiedJulianDate &start,
+                                                  const ModifiedJulianDate &end,
+                                                  const SearchOptions &opts = {}) {
   return culminations(obs, Period(start, end), opts);
 }
 
@@ -240,8 +245,9 @@ inline std::vector<Period> altitude_periods(const Geodetic &obs, const Period &w
 /**
  * @brief Backward-compatible [start, end] overload.
  */
-inline std::vector<Period> altitude_periods(const Geodetic &obs, const ModifiedJulianDate &start, const ModifiedJulianDate &end,
-                                            qtty::Degree min_alt, qtty::Degree max_alt) {
+inline std::vector<Period> altitude_periods(const Geodetic &obs, const ModifiedJulianDate &start,
+                                            const ModifiedJulianDate &end, qtty::Degree min_alt,
+                                            qtty::Degree max_alt) {
   siderust_altitude_query_t q = {obs.to_c(), start.value(), end.value(), min_alt.value(),
                                  max_alt.value()};
   tempoch_period_mjd_t *ptr = nullptr;
@@ -288,8 +294,9 @@ inline std::vector<Period> above_threshold(const Geodetic &obs, const Period &wi
 /**
  * @brief Backward-compatible [start, end] overload.
  */
-inline std::vector<Period> above_threshold(const Geodetic &obs, const ModifiedJulianDate &start, const ModifiedJulianDate &end,
-                                           qtty::Degree threshold, const SearchOptions &opts = {}) {
+inline std::vector<Period> above_threshold(const Geodetic &obs, const ModifiedJulianDate &start,
+                                           const ModifiedJulianDate &end, qtty::Degree threshold,
+                                           const SearchOptions &opts = {}) {
   return above_threshold(obs, Period(start, end), threshold, opts);
 }
 
@@ -310,8 +317,9 @@ inline std::vector<Period> below_threshold(const Geodetic &obs, const Period &wi
 /**
  * @brief Backward-compatible [start, end] overload.
  */
-inline std::vector<Period> below_threshold(const Geodetic &obs, const ModifiedJulianDate &start, const ModifiedJulianDate &end,
-                                           qtty::Degree threshold, const SearchOptions &opts = {}) {
+inline std::vector<Period> below_threshold(const Geodetic &obs, const ModifiedJulianDate &start,
+                                           const ModifiedJulianDate &end, qtty::Degree threshold,
+                                           const SearchOptions &opts = {}) {
   return below_threshold(obs, Period(start, end), threshold, opts);
 }
 
@@ -332,8 +340,8 @@ inline std::vector<CrossingEvent> crossings(const Geodetic &obs, const Period &w
 /**
  * @brief Backward-compatible [start, end] overload.
  */
-inline std::vector<CrossingEvent> crossings(const Geodetic &obs, const ModifiedJulianDate &start, const ModifiedJulianDate &end,
-                                            qtty::Degree threshold,
+inline std::vector<CrossingEvent> crossings(const Geodetic &obs, const ModifiedJulianDate &start,
+                                            const ModifiedJulianDate &end, qtty::Degree threshold,
                                             const SearchOptions &opts = {}) {
   return crossings(obs, Period(start, end), threshold, opts);
 }
@@ -354,8 +362,10 @@ inline std::vector<CulminationEvent> culminations(const Geodetic &obs, const Per
 /**
  * @brief Backward-compatible [start, end] overload.
  */
-inline std::vector<CulminationEvent> culminations(const Geodetic &obs, const ModifiedJulianDate &start,
-                                                  const ModifiedJulianDate &end, const SearchOptions &opts = {}) {
+inline std::vector<CulminationEvent> culminations(const Geodetic &obs,
+                                                  const ModifiedJulianDate &start,
+                                                  const ModifiedJulianDate &end,
+                                                  const SearchOptions &opts = {}) {
   return culminations(obs, Period(start, end), opts);
 }
 
@@ -377,8 +387,9 @@ inline std::vector<Period> altitude_periods(const Geodetic &obs, const Period &w
 /**
  * @brief Backward-compatible [start, end] overload.
  */
-inline std::vector<Period> altitude_periods(const Geodetic &obs, const ModifiedJulianDate &start, const ModifiedJulianDate &end,
-                                            qtty::Degree min_alt, qtty::Degree max_alt) {
+inline std::vector<Period> altitude_periods(const Geodetic &obs, const ModifiedJulianDate &start,
+                                            const ModifiedJulianDate &end, qtty::Degree min_alt,
+                                            qtty::Degree max_alt) {
   siderust_altitude_query_t q = {obs.to_c(), start.value(), end.value(), min_alt.value(),
                                  max_alt.value()};
   tempoch_period_mjd_t *ptr = nullptr;
@@ -425,7 +436,8 @@ inline std::vector<Period> above_threshold(const Star &s, const Geodetic &obs, c
 /**
  * @brief Backward-compatible [start, end] overload.
  */
-inline std::vector<Period> above_threshold(const Star &s, const Geodetic &obs, const ModifiedJulianDate &start,
+inline std::vector<Period> above_threshold(const Star &s, const Geodetic &obs,
+                                           const ModifiedJulianDate &start,
                                            const ModifiedJulianDate &end, qtty::Degree threshold,
                                            const SearchOptions &opts = {}) {
   return above_threshold(s, obs, Period(start, end), threshold, opts);
@@ -448,7 +460,8 @@ inline std::vector<Period> below_threshold(const Star &s, const Geodetic &obs, c
 /**
  * @brief Backward-compatible [start, end] overload.
  */
-inline std::vector<Period> below_threshold(const Star &s, const Geodetic &obs, const ModifiedJulianDate &start,
+inline std::vector<Period> below_threshold(const Star &s, const Geodetic &obs,
+                                           const ModifiedJulianDate &start,
                                            const ModifiedJulianDate &end, qtty::Degree threshold,
                                            const SearchOptions &opts = {}) {
   return below_threshold(s, obs, Period(start, end), threshold, opts);
@@ -471,7 +484,8 @@ inline std::vector<CrossingEvent> crossings(const Star &s, const Geodetic &obs,
 /**
  * @brief Backward-compatible [start, end] overload.
  */
-inline std::vector<CrossingEvent> crossings(const Star &s, const Geodetic &obs, const ModifiedJulianDate &start,
+inline std::vector<CrossingEvent> crossings(const Star &s, const Geodetic &obs,
+                                            const ModifiedJulianDate &start,
                                             const ModifiedJulianDate &end, qtty::Degree threshold,
                                             const SearchOptions &opts = {}) {
   return crossings(s, obs, Period(start, end), threshold, opts);
@@ -495,7 +509,8 @@ inline std::vector<CulminationEvent> culminations(const Star &s, const Geodetic 
  * @brief Backward-compatible [start, end] overload.
  */
 inline std::vector<CulminationEvent> culminations(const Star &s, const Geodetic &obs,
-                                                  const ModifiedJulianDate &start, const ModifiedJulianDate &end,
+                                                  const ModifiedJulianDate &start,
+                                                  const ModifiedJulianDate &end,
                                                   const SearchOptions &opts = {}) {
   return culminations(s, obs, Period(start, end), opts);
 }
@@ -547,7 +562,8 @@ inline std::vector<Period> above_threshold(const spherical::direction::ICRS &dir
  * @brief Backward-compatible RA/Dec + [start, end] overload.
  */
 inline std::vector<Period> above_threshold(qtty::Degree ra, qtty::Degree dec, const Geodetic &obs,
-                                           const ModifiedJulianDate &start, const ModifiedJulianDate &end, qtty::Degree threshold,
+                                           const ModifiedJulianDate &start,
+                                           const ModifiedJulianDate &end, qtty::Degree threshold,
                                            const SearchOptions &opts = {}) {
   return above_threshold(spherical::direction::ICRS(ra, dec), obs, Period(start, end), threshold,
                          opts);
@@ -572,7 +588,8 @@ inline std::vector<Period> below_threshold(const spherical::direction::ICRS &dir
  * @brief Backward-compatible RA/Dec + [start, end] overload.
  */
 inline std::vector<Period> below_threshold(qtty::Degree ra, qtty::Degree dec, const Geodetic &obs,
-                                           const ModifiedJulianDate &start, const ModifiedJulianDate &end, qtty::Degree threshold,
+                                           const ModifiedJulianDate &start,
+                                           const ModifiedJulianDate &end, qtty::Degree threshold,
                                            const SearchOptions &opts = {}) {
   return below_threshold(spherical::direction::ICRS(ra, dec), obs, Period(start, end), threshold,
                          opts);

@@ -266,8 +266,8 @@ public:
   }
 
   /// Backward-compatible [start, end] overload.
-  std::vector<Period> above_threshold(const Geodetic &obs, const ModifiedJulianDate &start, const ModifiedJulianDate &end,
-                                      qtty::Degree threshold,
+  std::vector<Period> above_threshold(const Geodetic &obs, const ModifiedJulianDate &start,
+                                      const ModifiedJulianDate &end, qtty::Degree threshold,
                                       const SearchOptions &opts = {}) const {
     return above_threshold(obs, Period(start, end), threshold, opts);
   }
@@ -288,8 +288,8 @@ public:
   }
 
   /// Backward-compatible [start, end] overload.
-  std::vector<Period> below_threshold(const Geodetic &obs, const ModifiedJulianDate &start, const ModifiedJulianDate &end,
-                                      qtty::Degree threshold,
+  std::vector<Period> below_threshold(const Geodetic &obs, const ModifiedJulianDate &start,
+                                      const ModifiedJulianDate &end, qtty::Degree threshold,
                                       const SearchOptions &opts = {}) const {
     return below_threshold(obs, Period(start, end), threshold, opts);
   }
@@ -309,8 +309,8 @@ public:
   }
 
   /// Backward-compatible [start, end] overload.
-  std::vector<CrossingEvent> crossings(const Geodetic &obs, const ModifiedJulianDate &start, const ModifiedJulianDate &end,
-                                       qtty::Degree threshold,
+  std::vector<CrossingEvent> crossings(const Geodetic &obs, const ModifiedJulianDate &start,
+                                       const ModifiedJulianDate &end, qtty::Degree threshold,
                                        const SearchOptions &opts = {}) const {
     return crossings(obs, Period(start, end), threshold, opts);
   }
@@ -329,7 +329,8 @@ public:
   }
 
   /// Backward-compatible [start, end] overload.
-  std::vector<CulminationEvent> culminations(const Geodetic &obs, const ModifiedJulianDate &start, const ModifiedJulianDate &end,
+  std::vector<CulminationEvent> culminations(const Geodetic &obs, const ModifiedJulianDate &start,
+                                             const ModifiedJulianDate &end,
                                              const SearchOptions &opts = {}) const {
     return culminations(obs, Period(start, end), opts);
   }
@@ -365,8 +366,10 @@ public:
   }
 
   /// Backward-compatible [start, end] overload.
-  std::vector<AzimuthCrossingEvent> azimuth_crossings(const Geodetic &obs, const ModifiedJulianDate &start,
-                                                      const ModifiedJulianDate &end, qtty::Degree bearing,
+  std::vector<AzimuthCrossingEvent> azimuth_crossings(const Geodetic &obs,
+                                                      const ModifiedJulianDate &start,
+                                                      const ModifiedJulianDate &end,
+                                                      qtty::Degree bearing,
                                                       const SearchOptions &opts = {}) const {
     return azimuth_crossings(obs, Period(start, end), bearing, opts);
   }
@@ -400,7 +403,8 @@ private:
     std::vector<Period> result;
     result.reserve(count);
     for (uintptr_t i = 0; i < count; ++i) {
-      result.push_back(Period(ModifiedJulianDate(ptr[i].start_mjd), ModifiedJulianDate(ptr[i].end_mjd)));
+      result.push_back(
+          Period(ModifiedJulianDate(ptr[i].start_mjd), ModifiedJulianDate(ptr[i].end_mjd)));
     }
     siderust_periods_free(ptr, count);
     return result;
@@ -625,7 +629,8 @@ private:
     std::vector<Period> result;
     result.reserve(count);
     for (uintptr_t i = 0; i < count; ++i) {
-      result.push_back(Period(ModifiedJulianDate(ptr[i].start_mjd), ModifiedJulianDate(ptr[i].end_mjd)));
+      result.push_back(
+          Period(ModifiedJulianDate(ptr[i].start_mjd), ModifiedJulianDate(ptr[i].end_mjd)));
     }
     siderust_periods_free(ptr, count);
     return result;

@@ -26,10 +26,11 @@ elseif(NOT "${SIDERUST_FFI_FEATURES}" STREQUAL "")
     set(_SIDERUST_FEATURES_ARGS --features ${SIDERUST_FFI_FEATURES})
 endif()
 
-# Detect whether the satellite feature is enabled so C++ dynamics.hpp is armed.
-set(_SIDERUST_SATELLITE OFF)
 if(SIDERUST_FFI_FEATURES MATCHES "(^|,)satellite(,|$)")
-    set(_SIDERUST_SATELLITE ON)
+    message(FATAL_ERROR
+        "The satellite feature and C++ dynamics adapter have been removed from siderust-cpp. "
+        "Remove 'satellite' from SIDERUST_FFI_FEATURES."
+    )
 endif()
 
 # ---------------------------------------------------------------------------
@@ -104,9 +105,6 @@ target_link_libraries(siderust_cpp INTERFACE
     $<INSTALL_INTERFACE:tempoch::tempoch_cpp>
     $<INSTALL_INTERFACE:qtty::qtty_cpp>
 )
-if(_SIDERUST_SATELLITE)
-    target_compile_definitions(siderust_cpp INTERFACE SIDERUST_SATELLITE=1)
-endif()
 add_dependencies(siderust_cpp build_siderust_ffi)
 
 # ---------------------------------------------------------------------------
@@ -213,9 +211,6 @@ set(TEST_SOURCES
     tests/test_context.cpp
     tests/test_twilight.cpp
 )
-if(_SIDERUST_SATELLITE)
-    list(APPEND TEST_SOURCES tests/test_dynamics.cpp)
-endif()
 
 add_executable(test_siderust ${TEST_SOURCES})
 target_link_libraries(test_siderust PRIVATE siderust_cpp GTest::gtest)

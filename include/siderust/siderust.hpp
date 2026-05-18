@@ -49,6 +49,3 @@
 #include "target.hpp"
 #include "time.hpp"
 #include "twilight.hpp"
-#ifdef SIDERUST_SATELLITE
-#  include "dynamics.hpp"
-#endif
