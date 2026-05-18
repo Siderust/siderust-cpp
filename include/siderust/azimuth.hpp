@@ -130,17 +130,6 @@ inline std::vector<AzimuthCrossingEvent> azimuth_crossings(const Geodetic &obs,
 }
 
 /**
- * @brief Backward-compatible [start, end] overload.
- */
-inline std::vector<AzimuthCrossingEvent> azimuth_crossings(const Geodetic &obs,
-                                                           const ModifiedJulianDate &start,
-                                                           const ModifiedJulianDate &end,
-                                                           qtty::Degree bearing,
-                                                           const SearchOptions &opts = {}) {
-  return azimuth_crossings(obs, Period(start, end), bearing, opts);
-}
-
-/**
  * @brief Find azimuth extrema (northernmost / southernmost) for the Sun.
  */
 inline std::vector<AzimuthExtremum> azimuth_extrema(const Geodetic &obs, const Period &window,
@@ -151,16 +140,6 @@ inline std::vector<AzimuthExtremum> azimuth_extrema(const Geodetic &obs, const P
                                         window.c_inner(), opts.to_c(), &ptr, &count),
                "sun::azimuth_extrema");
   return detail::az_extrema_from_c(ptr, count);
-}
-
-/**
- * @brief Backward-compatible [start, end] overload.
- */
-inline std::vector<AzimuthExtremum> azimuth_extrema(const Geodetic &obs,
-                                                    const ModifiedJulianDate &start,
-                                                    const ModifiedJulianDate &end,
-                                                    const SearchOptions &opts = {}) {
-  return azimuth_extrema(obs, Period(start, end), opts);
 }
 
 /**
@@ -180,16 +159,6 @@ inline std::vector<Period> in_azimuth_range(const Geodetic &obs, const Period &w
 }
 
 /**
- * @brief Backward-compatible [start, end] overload.
- */
-inline std::vector<Period> in_azimuth_range(const Geodetic &obs, const ModifiedJulianDate &start,
-                                            const ModifiedJulianDate &end, qtty::Degree min_bearing,
-                                            qtty::Degree max_bearing,
-                                            const SearchOptions &opts = {}) {
-  return in_azimuth_range(obs, Period(start, end), min_bearing, max_bearing, opts);
-}
-
-/**
  * @brief Find periods when the Sun's azimuth is outside [min_bearing,
  * max_bearing].
  */
@@ -203,17 +172,6 @@ inline std::vector<Period> outside_azimuth_range(const Geodetic &obs, const Peri
                                               max_bearing.value(), opts.to_c(), &ptr, &count),
                "sun::outside_azimuth_range");
   return detail::periods_from_c(ptr, count);
-}
-
-/**
- * @brief Backward-compatible [start, end] overload.
- */
-inline std::vector<Period> outside_azimuth_range(const Geodetic &obs,
-                                                 const ModifiedJulianDate &start,
-                                                 const ModifiedJulianDate &end,
-                                                 qtty::Degree min_bearing, qtty::Degree max_bearing,
-                                                 const SearchOptions &opts = {}) {
-  return outside_azimuth_range(obs, Period(start, end), min_bearing, max_bearing, opts);
 }
 
 } // namespace sun
@@ -253,17 +211,6 @@ inline std::vector<AzimuthCrossingEvent> azimuth_crossings(const Geodetic &obs,
 }
 
 /**
- * @brief Backward-compatible [start, end] overload.
- */
-inline std::vector<AzimuthCrossingEvent> azimuth_crossings(const Geodetic &obs,
-                                                           const ModifiedJulianDate &start,
-                                                           const ModifiedJulianDate &end,
-                                                           qtty::Degree bearing,
-                                                           const SearchOptions &opts = {}) {
-  return azimuth_crossings(obs, Period(start, end), bearing, opts);
-}
-
-/**
  * @brief Find azimuth extrema (northernmost / southernmost) for the Moon.
  */
 inline std::vector<AzimuthExtremum> azimuth_extrema(const Geodetic &obs, const Period &window,
@@ -274,16 +221,6 @@ inline std::vector<AzimuthExtremum> azimuth_extrema(const Geodetic &obs, const P
                                         window.c_inner(), opts.to_c(), &ptr, &count),
                "moon::azimuth_extrema");
   return detail::az_extrema_from_c(ptr, count);
-}
-
-/**
- * @brief Backward-compatible [start, end] overload.
- */
-inline std::vector<AzimuthExtremum> azimuth_extrema(const Geodetic &obs,
-                                                    const ModifiedJulianDate &start,
-                                                    const ModifiedJulianDate &end,
-                                                    const SearchOptions &opts = {}) {
-  return azimuth_extrema(obs, Period(start, end), opts);
 }
 
 /**
@@ -303,16 +240,6 @@ inline std::vector<Period> in_azimuth_range(const Geodetic &obs, const Period &w
 }
 
 /**
- * @brief Backward-compatible [start, end] overload.
- */
-inline std::vector<Period> in_azimuth_range(const Geodetic &obs, const ModifiedJulianDate &start,
-                                            const ModifiedJulianDate &end, qtty::Degree min_bearing,
-                                            qtty::Degree max_bearing,
-                                            const SearchOptions &opts = {}) {
-  return in_azimuth_range(obs, Period(start, end), min_bearing, max_bearing, opts);
-}
-
-/**
  * @brief Find periods when the Moon's azimuth is outside [min_bearing,
  * max_bearing].
  */
@@ -326,17 +253,6 @@ inline std::vector<Period> outside_azimuth_range(const Geodetic &obs, const Peri
                                               max_bearing.value(), opts.to_c(), &ptr, &count),
                "moon::outside_azimuth_range");
   return detail::periods_from_c(ptr, count);
-}
-
-/**
- * @brief Backward-compatible [start, end] overload.
- */
-inline std::vector<Period> outside_azimuth_range(const Geodetic &obs,
-                                                 const ModifiedJulianDate &start,
-                                                 const ModifiedJulianDate &end,
-                                                 qtty::Degree min_bearing, qtty::Degree max_bearing,
-                                                 const SearchOptions &opts = {}) {
-  return outside_azimuth_range(obs, Period(start, end), min_bearing, max_bearing, opts);
 }
 
 } // namespace moon
@@ -376,17 +292,6 @@ inline std::vector<AzimuthCrossingEvent> azimuth_crossings(const Star &s, const 
 }
 
 /**
- * @brief Backward-compatible [start, end] overload.
- */
-inline std::vector<AzimuthCrossingEvent> azimuth_crossings(const Star &s, const Geodetic &obs,
-                                                           const ModifiedJulianDate &start,
-                                                           const ModifiedJulianDate &end,
-                                                           qtty::Degree bearing,
-                                                           const SearchOptions &opts = {}) {
-  return azimuth_crossings(s, obs, Period(start, end), bearing, opts);
-}
-
-/**
  * @brief Find periods when a star's azimuth is within [min, max] (degrees).
  */
 inline std::vector<Period> in_azimuth_range(const Star &s, const Geodetic &obs,
@@ -403,17 +308,6 @@ inline std::vector<Period> in_azimuth_range(const Star &s, const Geodetic &obs,
 }
 
 /**
- * @brief Backward-compatible [start, end] overload.
- */
-inline std::vector<Period> in_azimuth_range(const Star &s, const Geodetic &obs,
-                                            const ModifiedJulianDate &start,
-                                            const ModifiedJulianDate &end, qtty::Degree min_bearing,
-                                            qtty::Degree max_bearing,
-                                            const SearchOptions &opts = {}) {
-  return in_azimuth_range(s, obs, Period(start, end), min_bearing, max_bearing, opts);
-}
-
-/**
  * @brief Find periods when a star's azimuth is outside [min, max] (degrees).
  */
 inline std::vector<Period> outside_azimuth_range(const Star &s, const Geodetic &obs,
@@ -427,17 +321,6 @@ inline std::vector<Period> outside_azimuth_range(const Star &s, const Geodetic &
                                               max_bearing.value(), opts.to_c(), &ptr, &count),
                "star_altitude::outside_azimuth_range");
   return detail::periods_from_c(ptr, count);
-}
-
-/**
- * @brief Backward-compatible [start, end] overload.
- */
-inline std::vector<Period> outside_azimuth_range(const Star &s, const Geodetic &obs,
-                                                 const ModifiedJulianDate &start,
-                                                 const ModifiedJulianDate &end,
-                                                 qtty::Degree min_bearing, qtty::Degree max_bearing,
-                                                 const SearchOptions &opts = {}) {
-  return outside_azimuth_range(s, obs, Period(start, end), min_bearing, max_bearing, opts);
 }
 
 } // namespace star_altitude
@@ -490,16 +373,6 @@ inline std::vector<AzimuthCrossingEvent>
 azimuth_crossings(qtty::Degree ra, qtty::Degree dec, const Geodetic &obs, const Period &window,
                   qtty::Degree bearing, const SearchOptions &opts = {}) {
   return azimuth_crossings(spherical::direction::ICRS(ra, dec), obs, window, bearing, opts);
-}
-
-/**
- * @brief Backward-compatible [start, end] overload.
- */
-inline std::vector<AzimuthCrossingEvent>
-azimuth_crossings(const spherical::direction::ICRS &dir, const Geodetic &obs,
-                  const ModifiedJulianDate &start, const ModifiedJulianDate &end,
-                  qtty::Degree bearing, const SearchOptions &opts = {}) {
-  return azimuth_crossings(dir, obs, Period(start, end), bearing, opts);
 }
 
 } // namespace icrs_altitude
