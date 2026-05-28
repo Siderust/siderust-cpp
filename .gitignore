@@ -48,4 +48,4 @@ _deps/
 coverage/
 
 # Package manager
-vcpkg_installed/
+vcpkg_installed/stage/

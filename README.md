@@ -124,6 +124,10 @@ find_package(siderust_cpp REQUIRED)
 target_link_libraries(your_target PRIVATE siderust::siderust_cpp)
 ```
 
+A reference external-consumer fixture lives under
+[`tests/installed-consumer/`](tests/installed-consumer/) and is exercised by
+the `ci-installed-consumer.yml` workflow on every push.
+
 > **Note:** Pre-built `.deb` and `.rpm` packages are automatically built by CI
 > and attached to every
 > [GitHub Release](https://github.com/Siderust/siderust-cpp/releases).
@@ -183,7 +187,7 @@ Generated HTML entry point:
 ### Prerequisites
 
 - C++17 compiler (GCC 8+, Clang 7+, MSVC 2019+)
-- CMake 3.15+
+- CMake 3.21+
 - Rust toolchain (cargo) — Rust FFI libraries are built automatically
 - Internet connection for Google Test (fetched automatically)
 

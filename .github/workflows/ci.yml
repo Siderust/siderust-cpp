@@ -31,8 +31,12 @@ jobs:
     needs: build-test-docs
     uses: ./.github/workflows/ci-package.yml
 
-  release:
+  installed-consumer:
     needs: package
+    uses: ./.github/workflows/ci-installed-consumer.yml
+
+  release:
+    needs: [package, installed-consumer]
     if: startsWith(github.ref, 'refs/tags/v')
     uses: ./.github/workflows/ci-release.yml
     secrets:

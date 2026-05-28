@@ -5,6 +5,74 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- `tests/installed-consumer/` fixture and `.github/workflows/ci-installed-consumer.yml`
+  workflow exercising the full installed-package consumer path:
+  configure → build → install to a staging prefix → external CMake
+  project does `find_package(siderust_cpp REQUIRED)`, includes
+  `<siderust/siderust.hpp>`, links `siderust::siderust_cpp`, and runs a
+  runtime smoke binary against the bundled `libsiderust_ffi.so`.
+- Top-level guards `PROJECT_IS_TOP_LEVEL` and explicit options
+  `SIDERUST_CPP_BUILD_TESTS`, `SIDERUST_CPP_BUILD_EXAMPLES`,
+  `SIDERUST_CPP_INSTALL`, `SIDERUST_CPP_ENABLE_PACKAGING` so siderust-cpp
+  is safe to consume via `add_subdirectory(...)` without dragging in
+  GoogleTest, examples, install rules, or CPack.
+- `siderust::siderust_cpp` ALIAS target so build-tree consumers can use
+  the same namespaced target name as installed consumers.
+- Pointer to a Phase-B work plan and public-API coverage matrix for the
+  upcoming dynamics-and-pod expansion (see plan.md in the session
+  workspace).
+
+### Changed
+
+- `.gitmodules` now uses HTTPS URLs (`https://github.com/Siderust/...`)
+  for both the `siderust` and `tempoch-cpp` submodules so public clones
+  and CI jobs without SSH credentials succeed.
+- `cmake/siderust_cppConfig.cmake.in` rewritten:
+  - calls `find_dependency(qtty_cpp)` and `find_dependency(tempoch_cpp)`,
+  - defines `siderust::siderust_ffi` as a SHARED IMPORTED target that
+    points at the bundled `libsiderust_ffi.so` in the install prefix,
+    so consumers linking `siderust::siderust_cpp` resolve FFI symbols
+    transitively without manually setting `LD_LIBRARY_PATH` paths,
+  - includes the exported `siderust_cppTargets.cmake`,
+  - exposes `siderust_cpp_INCLUDE_DIRS` / `siderust_cpp_LIBRARIES`
+    legacy variables for non-target-based consumers.
+- Top-level `CMakeLists.txt`:
+  - bumped minimum CMake to 3.21 (for `PROJECT_IS_TOP_LEVEL`),
+  - uses `GNUInstallDirs` (`CMAKE_INSTALL_INCLUDEDIR` /
+    `CMAKE_INSTALL_LIBDIR`) instead of hard-coded `include/` `lib/`,
+  - install/packaging/tests/examples are all gated on the new options.
+- CPack DEB/RPM dependencies updated to the real upstream versions
+  pulled in by the current `siderust` submodule:
+  `qtty-cpp >= 0.8`, `tempoch-cpp >= 0.6` (was 0.4.2 / 0.3.1).
+- `Dockerfile.prod` rust-builder stage now:
+  - sets `CARGO_TARGET_DIR=/src/tempoch-cpp/tempoch/tempoch-ffi/target`
+    when building `tempoch-ffi` so the artifact lands at the path the
+    cpp-builder stage expects,
+  - builds `qtty-ffi` with `cargo build -p qtty-ffi` from the qtty
+    workspace root so the artifact lands in
+    `/src/tempoch-cpp/qtty-cpp/qtty/target/release/` (not the previously
+    incorrect `qtty-ffi/target/release/` per-crate path that does not
+    exist for workspace members),
+  - source paths in the COPY blocks now match what the rust-builder
+    stage actually produces.
+
+### Removed
+
+- `include/siderust/constops.hpp`, `include/siderust/constops.h`, and
+  `tests/test_constops.cpp`. The constops Rust crate does not exist in
+  this workspace or in `siderust-ffi`, so the header declared symbols
+  that no library exported. Any consumer that included `constops.hpp`
+  would fail to link. The stub is gone; per the user-stated policy, no
+  deprecated/legacy code remains.
+- `|| true` masking on the `cp` of Rust shared libraries to
+  `build/staging/lib/` in `.github/workflows/ci-package.yml`. Missing
+  shared libraries are now a hard CI failure rather than a silently
+  broken package.
+
 ## [0.5.0] - 2026-05-18
 
 ### Removed

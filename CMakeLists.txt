@@ -1,10 +1,29 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.21)
 project(siderust_cpp VERSION 0.5.0 LANGUAGES CXX)
+
+# ---------------------------------------------------------------------------
+# CMake 3.21+ provides PROJECT_IS_TOP_LEVEL; emulate for older CMake if needed.
+# ---------------------------------------------------------------------------
+if(NOT DEFINED PROJECT_IS_TOP_LEVEL)
+    if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
+        set(PROJECT_IS_TOP_LEVEL TRUE)
+    else()
+        set(PROJECT_IS_TOP_LEVEL FALSE)
+    endif()
+endif()
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
-option(SIDERUST_BUILD_DOCS "Enable Doxygen documentation target." ON)
+
+# ---------------------------------------------------------------------------
+# Top-level options (safe defaults when consumed via add_subdirectory)
+# ---------------------------------------------------------------------------
+option(SIDERUST_BUILD_DOCS         "Enable Doxygen documentation target."          ${PROJECT_IS_TOP_LEVEL})
+option(SIDERUST_CPP_BUILD_TESTS    "Build siderust-cpp unit tests."                ${PROJECT_IS_TOP_LEVEL})
+option(SIDERUST_CPP_BUILD_EXAMPLES "Build siderust-cpp example programs."          ${PROJECT_IS_TOP_LEVEL})
+option(SIDERUST_CPP_INSTALL        "Generate install rules for siderust-cpp."      ${PROJECT_IS_TOP_LEVEL})
+option(SIDERUST_CPP_ENABLE_PACKAGING "Enable CPack (.deb / .rpm) packaging."       ${PROJECT_IS_TOP_LEVEL})
 
 # Find Cargo for building Rust libraries
 find_program(CARGO_BIN cargo REQUIRED)
@@ -13,7 +32,6 @@ find_program(CARGO_BIN cargo REQUIRED)
 # Paths to siderust-ffi (inside the siderust submodule)
 # ---------------------------------------------------------------------------
 set(SIDERUST_FFI_DIR       ${CMAKE_CURRENT_SOURCE_DIR}/siderust/siderust-ffi)
-
 set(SIDERUST_FFI_INCLUDE_DIR ${SIDERUST_FFI_DIR}/include)
 
 # Cargo features for siderust-ffi (e.g., "serde,de441")
@@ -39,19 +57,18 @@ endif()
 set(SIDERUST_ARTIFACT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/siderust/target/release)
 
 if(APPLE)
-    set(SIDERUST_LIBRARY_PATH ${SIDERUST_ARTIFACT_DIR}/libsiderust_ffi.dylib)
+    set(SIDERUST_LIBRARY_NAME libsiderust_ffi.dylib)
 elseif(WIN32)
-    set(SIDERUST_LIBRARY_PATH ${SIDERUST_ARTIFACT_DIR}/siderust_ffi.dll)
+    set(SIDERUST_LIBRARY_NAME siderust_ffi.dll)
     set(SIDERUST_IMPORT_LIBRARY ${SIDERUST_ARTIFACT_DIR}/siderust_ffi.dll.lib)
 else()
-    set(SIDERUST_LIBRARY_PATH ${SIDERUST_ARTIFACT_DIR}/libsiderust_ffi.so)
+    set(SIDERUST_LIBRARY_NAME libsiderust_ffi.so)
 endif()
+set(SIDERUST_LIBRARY_PATH ${SIDERUST_ARTIFACT_DIR}/${SIDERUST_LIBRARY_NAME})
 
 # ---------------------------------------------------------------------------
 # Build siderust-ffi via Cargo
 # ---------------------------------------------------------------------------
-
-# Build siderust-ffi (depends on tempoch-ffi via tempoch-cpp subdirectory)
 add_custom_target(
     build_siderust_ffi
     # Use `cargo rustc --crate-type cdylib` so that the shared library is
@@ -65,7 +82,7 @@ add_custom_target(
     VERBATIM
 )
 
-# Import siderust_ffi
+# Import siderust_ffi (build-tree imported target)
 add_library(siderust_ffi SHARED IMPORTED GLOBAL)
 set_target_properties(siderust_ffi PROPERTIES IMPORTED_LOCATION ${SIDERUST_LIBRARY_PATH})
 if(WIN32)
@@ -93,15 +110,20 @@ set(TEMPOCH_SUBMODULE_DIR_PARENT ${CMAKE_CURRENT_SOURCE_DIR}/tempoch-cpp/tempoch
 set(TEMPOCH_ARTIFACT_DIR  ${TEMPOCH_SUBMODULE_DIR_PARENT}/tempoch-ffi/target/release)
 
 add_library(siderust_cpp INTERFACE)
+add_library(siderust::siderust_cpp ALIAS siderust_cpp)
 target_include_directories(siderust_cpp INTERFACE
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<BUILD_INTERFACE:${SIDERUST_FFI_INCLUDE_DIR}>
     $<INSTALL_INTERFACE:include>
 )
+# Build-tree linking uses the in-tree imported targets. Install-tree linking
+# uses the imported targets defined in siderust_cppConfig.cmake (which point
+# at the installed shared library) plus the qtty / tempoch package configs.
 target_link_libraries(siderust_cpp INTERFACE
-    siderust_ffi
+    $<BUILD_INTERFACE:siderust_ffi>
     $<BUILD_INTERFACE:tempoch_cpp>
     $<BUILD_INTERFACE:qtty_cpp>
+    $<INSTALL_INTERFACE:siderust::siderust_ffi>
     $<INSTALL_INTERFACE:tempoch::tempoch_cpp>
     $<INSTALL_INTERFACE:qtty::qtty_cpp>
 )
@@ -133,7 +155,7 @@ if(SIDERUST_BUILD_DOCS)
     endif()
 endif()
 
-# RPATH for shared library lookup at runtime
+# RPATH for shared library lookup at runtime (build tree).
 if(APPLE)
     set(_siderust_rpath "@loader_path/../siderust/siderust-ffi/target/release;@loader_path/../tempoch-cpp/tempoch/tempoch-ffi/target/release;@loader_path/../tempoch-cpp/qtty-cpp/qtty/target/release")
 elseif(UNIX)
@@ -141,21 +163,23 @@ elseif(UNIX)
 endif()
 
 # ---------------------------------------------------------------------------
-# Google Test
+# Google Test (tests only)
 # ---------------------------------------------------------------------------
-include(FetchContent)
-FetchContent_Declare(
-    googletest
-    GIT_REPOSITORY https://github.com/google/googletest.git
-    GIT_TAG v1.14.0
-)
-set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-# Prevent GoogleTest artifacts from being picked up by cmake --install / CPack.
-set(INSTALL_GTEST OFF CACHE BOOL "" FORCE)
-set(INSTALL_GMOCK OFF CACHE BOOL "" FORCE)
-FetchContent_MakeAvailable(googletest)
+if(SIDERUST_CPP_BUILD_TESTS)
+    include(FetchContent)
+    FetchContent_Declare(
+        googletest
+        GIT_REPOSITORY https://github.com/google/googletest.git
+        GIT_TAG v1.14.0
+    )
+    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+    # Prevent GoogleTest artifacts from being picked up by cmake --install / CPack.
+    set(INSTALL_GTEST OFF CACHE BOOL "" FORCE)
+    set(INSTALL_GMOCK OFF CACHE BOOL "" FORCE)
+    FetchContent_MakeAvailable(googletest)
 
-enable_testing()
+    enable_testing()
+endif()
 
 # ---------------------------------------------------------------------------
 # Example helper: add an example only if its source file exists.
@@ -176,140 +200,156 @@ endmacro()
 # ---------------------------------------------------------------------------
 # Examples
 # ---------------------------------------------------------------------------
-
-# Numbered mirror examples (01–21, mirroring siderust Rust examples)
-siderust_add_example(01_basic_coordinates_example          examples/01_basic_coordinates.cpp)
-siderust_add_example(02_coordinate_transformations_example examples/02_coordinate_transformations.cpp)
-siderust_add_example(03_all_frame_conversions_example   examples/03_all_frames_conversions.cpp)
-siderust_add_example(04_all_center_conversions_example  examples/04_all_center_conversions.cpp)
-siderust_add_example(05_target_tracking_example         examples/05_target_tracking.cpp)
-siderust_add_example(06_night_events_example            examples/06_night_events.cpp)
-siderust_add_example(07_moon_properties_example         examples/07_moon_properties.cpp)
-siderust_add_example(08_solar_system_example            examples/08_solar_system.cpp)
-siderust_add_example(09_star_observability_example      examples/09_star_observability.cpp)
-siderust_add_example(10_time_periods_example            examples/10_time_periods.cpp)
-siderust_add_example(11_serde_serialization_example     examples/11_serde_serialization.cpp)
-siderust_add_example(12_runtime_ephemeris_example       examples/12_runtime_ephemeris.cpp)
-siderust_add_example(13_coordinate_operations_example   examples/13_coordinate_operations.cpp)
-siderust_add_example(14_nutation_models_example         examples/14_nutation_models.cpp)
-siderust_add_example(15_orbit_models_example            examples/15_orbit_models.cpp)
+if(SIDERUST_CPP_BUILD_EXAMPLES)
+    # Numbered mirror examples (01–21, mirroring siderust Rust examples)
+    siderust_add_example(01_basic_coordinates_example          examples/01_basic_coordinates.cpp)
+    siderust_add_example(02_coordinate_transformations_example examples/02_coordinate_transformations.cpp)
+    siderust_add_example(03_all_frame_conversions_example   examples/03_all_frames_conversions.cpp)
+    siderust_add_example(04_all_center_conversions_example  examples/04_all_center_conversions.cpp)
+    siderust_add_example(05_target_tracking_example         examples/05_target_tracking.cpp)
+    siderust_add_example(06_night_events_example            examples/06_night_events.cpp)
+    siderust_add_example(07_moon_properties_example         examples/07_moon_properties.cpp)
+    siderust_add_example(08_solar_system_example            examples/08_solar_system.cpp)
+    siderust_add_example(09_star_observability_example      examples/09_star_observability.cpp)
+    siderust_add_example(10_time_periods_example            examples/10_time_periods.cpp)
+    siderust_add_example(11_serde_serialization_example     examples/11_serde_serialization.cpp)
+    siderust_add_example(12_runtime_ephemeris_example       examples/12_runtime_ephemeris.cpp)
+    siderust_add_example(13_coordinate_operations_example   examples/13_coordinate_operations.cpp)
+    siderust_add_example(14_nutation_models_example         examples/14_nutation_models.cpp)
+    siderust_add_example(15_orbit_models_example            examples/15_orbit_models.cpp)
+endif()
 
 # ---------------------------------------------------------------------------
 # Tests
 # ---------------------------------------------------------------------------
-set(TEST_SOURCES
-    tests/main.cpp
-    tests/test_time.cpp
-    tests/test_observatories.cpp
-    tests/test_coordinates.cpp
-    tests/test_bodies.cpp
-    tests/test_altitude.cpp
-    tests/test_ephemeris.cpp
-    tests/test_bodycentric.cpp
-    tests/test_orbits.cpp
-    tests/test_subject.cpp
-    tests/test_context.cpp
-    tests/test_twilight.cpp
-)
+if(SIDERUST_CPP_BUILD_TESTS)
+    set(TEST_SOURCES
+        tests/main.cpp
+        tests/test_time.cpp
+        tests/test_observatories.cpp
+        tests/test_coordinates.cpp
+        tests/test_bodies.cpp
+        tests/test_altitude.cpp
+        tests/test_ephemeris.cpp
+        tests/test_bodycentric.cpp
+        tests/test_orbits.cpp
+        tests/test_subject.cpp
+        tests/test_context.cpp
+        tests/test_twilight.cpp
+    )
 
-add_executable(test_siderust ${TEST_SOURCES})
-target_link_libraries(test_siderust PRIVATE siderust_cpp GTest::gtest)
-if(DEFINED _siderust_rpath)
-    set_target_properties(test_siderust PROPERTIES
-        BUILD_RPATH ${_siderust_rpath}
-        INSTALL_RPATH ${_siderust_rpath}
+    add_executable(test_siderust ${TEST_SOURCES})
+    target_link_libraries(test_siderust PRIVATE siderust_cpp GTest::gtest)
+    if(DEFINED _siderust_rpath)
+        set_target_properties(test_siderust PROPERTIES
+            BUILD_RPATH ${_siderust_rpath}
+            INSTALL_RPATH ${_siderust_rpath}
+        )
+    endif()
+
+    include(GoogleTest)
+    gtest_discover_tests(test_siderust
+        PROPERTIES LABELS "siderust_cpp"
     )
 endif()
-
-include(GoogleTest)
-gtest_discover_tests(test_siderust
-    PROPERTIES LABELS "siderust_cpp"
-)
 
 # ---------------------------------------------------------------------------
 # Installation
 # ---------------------------------------------------------------------------
-install(DIRECTORY include/siderust
-    DESTINATION include
-    COMPONENT siderust-cpp
-    FILES_MATCHING PATTERN "*.hpp"
-)
+if(SIDERUST_CPP_INSTALL)
+    include(GNUInstallDirs)
 
-install(DIRECTORY ${SIDERUST_FFI_INCLUDE_DIR}/
-    DESTINATION include
-    COMPONENT siderust-cpp
-    FILES_MATCHING PATTERN "*.h"
-)
+    install(DIRECTORY include/siderust
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+        COMPONENT siderust-cpp
+        FILES_MATCHING PATTERN "*.hpp"
+    )
 
-install(FILES ${SIDERUST_LIBRARY_PATH}
-    DESTINATION lib
-    COMPONENT siderust-cpp
-)
+    install(DIRECTORY ${SIDERUST_FFI_INCLUDE_DIR}/
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+        COMPONENT siderust-cpp
+        FILES_MATCHING PATTERN "*.h"
+    )
 
-include(CMakePackageConfigHelpers)
+    install(FILES ${SIDERUST_LIBRARY_PATH}
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        COMPONENT siderust-cpp
+    )
 
-configure_package_config_file(
-    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/siderust_cppConfig.cmake.in
-    ${CMAKE_CURRENT_BINARY_DIR}/siderust_cppConfig.cmake
-    INSTALL_DESTINATION lib/cmake/siderust_cpp
-)
+    include(CMakePackageConfigHelpers)
 
-write_basic_package_version_file(
-    ${CMAKE_CURRENT_BINARY_DIR}/siderust_cppConfigVersion.cmake
-    VERSION ${PROJECT_VERSION}
-    COMPATIBILITY SameMajorVersion
-)
+    # Expose the installed shared library file name so the config file
+    # can reconstruct the absolute path at find_package time.
+    set(SIDERUST_FFI_INSTALLED_LIB_NAME "${SIDERUST_LIBRARY_NAME}")
 
-install(FILES
-    ${CMAKE_CURRENT_BINARY_DIR}/siderust_cppConfig.cmake
-    ${CMAKE_CURRENT_BINARY_DIR}/siderust_cppConfigVersion.cmake
-    DESTINATION lib/cmake/siderust_cpp
-    COMPONENT siderust-cpp
-)
+    configure_package_config_file(
+        ${CMAKE_CURRENT_SOURCE_DIR}/cmake/siderust_cppConfig.cmake.in
+        ${CMAKE_CURRENT_BINARY_DIR}/siderust_cppConfig.cmake
+        INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/siderust_cpp
+        PATH_VARS CMAKE_INSTALL_INCLUDEDIR CMAKE_INSTALL_LIBDIR
+    )
 
-install(TARGETS siderust_cpp
-    EXPORT siderust_cppTargets
-    INCLUDES DESTINATION include
-)
+    write_basic_package_version_file(
+        ${CMAKE_CURRENT_BINARY_DIR}/siderust_cppConfigVersion.cmake
+        VERSION ${PROJECT_VERSION}
+        COMPATIBILITY SameMajorVersion
+    )
 
-install(EXPORT siderust_cppTargets
-    FILE siderust_cppTargets.cmake
-    NAMESPACE siderust::
-    DESTINATION lib/cmake/siderust_cpp
-    COMPONENT siderust-cpp
-)
+    install(FILES
+        ${CMAKE_CURRENT_BINARY_DIR}/siderust_cppConfig.cmake
+        ${CMAKE_CURRENT_BINARY_DIR}/siderust_cppConfigVersion.cmake
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/siderust_cpp
+        COMPONENT siderust-cpp
+    )
+
+    install(TARGETS siderust_cpp
+        EXPORT siderust_cppTargets
+        INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+    )
+
+    install(EXPORT siderust_cppTargets
+        FILE siderust_cppTargets.cmake
+        NAMESPACE siderust::
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/siderust_cpp
+        COMPONENT siderust-cpp
+    )
+endif()
 
 # ---------------------------------------------------------------------------
 # Packaging (CPack — DEB and RPM)
 # ---------------------------------------------------------------------------
-set(CPACK_PACKAGE_NAME             "siderust-cpp")
-set(CPACK_PACKAGE_VERSION          "${PROJECT_VERSION}")
-set(CPACK_PACKAGE_VENDOR           "Siderust")
-set(CPACK_PACKAGE_CONTACT          "VPRamon <vallespuigramon@gmail.com>")
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY
-    "C++ wrapper for the siderust high-precision astronomy library")
-set(CPACK_PACKAGE_DESCRIPTION
-    "siderust-cpp provides a header-only C++17 API over the siderust Rust\n"
-    "astronomy library via the siderust-ffi C ABI.  It bundles the pre-built\n"
-    "siderust_ffi shared library together with the C++ headers and CMake\n"
-    "package config. Requires qtty-cpp and tempoch-cpp.")
-set(CPACK_RESOURCE_FILE_LICENSE    "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
-set(CPACK_PACKAGE_HOMEPAGE_URL     "https://github.com/Siderust/siderust-cpp")
+if(SIDERUST_CPP_ENABLE_PACKAGING AND SIDERUST_CPP_INSTALL)
+    set(CPACK_PACKAGE_NAME             "siderust-cpp")
+    set(CPACK_PACKAGE_VERSION          "${PROJECT_VERSION}")
+    set(CPACK_PACKAGE_VENDOR           "Siderust")
+    set(CPACK_PACKAGE_CONTACT          "VPRamon <vallespuigramon@gmail.com>")
+    set(CPACK_PACKAGE_DESCRIPTION_SUMMARY
+        "C++ wrapper for the siderust high-precision astronomy library")
+    set(CPACK_PACKAGE_DESCRIPTION
+        "siderust-cpp provides a header-only C++17 API over the siderust Rust\n"
+        "astronomy library via the siderust-ffi C ABI.  It bundles the pre-built\n"
+        "siderust_ffi shared library together with the C++ headers and CMake\n"
+        "package config. Requires qtty-cpp and tempoch-cpp.")
+    set(CPACK_RESOURCE_FILE_LICENSE    "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
+    set(CPACK_PACKAGE_HOMEPAGE_URL     "https://github.com/Siderust/siderust-cpp")
 
-set(CPACK_COMPONENTS_ALL "siderust-cpp")
+    set(CPACK_COMPONENTS_ALL "siderust-cpp")
 
-# -- DEB -----------------------------------------------------------------------
-set(CPACK_DEBIAN_PACKAGE_MAINTAINER "VPRamon <vallespuigramon@gmail.com>")
-set(CPACK_DEBIAN_PACKAGE_SECTION    "libs")
-set(CPACK_DEBIAN_PACKAGE_DEPENDS    "libc6 (>= 2.17), libstdc++6 (>= 9), qtty-cpp (>= 0.4.2), tempoch-cpp (>= 0.3.1)")
-set(CPACK_DEBIAN_FILE_NAME          DEB-DEFAULT)
+    # -- DEB ---------------------------------------------------------------
+    # Dependency versions track the upstream Rust crates pulled in by the
+    # current siderust submodule (siderust Cargo.toml: qtty 0.8, tempoch 0.6).
+    set(CPACK_DEBIAN_PACKAGE_MAINTAINER "VPRamon <vallespuigramon@gmail.com>")
+    set(CPACK_DEBIAN_PACKAGE_SECTION    "libs")
+    set(CPACK_DEBIAN_PACKAGE_DEPENDS    "libc6 (>= 2.17), libstdc++6 (>= 9), qtty-cpp (>= 0.8), tempoch-cpp (>= 0.6)")
+    set(CPACK_DEBIAN_FILE_NAME          DEB-DEFAULT)
 
-# -- RPM -----------------------------------------------------------------------
-set(CPACK_RPM_PACKAGE_LICENSE    "AGPL-3.0")
-set(CPACK_RPM_PACKAGE_GROUP      "Development/Libraries")
-set(CPACK_RPM_PACKAGE_REQUIRES   "glibc >= 2.17, libstdc++ >= 9, qtty-cpp >= 0.4.2, tempoch-cpp >= 0.3.1")
-set(CPACK_RPM_FILE_NAME          RPM-DEFAULT)
+    # -- RPM ---------------------------------------------------------------
+    set(CPACK_RPM_PACKAGE_LICENSE    "AGPL-3.0")
+    set(CPACK_RPM_PACKAGE_GROUP      "Development/Libraries")
+    set(CPACK_RPM_PACKAGE_REQUIRES   "glibc >= 2.17, libstdc++ >= 9, qtty-cpp >= 0.8, tempoch-cpp >= 0.6")
+    set(CPACK_RPM_FILE_NAME          RPM-DEFAULT)
 
-set(CPACK_GENERATOR "DEB;RPM")
+    set(CPACK_GENERATOR "DEB;RPM")
 
-include(CPack)
+    include(CPack)
+endif()

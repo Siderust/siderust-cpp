@@ -1,6 +1,6 @@
 [submodule "tempoch-cpp"]
 	path = tempoch-cpp
-	url = git@github.com:Siderust/tempoch-cpp.git
+	url = https://github.com/Siderust/tempoch-cpp.git
 [submodule "siderust"]
 	path = siderust
-	url = git@github.com:Siderust/siderust.git
+	url = https://github.com/Siderust/siderust.git
