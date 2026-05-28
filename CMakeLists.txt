@@ -217,6 +217,14 @@ if(SIDERUST_CPP_BUILD_EXAMPLES)
     siderust_add_example(13_coordinate_operations_example   examples/13_coordinate_operations.cpp)
     siderust_add_example(14_nutation_models_example         examples/14_nutation_models.cpp)
     siderust_add_example(15_orbit_models_example            examples/15_orbit_models.cpp)
+    siderust_add_example(16_lambert_earth_to_mars_example   examples/16_lambert_earth_to_mars.cpp)
+    siderust_add_example(17_sgp4_from_tle_example           examples/17_sgp4_from_tle.cpp)
+    siderust_add_example(18_lisa_pod_example                examples/18_lisa_pod.cpp)
+    if(TARGET 18_lisa_pod_example)
+        target_compile_definitions(18_lisa_pod_example PRIVATE
+            SIDERUST_TEST_DATA_DIR="${CMAKE_CURRENT_SOURCE_DIR}/siderust/tests/test-data/lisa"
+        )
+    endif()
 endif()
 
 # ---------------------------------------------------------------------------
@@ -236,6 +244,8 @@ if(SIDERUST_CPP_BUILD_TESTS)
         tests/test_subject.cpp
         tests/test_context.cpp
         tests/test_twilight.cpp
+        tests/test_lambert.cpp
+        tests/test_sgp4.cpp
     )
 
     add_executable(test_siderust ${TEST_SOURCES})
