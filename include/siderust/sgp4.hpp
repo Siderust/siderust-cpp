@@ -51,7 +51,7 @@ public:
   static Tle parse(std::string_view line1, std::string_view line2) {
     const std::string l1{line1};
     const std::string l2{line2};
-    SiderustTle      *handle = nullptr;
+    SiderustTle *handle = nullptr;
     check_status(siderust_tle_parse(l1.c_str(), l2.c_str(), &handle), "tle::Tle::parse");
     return Tle{handle};
   }
@@ -65,7 +65,7 @@ public:
     return *this;
   }
 
-  Tle(const Tle &)            = delete;
+  Tle(const Tle &) = delete;
   Tle &operator=(const Tle &) = delete;
 
   ~Tle() { siderust_tle_free(handle_); }
@@ -95,9 +95,9 @@ namespace sgp4 {
 
 /// Gravity model selector.
 enum class GravityModel : int {
-  Wgs72    = 0, ///< WGS-72 / AFSPC (default; matches TLE conventions).
+  Wgs72 = 0,    ///< WGS-72 / AFSPC (default; matches TLE conventions).
   Wgs72Iau = 1, ///< WGS-72 / IAU sidereal time.
-  Wgs84    = 2, ///< WGS-84 / IAU sidereal time.
+  Wgs84 = 2,    ///< WGS-84 / IAU sidereal time.
 };
 
 /// Propagated TEME state vector.
@@ -132,7 +132,7 @@ public:
     return *this;
   }
 
-  Propagator(const Propagator &)            = delete;
+  Propagator(const Propagator &) = delete;
   Propagator &operator=(const Propagator &) = delete;
 
   ~Propagator() { siderust_sgp4_free(handle_); }

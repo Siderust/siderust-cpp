@@ -25,7 +25,7 @@ TEST(Tle, ParseInvalidThrows) {
 }
 
 TEST(Sgp4, EpochJdInReasonableRange) {
-  auto t    = tle::Tle::parse(L1, L2);
+  auto t = tle::Tle::parse(L1, L2);
   auto prop = sgp4::Propagator(t);
   // TLE epoch is year 2000 (JD ~2451545 ± a year).
   double jd = prop.epoch_jd_utc();
@@ -34,19 +34,18 @@ TEST(Sgp4, EpochJdInReasonableRange) {
 }
 
 TEST(Sgp4, PropagateAtEpoch) {
-  auto t    = tle::Tle::parse(L1, L2);
+  auto t = tle::Tle::parse(L1, L2);
   auto prop = sgp4::Propagator(t);
-  auto s    = prop.propagate_at(prop.epoch_jd_utc());
+  auto s = prop.propagate_at(prop.epoch_jd_utc());
   // Position magnitude should be a plausible LEO altitude (3000–10000 km).
-  double r = std::sqrt(s.pos_km[0]*s.pos_km[0] +
-                       s.pos_km[1]*s.pos_km[1] +
-                       s.pos_km[2]*s.pos_km[2]);
+  double r =
+      std::sqrt(s.pos_km[0] * s.pos_km[0] + s.pos_km[1] * s.pos_km[1] + s.pos_km[2] * s.pos_km[2]);
   EXPECT_GT(r, 3'000.0);
   EXPECT_LT(r, 10'000.0);
 }
 
 TEST(Sgp4, PropagateOffset) {
-  auto t    = tle::Tle::parse(L1, L2);
+  auto t = tle::Tle::parse(L1, L2);
   auto prop = sgp4::Propagator(t);
   // States at different epochs must differ.
   auto s0 = prop.propagate_at(prop.epoch_jd_utc());
@@ -55,13 +54,13 @@ TEST(Sgp4, PropagateOffset) {
 }
 
 TEST(Sgp4, DefaultGravityModelIsWgs72) {
-  auto t    = tle::Tle::parse(L1, L2);
+  auto t = tle::Tle::parse(L1, L2);
   auto prop = sgp4::Propagator(t);
   EXPECT_EQ(prop.gravity_model(), 0);
 }
 
 TEST(Sgp4, MoveSemantics) {
-  auto t     = tle::Tle::parse(L1, L2);
+  auto t = tle::Tle::parse(L1, L2);
   auto prop1 = sgp4::Propagator(t);
   auto prop2 = std::move(prop1);
   // After move, prop2 is valid.

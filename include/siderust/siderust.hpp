@@ -47,6 +47,7 @@
 #include "orbital_center.hpp"
 #include "runtime_ephemeris.hpp"
 #include "sgp4.hpp"
+#include "sky_grid.hpp"
 #include "star_target.hpp"
 #include "subject.hpp"
 #include "target.hpp"

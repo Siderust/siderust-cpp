@@ -220,6 +220,7 @@ if(SIDERUST_CPP_BUILD_EXAMPLES)
     siderust_add_example(16_lambert_earth_to_mars_example   examples/16_lambert_earth_to_mars.cpp)
     siderust_add_example(17_sgp4_from_tle_example           examples/17_sgp4_from_tle.cpp)
     siderust_add_example(18_lisa_pod_example                examples/18_lisa_pod.cpp)
+    siderust_add_example(19_sky_grid_sampling_example       examples/19_sky_grid_sampling.cpp)
     if(TARGET 18_lisa_pod_example)
         target_compile_definitions(18_lisa_pod_example PRIVATE
             SIDERUST_TEST_DATA_DIR="${CMAKE_CURRENT_SOURCE_DIR}/siderust/tests/test-data/lisa"
@@ -246,6 +247,7 @@ if(SIDERUST_CPP_BUILD_TESTS)
         tests/test_twilight.cpp
         tests/test_lambert.cpp
         tests/test_sgp4.cpp
+        tests/test_sky_grid.cpp
     )
 
     add_executable(test_siderust ${TEST_SOURCES})

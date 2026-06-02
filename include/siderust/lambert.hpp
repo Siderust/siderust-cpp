@@ -40,7 +40,7 @@ enum class Branch : int {
 /// Householder-iteration diagnostics accompanying a Lambert solution.
 struct Diagnostics {
   std::uint32_t iterations;  ///< Number of Householder iterations performed.
-  double        residual;    ///< Final residual (dimensionless).
+  double residual;           ///< Final residual (dimensionless).
   std::uint32_t revolutions; ///< Number of complete revolutions (0 = single-rev).
 };
 
@@ -48,7 +48,7 @@ struct Diagnostics {
 struct Solution {
   std::array<double, 3> v1_kms; ///< Departure velocity [vx, vy, vz], km/s.
   std::array<double, 3> v2_kms; ///< Arrival velocity [vx, vy, vz], km/s.
-  Diagnostics           diag;   ///< Solver diagnostics.
+  Diagnostics diag;             ///< Solver diagnostics.
 };
 
 /**

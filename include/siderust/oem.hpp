@@ -39,7 +39,7 @@ namespace oem {
 
 /// A single spacecraft state vector from a CCSDS OEM file.
 struct StateVector {
-  double epoch_jd;             ///< Epoch as Julian Date.
+  double epoch_jd;               ///< Epoch as Julian Date.
   std::array<double, 3> pos_km;  ///< Position [x, y, z] in km.
   std::array<double, 3> vel_kms; ///< Velocity [vx, vy, vz] in km/s.
 };
@@ -58,7 +58,7 @@ struct StateVector {
 inline std::vector<StateVector> parse(std::string_view text) {
   const std::string buf{text};
   SiderustOemState *raw_ptr = nullptr;
-  unsigned long     count   = 0;
+  unsigned long count = 0;
 
   check_status(siderust_oem_parse_str(buf.c_str(), &raw_ptr, &count), "oem::parse");
 

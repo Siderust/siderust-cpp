@@ -22,26 +22,22 @@ static constexpr const char *L2 =
     "2 00005  34.2682 348.7242 1859667 331.7664  19.3264 10.82419157413667";
 
 int main() {
-    auto tle  = siderust::tle::Tle::parse(L1, L2);
-    auto prop = siderust::sgp4::Propagator(tle);
+  auto tle = siderust::tle::Tle::parse(L1, L2);
+  auto prop = siderust::sgp4::Propagator(tle);
 
-    std::printf("Satellite     : NORAD %u\n", tle.norad_id());
-    std::printf("Gravity model : %d (0=WGS-72, 1=WGS-72/IAU, 2=WGS-84)\n",
-                prop.gravity_model());
-    std::printf("TLE epoch (JD): %.10f\n\n", prop.epoch_jd_utc());
+  std::printf("Satellite     : NORAD %u\n", tle.norad_id());
+  std::printf("Gravity model : %d (0=WGS-72, 1=WGS-72/IAU, 2=WGS-84)\n", prop.gravity_model());
+  std::printf("TLE epoch (JD): %.10f\n\n", prop.epoch_jd_utc());
 
-    std::printf("%12s  %14s  %14s  %14s  %10s  %10s  %10s\n",
-                "t [min]", "x [km]", "y [km]", "z [km]",
-                "vx [km/s]", "vy [km/s]", "vz [km/s]");
+  std::printf("%12s  %14s  %14s  %14s  %10s  %10s  %10s\n", "t [min]", "x [km]", "y [km]", "z [km]",
+              "vx [km/s]", "vy [km/s]", "vz [km/s]");
 
-    for (double dt_min : {0.0, 360.0, 720.0, 1080.0}) {
-        double jd = prop.epoch_jd_utc() + dt_min / 1440.0;
-        auto   s  = prop.propagate_at(jd);
-        std::printf("%12.1f  %14.6f  %14.6f  %14.6f  %10.6f  %10.6f  %10.6f\n",
-                    dt_min,
-                    s.pos_km[0], s.pos_km[1], s.pos_km[2],
-                    s.vel_kms[0], s.vel_kms[1], s.vel_kms[2]);
-    }
+  for (double dt_min : {0.0, 360.0, 720.0, 1080.0}) {
+    double jd = prop.epoch_jd_utc() + dt_min / 1440.0;
+    auto s = prop.propagate_at(jd);
+    std::printf("%12.1f  %14.6f  %14.6f  %14.6f  %10.6f  %10.6f  %10.6f\n", dt_min, s.pos_km[0],
+                s.pos_km[1], s.pos_km[2], s.vel_kms[0], s.vel_kms[1], s.vel_kms[2]);
+  }
 
-    return 0;
+  return 0;
 }
