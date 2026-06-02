@@ -44,9 +44,9 @@ int main() {
 
   auto sep = polaris.angular_separation(sirius);
   std::cout << std::setprecision(4);
-  std::cout << "Polaris  (RA=" << polaris.ra() << ", Dec=" << polaris.dec() << ")" << std::endl;
-  std::cout << "Sirius   (RA=" << sirius.ra() << ", Dec=" << sirius.dec() << ")" << std::endl;
-  std::cout << "  Angular separation = " << sep << std::endl << std::endl;
+  std::cout << "Polaris  " << polaris << '\n';
+  std::cout << "Sirius   " << sirius << '\n';
+  std::cout << "  Angular separation = " << sep << "\n\n";
 
   // Nearby pair — separation should be about 0.66°
   spherical::direction::EquatorialMeanJ2000 star_a(10.0_deg, 30.0_deg);
@@ -151,17 +151,13 @@ int main() {
   auto mars_cart = mars.to_cartesian();
 
   auto eu_dist_cart = earth_cart.distance_to(mars_cart);
-  std::cout << "Earth cartesian (AU): (" << earth_cart.x() << ", " << earth_cart.y() << ", "
-            << earth_cart.z() << ")" << std::endl;
-  std::cout << "Mars  cartesian (AU): (" << mars_cart.x() << ", " << mars_cart.y() << ", "
-            << mars_cart.z() << ")" << std::endl;
-  std::cout << "  Euclidean distance = " << eu_dist_cart << "  (matches spherical)" << std::endl;
+  std::cout << "Earth cartesian (AU): " << earth_cart << '\n';
+  std::cout << "Mars  cartesian (AU): " << mars_cart << '\n';
+  std::cout << "  Euclidean distance = " << eu_dist_cart << "  (matches spherical)\n";
 
-  // Vector difference gives displacement vector
   auto diff = mars_cart - earth_cart;
-  std::cout << "  Mars \u2212 Earth vector: (" << diff.x() << ", " << diff.y() << ", " << diff.z()
-            << ")" << std::endl;
-  std::cout << "  |Mars \u2212 Earth|      = " << diff.magnitude() << std::endl << std::endl;
+  std::cout << "  Mars \u2212 Earth vector: " << diff << '\n';
+  std::cout << "  |Mars \u2212 Earth|      = " << diff.magnitude() << "\n\n";
 
   // =========================================================================
   // 6. Ecliptic Directions — Same API, Different Frame

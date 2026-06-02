@@ -22,7 +22,6 @@
 
 #include <chrono>
 #include <cmath>
-#include <cstdio>
 #include <iomanip>
 #include <iostream>
 
@@ -57,7 +56,7 @@ inline TTJD jd_now() {
 // ─── Sections ───────────────────────────────────────────────────────────────
 
 void section_planet_constants_and_periods() {
-  std::puts("1) PLANET CONSTANTS + ORBITAL PERIOD (Kepler 3rd law)\n");
+  std::cout << "1) PLANET CONSTANTS + ORBITAL PERIOD (Kepler 3rd law)\n\n";
 
   struct PlanetInfo {
     const char *name;
@@ -69,20 +68,22 @@ void section_planet_constants_and_periods() {
       {"Uranus", &URANUS()},   {"Neptune", &NEPTUNE()},
   };
 
-  std::printf("%-8s %10s %10s %10s\n", "Planet", "a [AU]", "e", "Period");
-  std::puts("------------------------------------------------");
+  std::cout << std::left << std::setw(8) << "Planet" << std::right << std::setw(10) << "a [AU]"
+            << std::setw(10) << "e" << std::setw(10) << "Period" << '\n';
+  std::cout << std::string(38, '-') << '\n';
   for (auto &[name, p] : planets) {
     auto period = orbit_period(p->orbit);
-    std::printf("%-8s %10.6f %10.6f ", name, p->orbit.semi_major_axis.value(),
-                p->orbit.eccentricity);
-    std::cout << std::fixed << std::setprecision(2) << period << std::endl;
+    std::cout << std::left << std::setw(8) << name << std::right << std::fixed
+              << std::setprecision(6) << std::setw(10) << p->orbit.semi_major_axis.value()
+              << std::setw(10) << p->orbit.eccentricity << std::setw(10) << std::setprecision(2)
+              << period << '\n';
   }
-  std::puts("");
+  std::cout << '\n';
 }
 
 void section_vsop87_positions(const TTJD &jd) {
-  std::puts("2) VSOP87 EPHEMERIDES (HELIOCENTRIC + BARYCENTRIC)");
-  std::puts("-----------------------------------------------");
+  std::cout << "2) VSOP87 EPHEMERIDES (HELIOCENTRIC + BARYCENTRIC)\n"
+            << "-----------------------------------------------\n";
 
   auto earth_h = ephemeris::earth_heliocentric(jd);
   auto mars_h = ephemeris::mars_heliocentric(jd);
@@ -101,16 +102,12 @@ void section_vsop87_positions(const TTJD &jd) {
             << sun_bary.distance() << std::endl;
 
   auto jupiter_bary = ephemeris::jupiter_barycentric(jd);
-  std::cout << "\nJupiter barycentric position at J2000:" << std::endl;
-  std::cout << "  x = " << std::fixed << std::setprecision(6) << jupiter_bary.x() << std::endl;
-  std::cout << "  y = " << std::fixed << std::setprecision(6) << jupiter_bary.y() << std::endl;
-  std::cout << "  z = " << std::fixed << std::setprecision(6) << jupiter_bary.z() << std::endl;
-  std::puts("");
+  std::cout << "\nJupiter barycentric position at J2000:\n  " << jupiter_bary << "\n\n";
 }
 
 void section_center_transforms(const TTJD &jd) {
-  std::puts("3) CENTER TRANSFORMS (HELIOCENTRIC -> GEOCENTRIC)");
-  std::puts("-----------------------------------------------");
+  std::cout << "3) CENTER TRANSFORMS (HELIOCENTRIC -> GEOCENTRIC)\n"
+            << "-----------------------------------------------\n";
 
   auto mars_helio = ephemeris::mars_heliocentric(jd);
   auto mars_geo = mars_helio.to_center<Geocentric>(jd);
@@ -119,23 +116,23 @@ void section_center_transforms(const TTJD &jd) {
             << mars_geo.distance() << std::endl;
   std::cout << "Mars geocentric distance at J2000: " << std::fixed << std::setprecision(0)
             << mars_geo.distance().to<qtty::Kilometer>() << std::endl;
-  std::puts("");
+  std::cout << '\n';
 }
 
 void section_moon(const TTJD &jd) {
-  std::puts("4) MOON (ELP2000)");
-  std::puts("-----------------");
+  std::cout << "4) MOON (ELP2000)\n"
+            << "-----------------\n";
 
   auto moon_geo = ephemeris::moon_geocentric(jd);
   std::cout << "Moon geocentric distance (ELP2000): " << std::fixed << std::setprecision(1)
             << moon_geo.distance() << " (" << std::setprecision(6)
             << moon_geo.distance().to<qtty::AstronomicalUnit>() << ")" << std::endl;
-  std::puts("");
+  std::cout << '\n';
 }
 
 void section_trait_dispatch(const TTJD &jd) {
-  std::puts("5) EPHEMERIS DISPATCH (all inner planets)");
-  std::puts("-----------------------------------------");
+  std::cout << "5) EPHEMERIS DISPATCH (all inner planets)\n"
+            << "-----------------------------------------\n";
 
   // In C++ there is no dynamic trait dispatch for VSOP87.
   // Instead, we call each planet's ephemeris directly.
@@ -159,12 +156,12 @@ void section_trait_dispatch(const TTJD &jd) {
               << std::setprecision(5) << helio.distance() << "  bary=" << bary.distance()
               << std::endl;
   }
-  std::puts("");
+  std::cout << '\n';
 }
 
 void section_custom_planet() {
-  std::puts("6) CUSTOM PLANET + ORBITAL PERIOD");
-  std::puts("---------------------------------");
+  std::cout << "6) CUSTOM PLANET + ORBITAL PERIOD\n"
+            << "---------------------------------\n";
 
   Planet demo_world{
       qtty::Kilogram(5.972e24 * 2.0), // mass: double the Earth
@@ -173,7 +170,7 @@ void section_custom_planet() {
 
   auto period = orbit_period(demo_world.orbit);
 
-  std::puts("Custom planet built at runtime:");
+  std::cout << "Custom planet built at runtime:\n";
   std::cout << "  mass   = " << std::scientific << std::setprecision(3) << demo_world.mass
             << std::endl;
   std::cout << "  radius = " << std::fixed << std::setprecision(1) << demo_world.radius
@@ -185,8 +182,8 @@ void section_custom_planet() {
 }
 
 void section_current_snapshot(const TTJD &now) {
-  std::puts("7) CURRENT SNAPSHOT");
-  std::puts("-------------------");
+  std::cout << "7) CURRENT SNAPSHOT\n"
+            << "-------------------\n";
 
   auto earth_now = ephemeris::earth_heliocentric(now);
   auto mars_now = ephemeris::mars_heliocentric(now);
@@ -200,7 +197,7 @@ void section_current_snapshot(const TTJD &now) {
             << mars_geo_now.distance() << " (" << std::setprecision(0)
             << mars_geo_now.distance().to<qtty::Kilometer>() << ")" << std::endl;
 
-  std::puts("\n=== End of example ===");
+  std::cout << "\n=== End of example ===\n";
 }
 
 // ─── main
@@ -210,7 +207,7 @@ int main() {
   auto jd = TTJD::J2000();
   auto now = jd_now();
 
-  std::puts("=== Siderust Solar System Module Tour ===\n");
+  std::cout << "=== Siderust Solar System Module Tour ===\n\n";
   std::cout << "Epoch used for deterministic outputs: J2000 (JD " << std::fixed
             << std::setprecision(1) << jd << ")" << std::endl;
   std::cout << "Current epoch snapshot: JD " << std::setprecision(6) << now << "\n" << std::endl;

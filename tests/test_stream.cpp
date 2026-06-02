@@ -13,7 +13,7 @@ using namespace siderust::centers;
 
 namespace {
 
-std::string stream_to_string(const auto &value) {
+template <typename T> std::string stream_to_string(const T &value) {
   std::ostringstream oss;
   oss << value;
   return oss.str();
@@ -29,8 +29,7 @@ TEST(StreamOutput, CartesianDirection) {
 }
 
 TEST(StreamOutput, CartesianPosition) {
-  cartesian::Position<Heliocentric, EclipticMeanJ2000, qtty::AstronomicalUnit> pos(1.0, 0.0,
-                                                                                    0.0);
+  cartesian::Position<Heliocentric, EclipticMeanJ2000, qtty::AstronomicalUnit> pos(1.0, 0.0, 0.0);
   const auto s = stream_to_string(pos);
   EXPECT_NE(s.find("Heliocentric"), std::string::npos);
   EXPECT_NE(s.find("EclipticMeanJ2000"), std::string::npos);
@@ -38,9 +37,8 @@ TEST(StreamOutput, CartesianPosition) {
 }
 
 TEST(StreamOutput, CartesianDisplacement) {
-  cartesian::Displacement<EclipticMeanJ2000, qtty::AstronomicalUnit> d(qtty::AstronomicalUnit(0.1),
-                                                                       qtty::AstronomicalUnit(0.0),
-                                                                       qtty::AstronomicalUnit(0.0));
+  cartesian::Displacement<EclipticMeanJ2000, qtty::AstronomicalUnit> d(
+      qtty::AstronomicalUnit(0.1), qtty::AstronomicalUnit(0.0), qtty::AstronomicalUnit(0.0));
   const auto s = stream_to_string(d);
   EXPECT_NE(s.find("EclipticMeanJ2000"), std::string::npos);
   EXPECT_NE(s.find("displacement"), std::string::npos);
@@ -96,7 +94,6 @@ TEST(StreamOutput, JulianDate) {
 TEST(StreamOutput, QttyQuantityInCoordinate) {
   cartesian::Position<Heliocentric, EclipticMeanJ2000, qtty::AstronomicalUnit> pos(1.0, 0.0, 0.0);
   const auto s = stream_to_string(pos);
-  // qtty streams unit symbols (e.g. au) with quantities
-  EXPECT_TRUE(s.find("au") != std::string::npos || s.find("AU") != std::string::npos ||
-              s.find("astronomical") != std::string::npos);
+  EXPECT_NE(s.find("x="), std::string::npos);
+  EXPECT_NE(s.find(qtty::UnitTraits<qtty::AstronomicalUnit>::symbol()), std::string::npos);
 }

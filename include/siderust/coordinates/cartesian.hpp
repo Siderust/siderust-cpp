@@ -132,9 +132,8 @@ template <typename F> struct Direction {
 /**
  * @brief Stream operator for cartesian::Direction.
  */
-template <typename F>
-inline std::ostream &operator<<(std::ostream &os, const Direction<F> &dir) {
-  detail::write_frame<F>(os);
+template <typename F> inline std::ostream &operator<<(std::ostream &os, const Direction<F> &dir) {
+  coordinates::detail::write_frame<F>(os);
   return os << " direction (x=" << dir.x << ", y=" << dir.y << ", z=" << dir.z << ')';
 }
 
@@ -262,7 +261,7 @@ template <typename F, typename U> struct Displacement {
  */
 template <typename F, typename U>
 inline std::ostream &operator<<(std::ostream &os, const Displacement<F, U> &d) {
-  detail::write_frame<F>(os);
+  coordinates::detail::write_frame<F>(os);
   return os << " displacement (dx=" << d.x() << ", dy=" << d.y() << ", dz=" << d.z() << ')';
 }
 
@@ -487,7 +486,7 @@ template <typename C, typename F, typename U> struct Position {
  */
 template <typename C, typename F, typename U>
 inline std::ostream &operator<<(std::ostream &os, const Position<C, F, U> &pos) {
-  detail::write_center_frame<C, F>(os);
+  coordinates::detail::write_center_frame<C, F>(os);
   return os << " (x=" << pos.x() << ", y=" << pos.y() << ", z=" << pos.z() << ')';
 }
 

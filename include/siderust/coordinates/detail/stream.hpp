@@ -14,13 +14,11 @@ namespace siderust {
 namespace coordinates {
 namespace detail {
 
-template <typename C, typename F>
-inline void write_center_frame(std::ostream &os) {
+template <typename C, typename F> inline void write_center_frame(std::ostream &os) {
   os << centers::CenterTraits<C>::name() << ' ' << frames::FrameTraits<F>::name();
 }
 
-template <typename F>
-inline void write_frame(std::ostream &os) {
+template <typename F> inline void write_frame(std::ostream &os) {
   os << frames::FrameTraits<F>::name();
 }
 

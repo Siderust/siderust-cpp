@@ -22,6 +22,7 @@
 #include "ffi_core.hpp"
 
 #include <cstdint>
+#include <ostream>
 #include <string_view>
 #include <utility>
 
@@ -105,6 +106,12 @@ struct State {
   double pos_km[3];  ///< Position [x, y, z] in km (TEME frame).
   double vel_kms[3]; ///< Velocity [vx, vy, vz] in km/s (TEME frame).
 };
+
+inline std::ostream &operator<<(std::ostream &os, const State &s) {
+  os << "SGP4 TEME (pos_km=(" << s.pos_km[0] << ", " << s.pos_km[1] << ", " << s.pos_km[2]
+     << "), vel_kms=(" << s.vel_kms[0] << ", " << s.vel_kms[1] << ", " << s.vel_kms[2] << "))";
+  return os;
+}
 
 /**
  * @brief Move-only RAII wrapper around an initialised SGP4 propagator.

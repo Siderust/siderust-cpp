@@ -25,35 +25,29 @@
 #include <algorithm>
 #include <cassert>
 #include <cmath>
-#include <cstdio>
 #include <fstream>
+#include <iomanip>
+#include <iostream>
 #include <sstream>
 #include <stdexcept>
 #include <string>
 #include <vector>
 
-// ─── constants ────────────────────────────────────────────────────────────────
-
 static constexpr double J2000_JD = 2'451'545.0;
 static constexpr double C_KM_S = 299'792.458;
-
-// ─── Spacecraft ID ────────────────────────────────────────────────────────────
 
 enum class LisaScId { SC1 = -1001, SC2 = -1002, SC3 = -1003 };
 
 static int naif_id(LisaScId id) { return static_cast<int>(id); }
 
-// ─── OrbitPoint ───────────────────────────────────────────────────────────────
-
-/// One tabulated state vector stored as J2000 seconds + km/km·s⁻¹ components.
 struct OrbitPoint {
   double epoch_j2000_s;
-  double px, py, pz; // km
-  double vx, vy, vz; // km/s
+  double px, py, pz;
+  double vx, vy, vz;
 };
 
 using Orbit = std::vector<OrbitPoint>;
-using OrbitSet = std::array<Orbit, 3>; // [SC1, SC2, SC3]
+using OrbitSet = std::array<Orbit, 3>;
 
 static double jd_to_j2000s(double jd) { return (jd - J2000_JD) * 86'400.0; }
 
@@ -80,8 +74,6 @@ static Orbit orbit_from_oem(const std::string &path) {
   return pts;
 }
 
-// ─── Cubic Hermite interpolation ─────────────────────────────────────────────
-
 static OrbitPoint hermite_interp(const Orbit &pts, double t) {
   if (pts.empty())
     throw std::out_of_range("orbit is empty");
@@ -91,7 +83,6 @@ static OrbitPoint hermite_interp(const Orbit &pts, double t) {
   if (t < t0 || t > t1)
     throw std::out_of_range("epoch outside covered interval");
 
-  // Binary search for bracketing index.
   std::size_t idx = 0;
   {
     std::size_t lo = 0, hi = pts.size();
@@ -105,7 +96,6 @@ static OrbitPoint hermite_interp(const Orbit &pts, double t) {
     idx = (lo == 0) ? 0 : lo - 1;
     if (idx >= pts.size() - 1)
       idx = pts.size() - 2;
-    // Exact hit?
     if (pts[idx + 1].epoch_j2000_s == t)
       return pts[idx + 1];
     if (pts[idx].epoch_j2000_s == t)
@@ -144,10 +134,8 @@ static OrbitPoint hermite_interp(const Orbit &pts, double t) {
           iv(p0.pz, p0.vz, p1.pz, p1.vz)};
 }
 
-// ─── LisaEphemerisProvider ────────────────────────────────────────────────────
-
 struct LisaEphemerisProvider {
-  OrbitSet orbits; // [0]=SC1, [1]=SC2, [2]=SC3
+  OrbitSet orbits;
 
   const Orbit &orbit_for(int naif) const {
     switch (naif) {
@@ -167,9 +155,6 @@ struct LisaEphemerisProvider {
   }
 };
 
-// ─── Inter-satellite range observation ───────────────────────────────────────
-
-/// Compute light-time-corrected one-way range SC_A → SC_B (metres).
 static double modelled_range_m(const LisaEphemerisProvider &prov, int sc_a_naif, int sc_b_naif,
                                double t_recv_j2000_s) {
   auto pt_a = prov.state(sc_a_naif, t_recv_j2000_s);
@@ -178,19 +163,16 @@ static double modelled_range_m(const LisaEphemerisProvider &prov, int sc_a_naif,
   double dx0 = pt_a.px - pt_b0.px;
   double dy0 = pt_a.py - pt_b0.py;
   double dz0 = pt_a.pz - pt_b0.pz;
-  double rho0 = std::sqrt(dx0 * dx0 + dy0 * dy0 + dz0 * dz0); // km
+  double rho0 = std::sqrt(dx0 * dx0 + dy0 * dy0 + dz0 * dz0);
 
-  // One Newton step for light-time.
   double t_emit = t_recv_j2000_s - rho0 / C_KM_S;
   auto pt_b1 = prov.state(sc_b_naif, t_emit);
 
   double dx1 = pt_a.px - pt_b1.px;
   double dy1 = pt_a.py - pt_b1.py;
   double dz1 = pt_a.pz - pt_b1.pz;
-  return std::sqrt(dx1 * dx1 + dy1 * dy1 + dz1 * dz1) * 1'000.0; // → m
+  return std::sqrt(dx1 * dx1 + dy1 * dy1 + dz1 * dz1) * 1'000.0;
 }
-
-// ─── main ─────────────────────────────────────────────────────────────────────
 
 int main() {
 #ifndef SIDERUST_TEST_DATA_DIR
@@ -204,27 +186,25 @@ int main() {
   prov.orbits[1] = orbit_from_oem(root + "/lisa_orbit_sample.oem2");
   prov.orbits[2] = orbit_from_oem(root + "/lisa_orbit_sample.oem3");
 
-  // Query SC1 at its first tabulated epoch.
   const double sc1_t0 = prov.orbits[0].front().epoch_j2000_s;
   auto pt = prov.state(naif_id(LisaScId::SC1), sc1_t0);
-  std::printf("SC1 position at t₀: (%.0f, %.0f, %.0f) km\n", pt.px, pt.py, pt.pz);
+  std::cout << std::fixed << std::setprecision(0);
+  std::cout << "SC1 position at t₀: (" << pt.px << ", " << pt.py << ", " << pt.pz << ") km\n";
 
-  // Build a synthetic range observation with zero residual by construction.
   const double meas_m =
       modelled_range_m(prov, naif_id(LisaScId::SC1), naif_id(LisaScId::SC2), sc1_t0);
 
   const double epoch_jd = sc1_t0 / 86'400.0 + J2000_JD;
-  std::printf("InterSatRangeObs { sc_a: SC1, sc_b: SC2, epoch_jd: %.6f, "
-              "measured_m: %.6f, sigma: 1e-12 }\n",
-              epoch_jd, meas_m);
+  std::cout << std::setprecision(6);
+  std::cout << "InterSatRangeObs { sc_a: SC1, sc_b: SC2, epoch_jd: " << epoch_jd
+            << ", measured_m: " << meas_m << ", sigma: 1e-12 }\n";
 
-  // Compute residual: O − C  (should be ~0 since measured == modelled).
   const double computed_m =
       modelled_range_m(prov, naif_id(LisaScId::SC1), naif_id(LisaScId::SC2), sc1_t0);
   const double residual = meas_m - computed_m;
-  std::printf("O−C residual: %.6f m  (should be ~0)\n", residual);
+  std::cout << "O−C residual: " << residual << " m  (should be ~0)\n";
   assert(std::abs(residual) < 1.0 && "residual too large");
 
-  std::printf("LISA example completed successfully.\n");
+  std::cout << "LISA example completed successfully.\n";
   return 0;
 }

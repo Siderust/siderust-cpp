@@ -426,7 +426,7 @@ public:
  */
 template <typename F, std::enable_if_t<frames::has_ra_dec_v<F>, int> = 0>
 inline std::ostream &operator<<(std::ostream &os, const Direction<F> &dir) {
-  detail::write_frame<F>(os);
+  coordinates::detail::write_frame<F>(os);
   return os << " (ra=" << dir.ra() << ", dec=" << dir.dec() << ')';
 }
 
@@ -435,7 +435,7 @@ inline std::ostream &operator<<(std::ostream &os, const Direction<F> &dir) {
  */
 template <typename F, std::enable_if_t<frames::has_az_alt_v<F>, int> = 0>
 inline std::ostream &operator<<(std::ostream &os, const Direction<F> &dir) {
-  detail::write_frame<F>(os);
+  coordinates::detail::write_frame<F>(os);
   return os << " (az=" << dir.az() << ", alt=" << dir.alt() << ')';
 }
 
@@ -444,7 +444,7 @@ inline std::ostream &operator<<(std::ostream &os, const Direction<F> &dir) {
  */
 template <typename F, std::enable_if_t<frames::has_lon_lat_v<F>, int> = 0>
 inline std::ostream &operator<<(std::ostream &os, const Direction<F> &dir) {
-  detail::write_frame<F>(os);
+  coordinates::detail::write_frame<F>(os);
   return os << " (lon=" << dir.lon() << ", lat=" << dir.lat() << ')';
 }
 
@@ -453,7 +453,7 @@ inline std::ostream &operator<<(std::ostream &os, const Direction<F> &dir) {
  */
 template <typename C, typename F, typename U, std::enable_if_t<frames::has_ra_dec_v<F>, int> = 0>
 inline std::ostream &operator<<(std::ostream &os, const Position<C, F, U> &pos) {
-  detail::write_center_frame<C, F>(os);
+  coordinates::detail::write_center_frame<C, F>(os);
   return os << " (ra=" << pos.ra() << ", dec=" << pos.dec() << ", r=" << pos.distance() << ')';
 }
 
@@ -462,7 +462,7 @@ inline std::ostream &operator<<(std::ostream &os, const Position<C, F, U> &pos) 
  */
 template <typename C, typename F, typename U, std::enable_if_t<frames::has_az_alt_v<F>, int> = 0>
 inline std::ostream &operator<<(std::ostream &os, const Position<C, F, U> &pos) {
-  detail::write_center_frame<C, F>(os);
+  coordinates::detail::write_center_frame<C, F>(os);
   return os << " (az=" << pos.az() << ", alt=" << pos.alt() << ", r=" << pos.distance() << ')';
 }
 
@@ -471,7 +471,7 @@ inline std::ostream &operator<<(std::ostream &os, const Position<C, F, U> &pos) 
  */
 template <typename C, typename F, typename U, std::enable_if_t<frames::has_lon_lat_v<F>, int> = 0>
 inline std::ostream &operator<<(std::ostream &os, const Position<C, F, U> &pos) {
-  detail::write_center_frame<C, F>(os);
+  coordinates::detail::write_center_frame<C, F>(os);
   return os << " (lon=" << pos.lon() << ", lat=" << pos.lat() << ", r=" << pos.distance() << ')';
 }
 
