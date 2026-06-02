@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.21)
-project(siderust_cpp VERSION 0.5.0 LANGUAGES CXX)
+project(siderust_cpp VERSION 0.6.0 LANGUAGES CXX)
 
 # ---------------------------------------------------------------------------
 # CMake 3.21+ provides PROJECT_IS_TOP_LEVEL; emulate for older CMake if needed.
