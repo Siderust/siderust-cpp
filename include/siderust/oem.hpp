@@ -37,6 +37,23 @@ namespace siderust {
 /// @{
 namespace oem {
 
+namespace detail {
+
+struct OemStatesGuard {
+  SiderustOemState *ptr = nullptr;
+  unsigned long count = 0;
+
+  ~OemStatesGuard() { siderust_oem_states_free(ptr, count); }
+
+  OemStatesGuard() = default;
+  OemStatesGuard(const OemStatesGuard &) = delete;
+  OemStatesGuard &operator=(const OemStatesGuard &) = delete;
+  OemStatesGuard(OemStatesGuard &&) = delete;
+  OemStatesGuard &operator=(OemStatesGuard &&) = delete;
+};
+
+} // namespace detail
+
 /// A single spacecraft state vector from a CCSDS OEM file.
 struct StateVector {
   double epoch_jd;               ///< Epoch as Julian Date.
@@ -62,6 +79,10 @@ inline std::vector<StateVector> parse(std::string_view text) {
 
   check_status(siderust_oem_parse_str(buf.c_str(), &raw_ptr, &count), "oem::parse");
 
+  detail::OemStatesGuard guard{};
+  guard.ptr = raw_ptr;
+  guard.count = count;
+
   std::vector<StateVector> result;
   result.reserve(static_cast<std::size_t>(count));
   for (unsigned long i = 0; i < count; ++i) {
@@ -71,7 +92,6 @@ inline std::vector<StateVector> parse(std::string_view text) {
                       {s.vel_kms[0], s.vel_kms[1], s.vel_kms[2]}});
   }
 
-  siderust_oem_states_free(raw_ptr, count);
   return result;
 }
 

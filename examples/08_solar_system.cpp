@@ -40,7 +40,7 @@ static constexpr double GM_SUN_AU3_DAY2 = 0.01720209895 * 0.01720209895;
 /// Sidereal period via Kepler's 3rd law: T = 2π √(a³/μ) [days].
 inline qtty::Day orbit_period(const Orbit &orb) {
   double a = orb.semi_major_axis.value();
-  double T = 2.0 * M_PI * std::sqrt(a * a * a / GM_SUN_AU3_DAY2);
+  double T = 2.0 * constants::pi * std::sqrt(a * a * a / GM_SUN_AU3_DAY2);
   return qtty::Day(T);
 }
 

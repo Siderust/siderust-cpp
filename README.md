@@ -128,6 +128,22 @@ A reference external-consumer fixture lives under
 [`tests/installed-consumer/`](tests/installed-consumer/) and is exercised by
 the `ci-installed-consumer.yml` workflow on every push.
 
+### Runtime shared libraries (loader path)
+
+`siderust-cpp` is header-only, but every binary must load three Rust FFI shared
+libraries at runtime: `libsiderust_ffi`, `libtempoch_ffi`, and `libqtty_ffi`.
+
+| Install layout | Linux / macOS | Windows (MSVC) |
+|----------------|---------------|----------------|
+| **System packages** (`.deb` / `.rpm` into `/usr` or `/usr/local`) | The dynamic linker finds libraries in standard `lib/` paths after `ldconfig` or equivalent. No extra environment variables are usually required. | Install `siderust_ffi.dll`, `tempoch_ffi.dll`, and `qtty_ffi.dll` under `bin/` (or ensure that directory is on `PATH`). Link via the `.dll.lib` import libraries in `lib/`. |
+| **Custom CMake prefix** (`cmake --install … --prefix /opt/foo`) | Either add `/opt/foo/lib` to `LD_LIBRARY_PATH` (Linux) or `DYLD_LIBRARY_PATH` (macOS), **or** link your executable with an RPATH/`@rpath` that points at `$ORIGIN/../lib` relative to your binary. The installed-consumer CI smoke test uses the latter when built with `CMAKE_PREFIX_PATH` set to the staged prefix. | Add the install `bin/` directory to `PATH`, or copy the three DLLs next to your executable. `find_package(siderust_cpp)` sets `IMPORTED_LOCATION` (DLL) and `IMPORTED_IMPLIB` (`.dll.lib`) on `siderust::siderust_ffi`. |
+| **In-tree build** (`add_subdirectory` / local `build/`) | CMake sets `BUILD_RPATH` on examples and tests to the Cargo `target/release` directories under the submodules. | Same as custom prefix: DLLs live next to import libraries under each crate’s `target/release/`. |
+
+`find_package(siderust_cpp)` defines imported targets `siderust::siderust_cpp` and
+`siderust::siderust_ffi` so that **linking** resolves symbols; **loading** still
+requires the platform loader to locate the `.so`/`.dylib`/`.dll` files using the
+rules above.
+
 > **Note:** Pre-built `.deb` and `.rpm` packages are automatically built by CI
 > and attached to every
 > [GitHub Release](https://github.com/Siderust/siderust-cpp/releases).

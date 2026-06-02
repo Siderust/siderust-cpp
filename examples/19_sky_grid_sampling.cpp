@@ -36,9 +36,9 @@ int main() {
   for (const auto &cell : equal_area.cells()) {
     total_sr += cell.solid_angle.value();
   }
-  std::cout << "equal-area total solid angle: " << total_sr << " sr (hemisphere = " << 2.0 * M_PI
-            << " sr)\n";
-  assert(std::abs(total_sr - 2.0 * M_PI) / (2.0 * M_PI) < 0.01);
+  std::cout << "equal-area total solid angle: " << total_sr
+            << " sr (hemisphere = " << 2.0 * constants::pi << " sr)\n";
+  assert(std::abs(total_sr - 2.0 * constants::pi) / (2.0 * constants::pi) < 0.01);
 
   // Apply a 20deg horizon mask via the builder.
   auto masked = SkyGrid::with_steps(qtty::Degree(10.0), qtty::Degree(10.0));

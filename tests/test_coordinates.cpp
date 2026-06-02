@@ -159,7 +159,7 @@ TEST(TypedCoordinates, QttyDegreeAccessors) {
 
   // Convert to radians through qtty
   qtty::Radian ra_rad = ra.to<qtty::Radian>();
-  EXPECT_NEAR(ra_rad.value(), 123.456 * M_PI / 180.0, 1e-10);
+  EXPECT_NEAR(ra_rad.value(), 123.456 * constants::pi / 180.0, 1e-10);
 }
 
 // ============================================================================

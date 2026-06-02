@@ -18,6 +18,23 @@
 
 namespace siderust {
 
+namespace detail {
+
+struct SkyGridCellsGuard {
+  SiderustSkyGridCell *ptr = nullptr;
+  uintptr_t count = 0;
+
+  ~SkyGridCellsGuard() { siderust_sky_grid_cells_free(ptr, count); }
+
+  SkyGridCellsGuard() = default;
+  SkyGridCellsGuard(const SkyGridCellsGuard &) = delete;
+  SkyGridCellsGuard &operator=(const SkyGridCellsGuard &) = delete;
+  SkyGridCellsGuard(SkyGridCellsGuard &&) = delete;
+  SkyGridCellsGuard &operator=(SkyGridCellsGuard &&) = delete;
+};
+
+} // namespace detail
+
 /**
  * @brief A single sky-grid cell: a Horizontal direction and its solid angle.
  *
@@ -81,12 +98,16 @@ public:
     check_status(
         siderust_sky_grid_cells(alt_min_, alt_max_, alt_step_, az_step_, equal_area_, &ptr, &count),
         "SkyGrid::cells");
+
+    detail::SkyGridCellsGuard guard{};
+    guard.ptr = ptr;
+    guard.count = count;
+
     std::vector<SkyGridCell> result;
     result.reserve(count);
     for (uintptr_t i = 0; i < count; ++i) {
       result.push_back(SkyGridCell::from_c(ptr[i]));
     }
-    siderust_sky_grid_cells_free(ptr, count);
     return result;
   }
 

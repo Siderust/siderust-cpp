@@ -141,7 +141,7 @@ inline spherical::direction::ICRS apply_proper_motion(const spherical::direction
   // ProperMotion rates in deg/yr (already stored as deg/yr in the struct)
   // MuAlphaStar convention: pm_ra is already μα* = μα·cos(δ), so divide by
   // cos(δ)
-  double cos_dec = std::cos(dec_deg * M_PI / 180.0);
+  double cos_dec = std::cos(dec_deg * constants::pi / 180.0);
   double dra = (cos_dec > 1e-12) ? pm.pm_ra_deg_yr * dt_years / cos_dec : 0.0;
   double ddec = pm.pm_dec_deg_yr * dt_years;
 

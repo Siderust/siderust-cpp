@@ -36,7 +36,7 @@ TEST(SkyGrid, EqualAreaSolidAnglesSumToHemisphere) {
   for (const auto &cell : grid.cells()) {
     total += cell.solid_angle.value();
   }
-  const double hemisphere = 2.0 * M_PI;
+  const double hemisphere = 2.0 * constants::pi;
   EXPECT_NEAR(total, hemisphere, hemisphere * 0.01);
 }
 

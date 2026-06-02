@@ -24,6 +24,7 @@
 
 #include <array>
 #include <cstdint>
+#include <ostream>
 
 namespace siderust {
 
@@ -51,6 +52,22 @@ struct Solution {
   Diagnostics diag;             ///< Solver diagnostics.
 };
 
+namespace detail {
+
+inline Solution solve_impl(const double *r1_km, const double *r2_km, double tof_s, double mu_km3_s2,
+                           Branch branch) {
+  Solution sol{};
+  SiderustLambertDiagnostics diag{};
+  const auto status =
+      siderust_lambert_solve(r1_km, r2_km, tof_s, mu_km3_s2, static_cast<int>(branch),
+                             sol.v1_kms.data(), sol.v2_kms.data(), &diag);
+  check_status(status, "lambert::solve");
+  sol.diag = {diag.iterations, diag.residual, diag.revolutions};
+  return sol;
+}
+
+} // namespace detail
+
 /**
  * @brief Solve Lambert's single-revolution two-point boundary-value problem.
  *
@@ -66,21 +83,23 @@ struct Solution {
  */
 inline Solution solve(const double (&r1_km)[3], const double (&r2_km)[3], double tof_s,
                       double mu_km3_s2, Branch branch = Branch::Prograde) {
-  Solution sol{};
-  SiderustLambertDiagnostics diag{};
-  const auto status =
-      siderust_lambert_solve(r1_km, r2_km, tof_s, mu_km3_s2, static_cast<int>(branch),
-                             sol.v1_kms.data(), sol.v2_kms.data(), &diag);
-  check_status(status, "lambert::solve");
-  sol.diag = {diag.iterations, diag.residual, diag.revolutions};
-  return sol;
+  return detail::solve_impl(r1_km, r2_km, tof_s, mu_km3_s2, branch);
 }
 
 /// Overload accepting `std::array<double,3>` positions.
 inline Solution solve(const std::array<double, 3> &r1_km, const std::array<double, 3> &r2_km,
                       double tof_s, double mu_km3_s2, Branch branch = Branch::Prograde) {
-  return solve(reinterpret_cast<const double(&)[3]>(*r1_km.data()),
-               reinterpret_cast<const double(&)[3]>(*r2_km.data()), tof_s, mu_km3_s2, branch);
+  return detail::solve_impl(r1_km.data(), r2_km.data(), tof_s, mu_km3_s2, branch);
+}
+
+/**
+ * @brief Stream a Lambert solution (velocities in km/s).
+ */
+inline std::ostream &operator<<(std::ostream &os, const Solution &sol) {
+  os << "Lambert (v1=(" << sol.v1_kms[0] << ", " << sol.v1_kms[1] << ", " << sol.v1_kms[2]
+     << ") km/s, v2=(" << sol.v2_kms[0] << ", " << sol.v2_kms[1] << ", " << sol.v2_kms[2]
+     << ") km/s, iters=" << sol.diag.iterations << ", residual=" << sol.diag.residual << ')';
+  return os;
 }
 
 } // namespace lambert

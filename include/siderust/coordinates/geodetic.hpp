@@ -65,7 +65,7 @@ struct Geodetic {
  * @brief Stream operator for Geodetic.
  */
 inline std::ostream &operator<<(std::ostream &os, const Geodetic &geo) {
-  return os << "lon=" << geo.lon << " lat=" << geo.lat << " h=" << geo.height;
+  return os << "Geodetic (lon=" << geo.lon << ", lat=" << geo.lat << ", h=" << geo.height << ')';
 }
 
 } // namespace siderust

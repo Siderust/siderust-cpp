@@ -248,9 +248,14 @@ if(SIDERUST_CPP_BUILD_TESTS)
         tests/test_lambert.cpp
         tests/test_sgp4.cpp
         tests/test_sky_grid.cpp
+        tests/test_oem.cpp
+        tests/test_stream.cpp
     )
 
     add_executable(test_siderust ${TEST_SOURCES})
+    target_compile_definitions(test_siderust PRIVATE
+        SIDERUST_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}"
+    )
     target_link_libraries(test_siderust PRIVATE siderust_cpp GTest::gtest)
     if(DEFINED _siderust_rpath)
         set_target_properties(test_siderust PROPERTIES
@@ -283,22 +288,33 @@ if(SIDERUST_CPP_INSTALL)
         FILES_MATCHING PATTERN "*.h"
     )
 
-    install(FILES ${SIDERUST_LIBRARY_PATH}
-        DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        COMPONENT siderust-cpp
-    )
+    if(WIN32)
+        install(FILES ${SIDERUST_LIBRARY_PATH}
+            DESTINATION ${CMAKE_INSTALL_BINDIR}
+            COMPONENT siderust-cpp
+        )
+        install(FILES ${SIDERUST_IMPORT_LIBRARY}
+            DESTINATION ${CMAKE_INSTALL_LIBDIR}
+            COMPONENT siderust-cpp
+        )
+        set(SIDERUST_FFI_INSTALLED_IMPLIB_NAME "siderust_ffi.dll.lib")
+    else()
+        install(FILES ${SIDERUST_LIBRARY_PATH}
+            DESTINATION ${CMAKE_INSTALL_LIBDIR}
+            COMPONENT siderust-cpp
+        )
+    endif()
 
     include(CMakePackageConfigHelpers)
 
-    # Expose the installed shared library file name so the config file
-    # can reconstruct the absolute path at find_package time.
+    # Expose installed artifact names so the package config can reconstruct paths.
     set(SIDERUST_FFI_INSTALLED_LIB_NAME "${SIDERUST_LIBRARY_NAME}")
 
     configure_package_config_file(
         ${CMAKE_CURRENT_SOURCE_DIR}/cmake/siderust_cppConfig.cmake.in
         ${CMAKE_CURRENT_BINARY_DIR}/siderust_cppConfig.cmake
         INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/siderust_cpp
-        PATH_VARS CMAKE_INSTALL_INCLUDEDIR CMAKE_INSTALL_LIBDIR
+        PATH_VARS CMAKE_INSTALL_INCLUDEDIR CMAKE_INSTALL_LIBDIR CMAKE_INSTALL_BINDIR
     )
 
     write_basic_package_version_file(

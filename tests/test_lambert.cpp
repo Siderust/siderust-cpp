@@ -3,6 +3,7 @@
 
 #include <cmath>
 #include <gtest/gtest.h>
+#include <siderust/constants.hpp>
 #include <siderust/siderust.hpp>
 
 using namespace siderust;
@@ -16,7 +17,7 @@ static constexpr double SECONDS_PER_DAY = 86'400.0;
 TEST(Lambert, EarthMarsPrograde) {
   const double r_earth = AU_KM;
   const double r_mars = 1.524 * AU_KM;
-  const double phi = 60.0 * M_PI / 180.0;
+  const double phi = 60.0 * constants::pi / 180.0;
 
   const double r1[3] = {r_earth, 0.0, 0.0};
   const double r2[3] = {r_mars * std::cos(phi), r_mars * std::sin(phi), 0.0};
@@ -62,7 +63,7 @@ TEST(Lambert, CircularOrbit90deg) {
   const double MU_EARTH = 398'600.4418;
 
   // ToF for a quarter orbit.
-  double tof = (M_PI / 2.0) * std::sqrt(r_km * r_km * r_km / MU_EARTH);
+  double tof = (constants::pi / 2.0) * std::sqrt(r_km * r_km * r_km / MU_EARTH);
 
   const double r1[3] = {r_km, 0.0, 0.0};
   const double r2[3] = {0.0, r_km, 0.0};

@@ -13,12 +13,26 @@ find_dependency(tempoch_cpp REQUIRED)
 set_and_check(SIDERUST_CPP_INCLUDE_DIR "@PACKAGE_CMAKE_INSTALL_INCLUDEDIR@")
 set_and_check(SIDERUST_CPP_LIB_DIR     "@PACKAGE_CMAKE_INSTALL_LIBDIR@")
 
-# Absolute path to the bundled siderust_ffi shared library.
-set(SIDERUST_FFI_LIBRARY "${SIDERUST_CPP_LIB_DIR}/@SIDERUST_FFI_INSTALLED_LIB_NAME@")
+# Runtime shared library (DLL on Windows, .so/.dylib elsewhere).
+if(WIN32)
+    set_and_check(SIDERUST_CPP_BINDIR "@PACKAGE_CMAKE_INSTALL_BINDIR@")
+    set(SIDERUST_FFI_LIBRARY "${SIDERUST_CPP_BINDIR}/@SIDERUST_FFI_INSTALLED_LIB_NAME@")
+    set(SIDERUST_FFI_IMPLIB "${SIDERUST_CPP_LIB_DIR}/@SIDERUST_FFI_INSTALLED_IMPLIB_NAME@")
+else()
+    set(SIDERUST_FFI_LIBRARY "${SIDERUST_CPP_LIB_DIR}/@SIDERUST_FFI_INSTALLED_LIB_NAME@")
+endif()
+
 if(NOT EXISTS "${SIDERUST_FFI_LIBRARY}")
     set(siderust_cpp_FOUND FALSE)
     set(siderust_cpp_NOT_FOUND_MESSAGE
         "siderust_cpp: bundled siderust_ffi shared library not found at ${SIDERUST_FFI_LIBRARY}")
+    return()
+endif()
+
+if(WIN32 AND NOT EXISTS "${SIDERUST_FFI_IMPLIB}")
+    set(siderust_cpp_FOUND FALSE)
+    set(siderust_cpp_NOT_FOUND_MESSAGE
+        "siderust_cpp: bundled siderust_ffi import library not found at ${SIDERUST_FFI_IMPLIB}")
     return()
 endif()
 
@@ -37,19 +51,31 @@ endif()
 # ---------------------------------------------------------------------------
 set(_siderust_ffi_search_paths
     "${PACKAGE_PREFIX_DIR}/${CMAKE_INSTALL_LIBDIR}"
+    "${PACKAGE_PREFIX_DIR}/${CMAKE_INSTALL_BINDIR}"
     "${PACKAGE_PREFIX_DIR}/lib"
     "${PACKAGE_PREFIX_DIR}/lib64"
+    "${PACKAGE_PREFIX_DIR}/bin"
     "${SIDERUST_CPP_LIB_DIR}")
+if(WIN32)
+    list(APPEND _siderust_ffi_search_paths "${SIDERUST_CPP_BINDIR}")
+endif()
 
 if(NOT TARGET qtty_ffi)
-    find_library(_siderust_qtty_ffi_path
-        NAMES qtty_ffi libqtty_ffi
-        PATHS ${_siderust_ffi_search_paths}
-        NO_DEFAULT_PATH)
+    if(WIN32)
+        find_library(_siderust_qtty_ffi_path
+            NAMES qtty_ffi
+            PATHS ${_siderust_ffi_search_paths}
+            NO_DEFAULT_PATH)
+    else()
+        find_library(_siderust_qtty_ffi_path
+            NAMES qtty_ffi libqtty_ffi
+            PATHS ${_siderust_ffi_search_paths}
+            NO_DEFAULT_PATH)
+    endif()
     if(NOT _siderust_qtty_ffi_path)
         set(siderust_cpp_FOUND FALSE)
         set(siderust_cpp_NOT_FOUND_MESSAGE
-            "siderust_cpp: could not locate libqtty_ffi under ${_siderust_ffi_search_paths}")
+            "siderust_cpp: could not locate qtty_ffi under ${_siderust_ffi_search_paths}")
         return()
     endif()
     add_library(qtty_ffi SHARED IMPORTED)
@@ -57,14 +83,21 @@ if(NOT TARGET qtty_ffi)
 endif()
 
 if(NOT TARGET tempoch_ffi)
-    find_library(_siderust_tempoch_ffi_path
-        NAMES tempoch_ffi libtempoch_ffi
-        PATHS ${_siderust_ffi_search_paths}
-        NO_DEFAULT_PATH)
+    if(WIN32)
+        find_library(_siderust_tempoch_ffi_path
+            NAMES tempoch_ffi
+            PATHS ${_siderust_ffi_search_paths}
+            NO_DEFAULT_PATH)
+    else()
+        find_library(_siderust_tempoch_ffi_path
+            NAMES tempoch_ffi libtempoch_ffi
+            PATHS ${_siderust_ffi_search_paths}
+            NO_DEFAULT_PATH)
+    endif()
     if(NOT _siderust_tempoch_ffi_path)
         set(siderust_cpp_FOUND FALSE)
         set(siderust_cpp_NOT_FOUND_MESSAGE
-            "siderust_cpp: could not locate libtempoch_ffi under ${_siderust_ffi_search_paths}")
+            "siderust_cpp: could not locate tempoch_ffi under ${_siderust_ffi_search_paths}")
         return()
     endif()
     add_library(tempoch_ffi SHARED IMPORTED)
@@ -76,10 +109,14 @@ endif()
 # transitively.
 if(NOT TARGET siderust::siderust_ffi)
     add_library(siderust::siderust_ffi SHARED IMPORTED)
-    set_target_properties(siderust::siderust_ffi PROPERTIES
+    set(_siderust_ffi_props
         IMPORTED_LOCATION "${SIDERUST_FFI_LIBRARY}"
         INTERFACE_INCLUDE_DIRECTORIES "${SIDERUST_CPP_INCLUDE_DIR}"
     )
+    if(WIN32)
+        list(APPEND _siderust_ffi_props IMPORTED_IMPLIB "${SIDERUST_FFI_IMPLIB}")
+    endif()
+    set_target_properties(siderust::siderust_ffi PROPERTIES ${_siderust_ffi_props})
 endif()
 
 include("${CMAKE_CURRENT_LIST_DIR}/siderust_cppTargets.cmake")

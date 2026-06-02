@@ -116,9 +116,14 @@ jobs:
         shell: bash
         run: cmake --build build-consumer --target smoke
 
-      - name: Run consumer smoke binary
+      - name: Run consumer smoke binary (RPATH from staged prefix)
         shell: bash
         run: |
           set -euo pipefail
-          LD_LIBRARY_PATH="$GITHUB_WORKSPACE/stage/lib:${LD_LIBRARY_PATH:-}" \
-            ./build-consumer/smoke
+          ./build-consumer/smoke
+
+      - name: Verify smoke runs without LD_LIBRARY_PATH override
+        shell: bash
+        run: |
+          set -euo pipefail
+          env -u LD_LIBRARY_PATH ./build-consumer/smoke

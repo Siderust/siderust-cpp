@@ -12,6 +12,7 @@
  * flight.  Prints departure / arrival velocities and the implied Δv at each end.
  */
 
+#include <siderust/constants.hpp>
 #include <siderust/lambert.hpp>
 
 #include <cmath>
@@ -25,7 +26,7 @@ int main() {
   // Heliocentric ICRS positions (toy J2000 placement).
   const double r_earth_km = AU_KM;
   const double r_mars_km = 1.524 * AU_KM;
-  const double phase_lead = 60.0 * M_PI / 180.0; // Mars 60° ahead
+  const double phase_lead = 60.0 * siderust::constants::pi / 180.0; // Mars 60° ahead
 
   const double r1[3] = {r_earth_km, 0.0, 0.0};
   const double r2[3] = {

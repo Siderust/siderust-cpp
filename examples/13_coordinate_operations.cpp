@@ -73,7 +73,7 @@ int main() {
 
   // angle_to returns radians
   double angle_rad = polaris_cart.angle_to(sirius_cart);
-  double angle_deg = angle_rad * 180.0 / M_PI;
+  double angle_deg = angle_rad * 180.0 / constants::pi;
 
   std::cout << std::setprecision(4);
   std::cout << "Polaris cartesian: (" << polaris_cart.x << ", " << polaris_cart.y << ", "

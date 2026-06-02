@@ -14,6 +14,8 @@
 
 #include <qtty/qtty.hpp>
 
+#include "detail/stream.hpp"
+
 #include <cmath>
 #include <ostream>
 #include <type_traits>
@@ -126,6 +128,15 @@ template <typename F> struct Direction {
     return to_frame<Target>(jd);
   }
 };
+
+/**
+ * @brief Stream operator for cartesian::Direction.
+ */
+template <typename F>
+inline std::ostream &operator<<(std::ostream &os, const Direction<F> &dir) {
+  detail::write_frame<F>(os);
+  return os << " direction (x=" << dir.x << ", y=" << dir.y << ", z=" << dir.z << ')';
+}
 
 // Forward-declare Position for Displacement operators.
 template <typename C, typename F, typename U> struct Position;
@@ -251,7 +262,8 @@ template <typename F, typename U> struct Displacement {
  */
 template <typename F, typename U>
 inline std::ostream &operator<<(std::ostream &os, const Displacement<F, U> &d) {
-  return os << d.x() << ", " << d.y() << ", " << d.z();
+  detail::write_frame<F>(os);
+  return os << " displacement (dx=" << d.x() << ", dy=" << d.y() << ", dz=" << d.z() << ')';
 }
 
 /**
@@ -475,7 +487,8 @@ template <typename C, typename F, typename U> struct Position {
  */
 template <typename C, typename F, typename U>
 inline std::ostream &operator<<(std::ostream &os, const Position<C, F, U> &pos) {
-  return os << pos.x() << ", " << pos.y() << ", " << pos.z();
+  detail::write_center_frame<C, F>(os);
+  return os << " (x=" << pos.x() << ", y=" << pos.y() << ", z=" << pos.z() << ')';
 }
 
 } // namespace cartesian
