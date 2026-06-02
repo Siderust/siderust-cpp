@@ -5,7 +5,7 @@
 /// @brief Orbit model overview for the C++ bindings.
 
 #include <cmath>
-#include <cstdio>
+#include <iostream>
 #include <siderust/siderust.hpp>
 
 using namespace siderust;
@@ -15,44 +15,41 @@ using TTJD = JulianDate;
 int main() {
   const TTJD jd(2458850.0);
 
-  std::puts("=== Orbit Models ===\n");
-  std::printf("Epoch: %.1f\n\n", jd.value());
+  std::cout << "=== Orbit Models ===\n\n";
+  std::cout << "Epoch: " << jd << "\n\n";
 
   const KeplerianOrbit kepler{1.0_au, 0.0167, 0.0_deg, 0.0_deg, 102.9_deg, 100.0_deg, 2451545.0};
   const auto kepler_pos = kepler_position(kepler, jd);
-  std::puts("1. KeplerianOrbit");
-  std::printf("   heliocentric position = (%.12f, %.12f, %.12f) AU\n", kepler_pos.x().value(),
-              kepler_pos.y().value(), kepler_pos.z().value());
-  std::printf("   radius = %.12f AU\n\n", kepler_pos.distance().value());
+  std::cout << "1. KeplerianOrbit\n";
+  std::cout << "   heliocentric position = " << kepler_pos << '\n';
+  std::cout << "   radius = " << kepler_pos.distance() << "\n\n";
 
   const MeanMotionOrbit mean_motion{1.0_au, 0.0167, 0.0_deg, 0.0_deg, 102.9_deg, 0.9856, 2451545.0};
   const auto mean_motion_pos = mean_motion.position_at(jd);
-  std::puts("2. MeanMotionOrbit");
-  std::printf("   heliocentric position = (%.12f, %.12f, %.12f) AU\n", mean_motion_pos.x().value(),
-              mean_motion_pos.y().value(), mean_motion_pos.z().value());
-  std::printf("   radius = %.12f AU\n\n", mean_motion_pos.distance().value());
+  std::cout << "2. MeanMotionOrbit\n";
+  std::cout << "   heliocentric position = " << mean_motion_pos << '\n';
+  std::cout << "   radius = " << mean_motion_pos.distance() << "\n\n";
 
   const ConicOrbit halley_like{0.586_au,  0.967,    162.3_deg, 58.4_deg,
                                111.3_deg, 38.4_deg, 2451545.0};
   const ConicOrbit hyperbolic{0.255_au, 1.2, 122.7_deg, 24.6_deg, 241.8_deg, 12.0_deg, 2451545.0};
   const auto halley_pos = halley_like.position_at(jd);
   const auto hyperbolic_pos = hyperbolic.position_at(jd);
-  std::puts("3. ConicOrbit");
-  std::printf("   halley-like kind = %s\n",
-              halley_like.kind() == ConicKind::Elliptic ? "Elliptic" : "Hyperbolic");
-  std::printf("   hyperbolic kind  = %s\n",
-              hyperbolic.kind() == ConicKind::Elliptic ? "Elliptic" : "Hyperbolic");
-  std::printf("   elliptic radius  = %.12f AU | hyperbolic radius = %.12f AU\n\n",
-              halley_pos.distance().value(), hyperbolic_pos.distance().value());
+  std::cout << "3. ConicOrbit\n";
+  std::cout << "   halley-like kind = " << halley_like.kind() << '\n';
+  std::cout << "   hyperbolic kind  = " << hyperbolic.kind() << '\n';
+  std::cout << "   elliptic radius  = " << halley_pos.distance()
+            << " | hyperbolic radius = " << hyperbolic_pos.distance() << "\n\n";
 
   const PreparedOrbit prepared(kepler);
   const auto prepared_pos = prepared.position_at(jd);
   const double delta = std::sqrt(std::pow(kepler_pos.x().value() - prepared_pos.x().value(), 2) +
                                  std::pow(kepler_pos.y().value() - prepared_pos.y().value(), 2) +
                                  std::pow(kepler_pos.z().value() - prepared_pos.z().value(), 2));
-  std::puts("4. PreparedOrbit");
-  std::printf("   prepared radius = %.12f AU\n", prepared_pos.distance().value());
-  std::printf("   chord delta vs direct Keplerian = %.3e\n", delta);
+  std::cout << std::scientific << std::setprecision(3);
+  std::cout << "4. PreparedOrbit\n";
+  std::cout << "   prepared radius = " << prepared_pos.distance() << '\n';
+  std::cout << "   chord delta vs direct Keplerian = " << delta << '\n';
 
   return 0;
 }

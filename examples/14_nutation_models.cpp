@@ -5,7 +5,7 @@
 /// @brief Nutation model selection example for the C++ bindings.
 
 #include <cmath>
-#include <cstdio>
+#include <iostream>
 #include <siderust/siderust.hpp>
 
 using namespace siderust;
@@ -25,9 +25,9 @@ int main() {
   const TTJD jd(2458850.0);
   const cartesian::Direction<ICRS> icrs(0.6, -0.3, 0.74);
 
-  std::puts("=== Nutation Model Selection ===\n");
-  std::printf("Epoch (TT): %.1f\n", jd.value());
-  std::printf("Input ICRS direction: (%.6f, %.6f, %.6f)\n\n", icrs.x, icrs.y, icrs.z);
+  std::cout << "=== Nutation Model Selection ===\n\n";
+  std::cout << "Epoch (TT): " << jd << '\n';
+  std::cout << "Input ICRS direction: " << icrs << "\n\n";
 
   const auto default_true = icrs.to_frame<EquatorialTrueOfDate>(jd);
 
@@ -39,23 +39,23 @@ int main() {
   const auto precession_only_true =
       icrs.to_frame_with<EquatorialTrueOfDate>(jd, precession_only_ctx);
 
-  std::puts("1. Default transform (Iau2006A)");
-  std::printf("   TOD direction = (%.12f, %.12f, %.12f)\n", default_true.x, default_true.y,
-              default_true.z);
+  std::cout << std::scientific << std::setprecision(3);
+  std::cout << "1. Default transform (Iau2006A)\n";
+  std::cout << "   TOD direction = " << default_true << '\n';
 
-  std::puts("\n2. Custom transform with Iau2000B");
-  std::printf("   TOD direction = (%.12f, %.12f, %.12f)\n", fast_true.x, fast_true.y, fast_true.z);
-  std::printf("   Chord delta vs default = %.3e\n", chord_delta(default_true, fast_true));
+  std::cout << "\n2. Custom transform with Iau2000B\n";
+  std::cout << "   TOD direction = " << fast_true << '\n';
+  std::cout << "   Chord delta vs default = " << chord_delta(default_true, fast_true) << '\n';
 
-  std::puts("\n3. Custom transform with Iau2006 (precession only)");
-  std::printf("   TOD direction = (%.12f, %.12f, %.12f)\n", precession_only_true.x,
-              precession_only_true.y, precession_only_true.z);
-  std::printf("   Chord delta vs default = %.3e\n",
-              chord_delta(default_true, precession_only_true));
+  std::cout << "\n3. Custom transform with Iau2006 (precession only)\n";
+  std::cout << "   TOD direction = " << precession_only_true << '\n';
+  std::cout << "   Chord delta vs default = " << chord_delta(default_true, precession_only_true)
+            << "\n\n";
 
-  std::puts("\nPattern to copy:");
-  std::puts("  AstroContext ctx;");
-  std::puts("  auto custom = ctx.with_model<Iau2000B>();");
-  std::puts("  auto tod = icrs.to_frame_with<EquatorialTrueOfDate>(jd, custom);");
+  std::cout << std::fixed;
+  std::cout << "Pattern to copy:\n";
+  std::cout << "  AstroContext ctx;\n";
+  std::cout << "  auto custom = ctx.with_model<Iau2000B>();\n";
+  std::cout << "  auto tod = icrs.to_frame_with<EquatorialTrueOfDate>(jd, custom);\n";
   return 0;
 }

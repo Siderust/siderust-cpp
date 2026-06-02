@@ -18,7 +18,6 @@
 #include <siderust/siderust.hpp>
 
 #include <cmath>
-#include <cstdio>
 #include <iomanip>
 #include <iostream>
 #include <string>
@@ -53,7 +52,7 @@ inline Orbit halley_orbit() {
 // ─── Section 1: Trackable objects ───────────────────────────────────────────
 
 void section_trackable_objects(const TTJD &jd, const TTJD &jd_next) {
-  std::puts("1) Trackable objects (ICRS, star, Sun, planet, Moon)");
+  std::cout << "1) Trackable objects (ICRS, star, Sun, planet, Moon)\n";
 
   // ICRS direction — time-invariant target
   spherical::direction::ICRS fixed_icrs(120.0_deg, 22.5_deg);
@@ -65,7 +64,7 @@ void section_trackable_objects(const TTJD &jd, const TTJD &jd_next) {
 
   // Sirius via the catalog StarTarget
   StarTarget sirius_target(SIRIUS());
-  std::printf("  Sirius via StarTarget: name = %s\n", sirius_target.name().c_str());
+  std::cout << "  Sirius via StarTarget: name = " << sirius_target.name() << '\n';
 
   // Sun, Mars, Moon via BodyTarget
   BodyTarget sun_target(Body::Sun);
@@ -92,7 +91,7 @@ void section_trackable_objects(const TTJD &jd, const TTJD &jd_next) {
 // ─── Section 2: Target snapshots ────────────────────────────────────────────
 
 void section_target_snapshots(const TTJD &jd, const TTJD &jd_next) {
-  std::puts("2) Target snapshots for arbitrary sky objects");
+  std::cout << "2) Target snapshots for arbitrary sky objects\n";
 
   // Mars heliocentric snapshot (VSOP87 ephemeris)
   Snapshot<cartesian::position::EclipticMeanJ2000<qtty::AstronomicalUnit>> mars_snap{
@@ -141,7 +140,7 @@ inline spherical::direction::ICRS apply_proper_motion(const spherical::direction
   // ProperMotion rates in deg/yr (already stored as deg/yr in the struct)
   // MuAlphaStar convention: pm_ra is already μα* = μα·cos(δ), so divide by
   // cos(δ)
-  double cos_dec = std::cos(dec_deg * M_PI / 180.0);
+  double cos_dec = std::cos(dec_deg * constants::pi / 180.0);
   double dra = (cos_dec > 1e-12) ? pm.pm_ra_deg_yr * dt_years / cos_dec : 0.0;
   double ddec = pm.pm_dec_deg_yr * dt_years;
 
@@ -149,7 +148,7 @@ inline spherical::direction::ICRS apply_proper_motion(const spherical::direction
 }
 
 void section_target_with_proper_motion(const TTJD &jd) {
-  std::puts("3) Target with proper motion (stellar-style target)");
+  std::cout << "3) Target with proper motion (stellar-style target)\n";
 
   // Betelgeuse approximate ICRS coordinates at J2000
   // (RA ≈ 88.7929°, Dec ≈ +7.4071°)
@@ -160,23 +159,20 @@ void section_target_with_proper_motion(const TTJD &jd) {
   constexpr double MAS_TO_DEG = 1.0 / 3600000.0;
   ProperMotion pm(27.54 * MAS_TO_DEG, 10.86 * MAS_TO_DEG);
 
-  std::cout << "  Betelgeuse-like target at J2000: RA " << std::fixed << std::setprecision(6)
-            << betelgeuse_pos.ra() << ", Dec " << betelgeuse_pos.dec() << std::endl;
+  std::cout << "  Betelgeuse-like target at J2000: " << betelgeuse_pos << '\n';
 
   // Propagate 25 years
   constexpr double JULIAN_YEAR = 365.25;
   auto jd_future = jd + qtty::Day(25.0 * JULIAN_YEAR);
   auto moved = apply_proper_motion(betelgeuse_pos, pm, jd, jd_future);
 
-  std::cout << "  After 25 years: RA " << std::fixed << std::setprecision(6) << moved.ra()
-            << ", Dec " << moved.dec() << "\n"
-            << std::endl;
+  std::cout << "  After 25 years: " << moved << "\n\n";
 }
 
 // ─── Section 4: Frame + center transforms ───────────────────────────────────
 
 void section_target_transform(const TTJD &jd) {
-  std::puts("4) Target conversion across frame + center");
+  std::cout << "4) Target conversion across frame + center\n";
 
   // Mars heliocentric ecliptic → geocentric equatorial
   auto mars_helio = ephemeris::mars_heliocentric(jd);
@@ -195,8 +191,8 @@ int main() {
   auto jd = TTJD::J2000();
   auto jd_next = jd + qtty::Day(1.0);
 
-  std::puts("Target + Trackable examples");
-  std::puts("===========================\n");
+  std::cout << "Target + Trackable examples\n"
+            << "===========================\n\n";
 
   section_trackable_objects(jd, jd_next);
   section_target_snapshots(jd, jd_next);

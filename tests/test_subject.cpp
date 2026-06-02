@@ -22,7 +22,7 @@ static Period one_day() { return Period(ModifiedJulianDate(60000.0), ModifiedJul
 TEST(SubjectTest, AltitudeAtBody) {
   auto subj = Subject::body(Body::Sun);
   auto alt = altitude_at(subj, paris(), mid_day());
-  EXPECT_TRUE(alt.value() > -M_PI && alt.value() < M_PI);
+  EXPECT_TRUE(alt.value() > -constants::pi && alt.value() < constants::pi);
 }
 
 TEST(SubjectTest, AltitudeAtMoon) {

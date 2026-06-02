@@ -8,11 +8,14 @@
 
 #include "../astro_context.hpp"
 #include "../centers.hpp"
+#include "../constants.hpp"
 #include "../frames.hpp"
 #include "../time.hpp"
 #include "geodetic.hpp"
 
 #include <qtty/qtty.hpp>
+
+#include "detail/stream.hpp"
 
 #include <cmath>
 #include <ostream>
@@ -139,8 +142,8 @@ public:
    * @return Angular separation in degrees.
    */
   qtty::Degree angular_separation(const Direction &other) const {
-    constexpr double DEG2RAD = M_PI / 180.0;
-    constexpr double RAD2DEG = 180.0 / M_PI;
+    constexpr double DEG2RAD = constants::pi / 180.0;
+    constexpr double RAD2DEG = 180.0 / constants::pi;
     const double az1 = azimuth_.value() * DEG2RAD;
     const double po1 = polar_.value() * DEG2RAD;
     const double az2 = other.azimuth_.value() * DEG2RAD;
@@ -210,7 +213,7 @@ public:
    * The result is a frame-tagged unit vector in `cartesian::Direction<F>`.
    */
   cartesian::Direction<F> to_cartesian() const {
-    constexpr double DEG2RAD = M_PI / 180.0;
+    constexpr double DEG2RAD = constants::pi / 180.0;
     const double az = azimuth_.value() * DEG2RAD;
     const double po = polar_.value() * DEG2RAD;
     const double cp = std::cos(po);
@@ -394,7 +397,7 @@ public:
     const double s = other.dist_.value();
 
     // convert degrees to radians
-    constexpr double DEG2RAD = M_PI / 180.0;
+    constexpr double DEG2RAD = constants::pi / 180.0;
     const double a1 = azimuth_.value() * DEG2RAD;
     const double p1 = polar_.value() * DEG2RAD;
     const double a2 = other.azimuth_.value() * DEG2RAD;
@@ -423,7 +426,8 @@ public:
  */
 template <typename F, std::enable_if_t<frames::has_ra_dec_v<F>, int> = 0>
 inline std::ostream &operator<<(std::ostream &os, const Direction<F> &dir) {
-  return os << dir.ra() << ", " << dir.dec();
+  coordinates::detail::write_frame<F>(os);
+  return os << " (ra=" << dir.ra() << ", dec=" << dir.dec() << ')';
 }
 
 /**
@@ -431,7 +435,8 @@ inline std::ostream &operator<<(std::ostream &os, const Direction<F> &dir) {
  */
 template <typename F, std::enable_if_t<frames::has_az_alt_v<F>, int> = 0>
 inline std::ostream &operator<<(std::ostream &os, const Direction<F> &dir) {
-  return os << dir.az() << ", " << dir.alt();
+  coordinates::detail::write_frame<F>(os);
+  return os << " (az=" << dir.az() << ", alt=" << dir.alt() << ')';
 }
 
 /**
@@ -439,7 +444,35 @@ inline std::ostream &operator<<(std::ostream &os, const Direction<F> &dir) {
  */
 template <typename F, std::enable_if_t<frames::has_lon_lat_v<F>, int> = 0>
 inline std::ostream &operator<<(std::ostream &os, const Direction<F> &dir) {
-  return os << dir.lon() << ", " << dir.lat();
+  coordinates::detail::write_frame<F>(os);
+  return os << " (lon=" << dir.lon() << ", lat=" << dir.lat() << ')';
+}
+
+/**
+ * @brief Stream operator for spherical::Position (RA/Dec frames).
+ */
+template <typename C, typename F, typename U, std::enable_if_t<frames::has_ra_dec_v<F>, int> = 0>
+inline std::ostream &operator<<(std::ostream &os, const Position<C, F, U> &pos) {
+  coordinates::detail::write_center_frame<C, F>(os);
+  return os << " (ra=" << pos.ra() << ", dec=" << pos.dec() << ", r=" << pos.distance() << ')';
+}
+
+/**
+ * @brief Stream operator for spherical::Position (Horizontal frame).
+ */
+template <typename C, typename F, typename U, std::enable_if_t<frames::has_az_alt_v<F>, int> = 0>
+inline std::ostream &operator<<(std::ostream &os, const Position<C, F, U> &pos) {
+  coordinates::detail::write_center_frame<C, F>(os);
+  return os << " (az=" << pos.az() << ", alt=" << pos.alt() << ", r=" << pos.distance() << ')';
+}
+
+/**
+ * @brief Stream operator for spherical::Position (lon/lat frames).
+ */
+template <typename C, typename F, typename U, std::enable_if_t<frames::has_lon_lat_v<F>, int> = 0>
+inline std::ostream &operator<<(std::ostream &os, const Position<C, F, U> &pos) {
+  coordinates::detail::write_center_frame<C, F>(os);
+  return os << " (lon=" << pos.lon() << ", lat=" << pos.lat() << ", r=" << pos.distance() << ')';
 }
 
 } // namespace spherical

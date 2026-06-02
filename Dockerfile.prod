@@ -34,14 +34,22 @@ COPY siderust/ siderust/
 COPY tempoch-cpp/ tempoch-cpp/
 
 # Build all Rust shared libraries in release mode.
+#
+# Path rules (must match siderust-cpp's top-level CMakeLists.txt and
+# the inner tempoch-cpp / qtty-cpp CMakeLists):
+#
+#   - siderust : workspace target dir            → /src/siderust/target/release/
+#   - tempoch  : CARGO_TARGET_DIR is overridden  → /src/tempoch-cpp/tempoch/tempoch-ffi/target/release/
+#   - qtty     : workspace target dir            → /src/tempoch-cpp/qtty-cpp/qtty/target/release/
 RUN cargo rustc --release --crate-type cdylib \
         --manifest-path /src/siderust/siderust-ffi/Cargo.toml
 
-RUN cargo rustc --release --crate-type cdylib \
+RUN CARGO_TARGET_DIR=/src/tempoch-cpp/tempoch/tempoch-ffi/target \
+    cargo rustc --release --crate-type cdylib \
         --manifest-path /src/tempoch-cpp/tempoch/tempoch-ffi/Cargo.toml
 
-RUN cargo rustc --release --crate-type cdylib \
-        --manifest-path /src/tempoch-cpp/qtty-cpp/qtty/qtty-ffi/Cargo.toml
+RUN cargo build --release -p qtty-ffi \
+        --manifest-path /src/tempoch-cpp/qtty-cpp/qtty/Cargo.toml
 
 # ---------------------------------------------------------------------------
 # Stage 2: C++ build and install
@@ -73,7 +81,7 @@ COPY . /src/
 # Bring pre-built Rust artefacts into the expected target/release locations
 # so CMake's custom target finds them and does not rebuild.
 COPY --from=rust-builder \
-    /src/siderust/siderust-ffi/target/release/libsiderust_ffi.so \
+    /src/siderust/target/release/libsiderust_ffi.so \
     /src/siderust/target/release/libsiderust_ffi.so
 
 COPY --from=rust-builder \
@@ -81,8 +89,8 @@ COPY --from=rust-builder \
     /src/tempoch-cpp/tempoch/tempoch-ffi/target/release/libtempoch_ffi.so
 
 COPY --from=rust-builder \
-    /src/tempoch-cpp/qtty-cpp/qtty/qtty-ffi/target/release/libqtty_ffi.so \
-    /src/tempoch-cpp/qtty-cpp/qtty/qtty-ffi/target/release/libqtty_ffi.so
+    /src/tempoch-cpp/qtty-cpp/qtty/target/release/libqtty_ffi.so \
+    /src/tempoch-cpp/qtty-cpp/qtty/target/release/libqtty_ffi.so
 
 RUN cmake -S . -B build -G Ninja \
         -DCMAKE_BUILD_TYPE=Release \
@@ -95,7 +103,7 @@ RUN cmake -S . -B build -G Ninja \
 RUN mkdir -p /install/lib && \
     cp /src/siderust/target/release/libsiderust_ffi.so \
        /src/tempoch-cpp/tempoch/tempoch-ffi/target/release/libtempoch_ffi.so \
-       /src/tempoch-cpp/qtty-cpp/qtty/qtty-ffi/target/release/libqtty_ffi.so \
+       /src/tempoch-cpp/qtty-cpp/qtty/target/release/libqtty_ffi.so \
        /install/lib/
 
 # ---------------------------------------------------------------------------

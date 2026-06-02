@@ -5,9 +5,124 @@ include(CMakeFindDependencyMacro)
 find_dependency(qtty_cpp REQUIRED)
 find_dependency(tempoch_cpp REQUIRED)
 
+# ---------------------------------------------------------------------------
+# Reconstruct the absolute install paths from PACKAGE_PREFIX_DIR (set by
+# @PACKAGE_INIT@) and the install-tree CMAKE_INSTALL_* directories that were
+# baked in at configure time via PATH_VARS.
+# ---------------------------------------------------------------------------
+set_and_check(SIDERUST_CPP_INCLUDE_DIR "@PACKAGE_CMAKE_INSTALL_INCLUDEDIR@")
+set_and_check(SIDERUST_CPP_LIB_DIR     "@PACKAGE_CMAKE_INSTALL_LIBDIR@")
+
+# Runtime shared library (DLL on Windows, .so/.dylib elsewhere).
+if(WIN32)
+    set_and_check(SIDERUST_CPP_BINDIR "@PACKAGE_CMAKE_INSTALL_BINDIR@")
+    set(SIDERUST_FFI_LIBRARY "${SIDERUST_CPP_BINDIR}/@SIDERUST_FFI_INSTALLED_LIB_NAME@")
+    set(SIDERUST_FFI_IMPLIB "${SIDERUST_CPP_LIB_DIR}/@SIDERUST_FFI_INSTALLED_IMPLIB_NAME@")
+else()
+    set(SIDERUST_FFI_LIBRARY "${SIDERUST_CPP_LIB_DIR}/@SIDERUST_FFI_INSTALLED_LIB_NAME@")
+endif()
+
+if(NOT EXISTS "${SIDERUST_FFI_LIBRARY}")
+    set(siderust_cpp_FOUND FALSE)
+    set(siderust_cpp_NOT_FOUND_MESSAGE
+        "siderust_cpp: bundled siderust_ffi shared library not found at ${SIDERUST_FFI_LIBRARY}")
+    return()
+endif()
+
+if(WIN32 AND NOT EXISTS "${SIDERUST_FFI_IMPLIB}")
+    set(siderust_cpp_FOUND FALSE)
+    set(siderust_cpp_NOT_FOUND_MESSAGE
+        "siderust_cpp: bundled siderust_ffi import library not found at ${SIDERUST_FFI_IMPLIB}")
+    return()
+endif()
+
+# ---------------------------------------------------------------------------
+# Workaround for upstream qtty-cpp / tempoch-cpp: their installed
+# *Targets.cmake exports the bare names `qtty_ffi` and `tempoch_ffi` in
+# INTERFACE_LINK_LIBRARIES (because they were build-tree SHARED IMPORTED
+# targets) but neither *Config.cmake defines a matching imported target in
+# the installed tree. Worse, those configs currently bake in a broken
+# absolute path for QTTY_FFI_LIBRARY / TEMPOCH_FFI_LIBRARY (the @PACKAGE_*@
+# substitution did not include CMAKE_INSTALL_PREFIX in PATH_VARS, so the
+# path comes out as e.g. "/lib/libqtty_ffi.so").
+#
+# Instead of trusting QTTY_FFI_LIBRARY / TEMPOCH_FFI_LIBRARY, locate the
+# shared libraries ourselves under the install prefix.
+# ---------------------------------------------------------------------------
+set(_siderust_ffi_search_paths
+    "${PACKAGE_PREFIX_DIR}/${CMAKE_INSTALL_LIBDIR}"
+    "${PACKAGE_PREFIX_DIR}/${CMAKE_INSTALL_BINDIR}"
+    "${PACKAGE_PREFIX_DIR}/lib"
+    "${PACKAGE_PREFIX_DIR}/lib64"
+    "${PACKAGE_PREFIX_DIR}/bin"
+    "${SIDERUST_CPP_LIB_DIR}")
+if(WIN32)
+    list(APPEND _siderust_ffi_search_paths "${SIDERUST_CPP_BINDIR}")
+endif()
+
+if(NOT TARGET qtty_ffi)
+    if(WIN32)
+        find_library(_siderust_qtty_ffi_path
+            NAMES qtty_ffi
+            PATHS ${_siderust_ffi_search_paths}
+            NO_DEFAULT_PATH)
+    else()
+        find_library(_siderust_qtty_ffi_path
+            NAMES qtty_ffi libqtty_ffi
+            PATHS ${_siderust_ffi_search_paths}
+            NO_DEFAULT_PATH)
+    endif()
+    if(NOT _siderust_qtty_ffi_path)
+        set(siderust_cpp_FOUND FALSE)
+        set(siderust_cpp_NOT_FOUND_MESSAGE
+            "siderust_cpp: could not locate qtty_ffi under ${_siderust_ffi_search_paths}")
+        return()
+    endif()
+    add_library(qtty_ffi SHARED IMPORTED)
+    set_target_properties(qtty_ffi PROPERTIES IMPORTED_LOCATION "${_siderust_qtty_ffi_path}")
+endif()
+
+if(NOT TARGET tempoch_ffi)
+    if(WIN32)
+        find_library(_siderust_tempoch_ffi_path
+            NAMES tempoch_ffi
+            PATHS ${_siderust_ffi_search_paths}
+            NO_DEFAULT_PATH)
+    else()
+        find_library(_siderust_tempoch_ffi_path
+            NAMES tempoch_ffi libtempoch_ffi
+            PATHS ${_siderust_ffi_search_paths}
+            NO_DEFAULT_PATH)
+    endif()
+    if(NOT _siderust_tempoch_ffi_path)
+        set(siderust_cpp_FOUND FALSE)
+        set(siderust_cpp_NOT_FOUND_MESSAGE
+            "siderust_cpp: could not locate tempoch_ffi under ${_siderust_ffi_search_paths}")
+        return()
+    endif()
+    add_library(tempoch_ffi SHARED IMPORTED)
+    set_target_properties(tempoch_ffi PROPERTIES IMPORTED_LOCATION "${_siderust_tempoch_ffi_path}")
+endif()
+
+# Imported target for the bundled siderust FFI shared library so consumers
+# that link against siderust::siderust_cpp resolve siderust_ffi symbols
+# transitively.
+if(NOT TARGET siderust::siderust_ffi)
+    add_library(siderust::siderust_ffi SHARED IMPORTED)
+    set(_siderust_ffi_props
+        IMPORTED_LOCATION "${SIDERUST_FFI_LIBRARY}"
+        INTERFACE_INCLUDE_DIRECTORIES "${SIDERUST_CPP_INCLUDE_DIR}"
+    )
+    if(WIN32)
+        list(APPEND _siderust_ffi_props IMPORTED_IMPLIB "${SIDERUST_FFI_IMPLIB}")
+    endif()
+    set_target_properties(siderust::siderust_ffi PROPERTIES ${_siderust_ffi_props})
+endif()
+
 include("${CMAKE_CURRENT_LIST_DIR}/siderust_cppTargets.cmake")
 
-set(SIDERUST_FFI_LIBRARY "@PACKAGE_CMAKE_INSTALL_PREFIX@/lib/@CMAKE_SHARED_LIBRARY_PREFIX@siderust_ffi@CMAKE_SHARED_LIBRARY_SUFFIX@")
-set(TEMPOCH_FFI_LIBRARY  "@PACKAGE_CMAKE_INSTALL_PREFIX@/lib/@CMAKE_SHARED_LIBRARY_PREFIX@tempoch_ffi@CMAKE_SHARED_LIBRARY_SUFFIX@")
+# Legacy variables for non-target-based consumers.
+set(SIDERUST_CPP_LIBRARIES    siderust::siderust_cpp)
+set(SIDERUST_CPP_INCLUDE_DIRS "${SIDERUST_CPP_INCLUDE_DIR}")
 
 check_required_components(siderust_cpp)

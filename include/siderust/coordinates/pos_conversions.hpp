@@ -6,6 +6,7 @@
  * conversions.
  */
 
+#include "../constants.hpp"
 #include "cartesian.hpp"
 #include "spherical.hpp"
 
@@ -18,10 +19,10 @@ spherical::Position<C, F, U> cartesian::Position<C, F, U>::to_spherical() const 
   const double y = comp_y.value();
   const double z = comp_z.value();
   const double r = std::sqrt(x * x + y * y + z * z);
-  double lon = std::atan2(y, x) * 180.0 / M_PI;
+  double lon = std::atan2(y, x) * 180.0 / constants::pi;
   if (lon < 0.0)
     lon += 360.0;
-  const double lat = std::atan2(z, std::sqrt(x * x + y * y)) * 180.0 / M_PI;
+  const double lat = std::atan2(z, std::sqrt(x * x + y * y)) * 180.0 / constants::pi;
   return spherical::Position<C, F, U>(qtty::Degree(lon), qtty::Degree(lat), U(r));
 }
 
@@ -41,8 +42,8 @@ cartesian::Position<C, F, U> spherical::Position<C, F, U>::to_cartesian() const 
     lat_deg = polar_.value();
   }
 
-  const double lon = lon_deg * M_PI / 180.0;
-  const double lat = lat_deg * M_PI / 180.0;
+  const double lon = lon_deg * constants::pi / 180.0;
+  const double lat = lat_deg * constants::pi / 180.0;
   const double r = dist_.value();
 
   const double cx = r * std::cos(lat) * std::cos(lon);

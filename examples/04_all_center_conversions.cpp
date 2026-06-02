@@ -15,7 +15,6 @@
 
 #include <siderust/siderust.hpp>
 
-#include <cstdio>
 #include <iomanip>
 #include <iostream>
 
@@ -77,8 +76,8 @@ int main() {
   auto p_geo = p_bary.to_center<Geocentric>(jd);
 
   // ── Standard center shifts ────────────────────────────────────────────────
-  std::puts("── Standard center shifts "
-            "─────────────────────────────────────────────");
+  std::cout << "── Standard center shifts "
+               "─────────────────────────────────────────────\n";
 
   // Barycentric source
   show_center_conversion<Barycentric, Barycentric>(jd, p_bary);
@@ -96,8 +95,8 @@ int main() {
   show_center_conversion<Geocentric, Heliocentric>(jd, p_geo);
 
   // ── Bodycentric: Mars-like orbit (heliocentric reference) ──────────────────
-  std::puts("\n── Bodycentric – Mars-like orbit (heliocentric ref) "
-            "───────────────────");
+  std::cout << "\n── Bodycentric – Mars-like orbit (heliocentric ref) "
+               "───────────────────\n";
   Orbit mars_orbit{1.524_au,  // semi_major_axis
                    0.0934,    // eccentricity
                    1.85_deg,  // inclination
@@ -112,8 +111,8 @@ int main() {
   show_bodycentric_conversion("Geocentric", jd, p_geo, mars_params);
 
   // ── Bodycentric: ISS-like orbit (geocentric reference) ────────────────────
-  std::puts("\n── Bodycentric – ISS-like orbit (geocentric ref) "
-            "──────────────────────");
+  std::cout << "\n── Bodycentric – ISS-like orbit (geocentric ref) "
+               "──────────────────────\n";
   Orbit iss_orbit{0.0000426_au, // ~6 378 km in AU
                   0.001,        // eccentricity
                   51.6_deg,     // inclination

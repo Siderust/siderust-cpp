@@ -20,7 +20,6 @@
 
 #include <siderust/siderust.hpp>
 
-#include <cstdio>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
@@ -45,35 +44,33 @@ inline std::string json_string(const std::string &s) { return "\"" + s + "\""; }
 // ─── Section 1: Time objects ────────────────────────────────────────────────
 
 void section_times() {
-  std::puts("1) TIME OBJECTS");
-  std::puts("---------------");
+  std::cout << "1) TIME OBJECTS\n"
+            << "---------------\n";
 
   auto jd = TTJD::J2000();
   auto mjd = jd.to<format::MJD>();
   auto jd_plus1 = jd + qtty::Day(1.0);
   auto jd_plus7 = jd + qtty::Day(7.0);
 
-  // Pretty-print a TimeBundle-like JSON
-  std::puts("{");
-  std::printf("  \"j2000\": %s,\n", json_number(jd.value(), 1).c_str());
-  std::printf("  \"mjd\": %s,\n", json_number(mjd.value(), 1).c_str());
-  std::printf("  \"timeline\": [\n");
-  std::printf("    %s,\n", json_number(jd.value(), 1).c_str());
-  std::printf("    %s,\n", json_number(jd_plus1.value(), 1).c_str());
-  std::printf("    %s\n", json_number(jd_plus7.value(), 1).c_str());
-  std::puts("  ]");
-  std::puts("}");
+  std::cout << "{\n";
+  std::cout << "  \"j2000\": " << json_number(jd.value(), 1) << ",\n";
+  std::cout << "  \"mjd\": " << json_number(mjd.value(), 1) << ",\n";
+  std::cout << "  \"timeline\": [\n";
+  std::cout << "    " << json_number(jd.value(), 1) << ",\n";
+  std::cout << "    " << json_number(jd_plus1.value(), 1) << ",\n";
+  std::cout << "    " << json_number(jd_plus7.value(), 1) << "\n";
+  std::cout << "  ]\n";
+  std::cout << "}\n";
 
   std::cout << "Roundtrip check: j2000=" << std::fixed << std::setprecision(1) << jd
-            << ", timeline_len=3\n"
-            << std::endl;
+            << ", timeline_len=3\n\n";
 }
 
 // ─── Section 2: Coordinate objects ──────────────────────────────────────────
 
 void section_coordinates() {
-  std::puts("2) COORDINATE OBJECTS");
-  std::puts("---------------------");
+  std::cout << "2) COORDINATE OBJECTS\n"
+            << "---------------------\n";
 
   // Geocentric ICRS cartesian (km)
   cartesian::Position<Geocentric, ICRS, qtty::Kilometer> geo_icrs_cart(6371.0, 0.0, 0.0);
@@ -85,26 +82,23 @@ void section_coordinates() {
   // Observer site (geodetic)
   Geodetic observer_site(-17.8947, 28.7636, 2396.0);
 
-  std::puts("{");
-  std::printf("  \"geo_icrs_cart\": { \"x\": %s, \"y\": %s, \"z\": %s, "
-              "\"unit\": \"km\" },\n",
-              json_number(geo_icrs_cart.x().value(), 1).c_str(),
-              json_number(geo_icrs_cart.y().value(), 1).c_str(),
-              json_number(geo_icrs_cart.z().value(), 1).c_str());
-  std::printf("  \"helio_ecl_sph\": { \"lon\": %s, \"lat\": %s, \"r\": %s, "
-              "\"unit\": \"AU\" },\n",
-              json_number(helio_ecl_sph.direction().lon().value(), 1).c_str(),
-              json_number(helio_ecl_sph.direction().lat().value(), 1).c_str(),
-              json_number(helio_ecl_sph.distance().value(), 1).c_str());
-  std::printf("  \"observer_site\": { \"lon\": %s, \"lat\": %s, \"height_m\": %s }\n",
-              json_number(observer_site.lon.value(), 4).c_str(),
-              json_number(observer_site.lat.value(), 4).c_str(),
-              json_number(observer_site.height.value(), 1).c_str());
-  std::puts("}");
+  std::cout << "{\n";
+  std::cout << "  \"geo_icrs_cart\": { \"x\": " << json_number(geo_icrs_cart.x().value(), 1)
+            << ", \"y\": " << json_number(geo_icrs_cart.y().value(), 1)
+            << ", \"z\": " << json_number(geo_icrs_cart.z().value(), 1)
+            << ", \"unit\": \"km\" },\n";
+  std::cout << "  \"helio_ecl_sph\": { \"lon\": "
+            << json_number(helio_ecl_sph.direction().lon().value(), 1)
+            << ", \"lat\": " << json_number(helio_ecl_sph.direction().lat().value(), 1)
+            << ", \"r\": " << json_number(helio_ecl_sph.distance().value(), 1)
+            << ", \"unit\": \"AU\" },\n";
+  std::cout << "  \"observer_site\": { \"lon\": " << json_number(observer_site.lon.value(), 4)
+            << ", \"lat\": " << json_number(observer_site.lat.value(), 4)
+            << ", \"height_m\": " << json_number(observer_site.height.value(), 1) << " }\n";
+  std::cout << "}\n";
 
-  std::cout << "Roundtrip check: x=" << std::fixed << std::setprecision(1) << geo_icrs_cart.x()
-            << ", lon=" << std::setprecision(4) << observer_site.lon << "\n"
-            << std::endl;
+  std::cout << "Roundtrip check: geo_icrs_cart=" << geo_icrs_cart
+            << ", observer_site=" << observer_site << "\n\n";
 }
 
 // ─── Section 3: Body-related objects ────────────────────────────────────────
@@ -142,8 +136,8 @@ struct BodySnapshotJSON {
 };
 
 void section_body_objects(const TTJD &jd) {
-  std::puts("3) BODY-RELATED OBJECTS");
-  std::puts("-----------------------");
+  std::cout << "3) BODY-RELATED OBJECTS\n"
+            << "-----------------------\n";
 
   BodySnapshotJSON earth_snap{"Earth", jd, EARTH().orbit, ephemeris::earth_heliocentric(jd)};
 
@@ -152,58 +146,45 @@ void section_body_objects(const TTJD &jd) {
   auto halley_pos = kepler_position(halley_orb, jd);
   BodySnapshotJSON halley_snap{"Halley", jd, halley_orb, halley_pos};
 
-  std::puts("Earth snapshot JSON:");
-  std::puts(earth_snap.to_json().c_str());
-  std::puts("Halley snapshot JSON:");
-  std::puts(halley_snap.to_json().c_str());
+  std::cout << "Earth snapshot JSON:\n" << earth_snap.to_json() << '\n';
+  std::cout << "Halley snapshot JSON:\n" << halley_snap.to_json() << '\n';
 
-  std::cout << "Roundtrip check: " << halley_snap.name << " @ JD " << std::fixed
-            << std::setprecision(1) << halley_snap.epoch << ", r=" << std::setprecision(6)
-            << halley_snap.helio_ecl.distance() << "\n"
-            << std::endl;
+  std::cout << "Roundtrip check: " << halley_snap.name << " @ " << halley_snap.epoch
+            << ", r=" << std::fixed << std::setprecision(6) << halley_snap.helio_ecl.distance()
+            << "\n\n";
 }
 
 // ─── Section 4: Target objects ──────────────────────────────────────────────
 
 void section_targets(const TTJD &jd) {
-  std::puts("4) TARGET OBJECTS");
-  std::puts("-----------------");
+  std::cout << "4) TARGET OBJECTS\n"
+            << "-----------------\n";
 
-  // Mars barycentric target
   auto mars_bary = ephemeris::mars_barycentric(jd);
-  // Moon geocentric target
   auto moon_geo = ephemeris::moon_geocentric(jd);
 
-  std::puts("{");
-  std::printf("  \"mars_bary_target\": {\n");
-  std::printf("    \"time\": %s,\n", json_number(jd.value(), 1).c_str());
-  std::printf("    \"position\": { \"x\": %s, \"y\": %s, \"z\": %s }\n",
-              json_number(mars_bary.x().value()).c_str(),
-              json_number(mars_bary.y().value()).c_str(),
-              json_number(mars_bary.z().value()).c_str());
-  std::printf("  },\n");
-  std::printf("  \"moon_geo_target\": {\n");
-  std::printf("    \"time\": %s,\n", json_number(jd.value(), 1).c_str());
-  std::printf("    \"position\": { \"x\": %s, \"y\": %s, \"z\": %s }\n",
-              json_number(moon_geo.x().value()).c_str(), json_number(moon_geo.y().value()).c_str(),
-              json_number(moon_geo.z().value()).c_str());
-  std::printf("  }\n");
-  std::puts("}");
+  std::cout << "{\n";
+  std::cout << "  \"mars_bary_target\": {\n";
+  std::cout << "    \"time\": " << json_number(jd.value(), 1) << ",\n";
+  std::cout << "    \"position\": " << mars_bary << "\n";
+  std::cout << "  },\n";
+  std::cout << "  \"moon_geo_target\": {\n";
+  std::cout << "    \"time\": " << json_number(jd.value(), 1) << ",\n";
+  std::cout << "    \"position\": " << moon_geo << "\n";
+  std::cout << "  }\n";
+  std::cout << "}\n";
 
-  std::cout << "Roundtrip check: Mars target JD " << std::fixed << std::setprecision(1) << jd
-            << ", Moon target JD " << jd << "\n"
-            << std::endl;
+  std::cout << "Roundtrip check: Mars target " << jd << ", Moon target " << jd << "\n\n";
 }
 
 // ─── Section 5: File I/O ────────────────────────────────────────────────────
 
 void section_file_io(const TTJD &jd) {
-  std::puts("5) FILE I/O");
-  std::puts("----------");
+  std::cout << "5) FILE I/O\n"
+            << "----------\n";
 
   const std::string out_path = "/tmp/siderust_serde_example_targets.json";
 
-  // Build a JSON string for the targets
   auto mars_bary = ephemeris::mars_barycentric(jd);
   auto moon_geo = ephemeris::moon_geocentric(jd);
 
@@ -212,30 +193,26 @@ void section_file_io(const TTJD &jd) {
   json << "{\n";
   json << "  \"mars_bary_target\": {\n";
   json << "    \"time\": " << jd.value() << ",\n";
-  json << "    \"position\": { \"x\": " << mars_bary.x().value()
-       << ", \"y\": " << mars_bary.y().value() << ", \"z\": " << mars_bary.z().value() << " }\n";
+  json << "    \"position\": " << mars_bary << "\n";
   json << "  },\n";
   json << "  \"moon_geo_target\": {\n";
   json << "    \"time\": " << jd.value() << ",\n";
-  json << "    \"position\": { \"x\": " << moon_geo.x().value()
-       << ", \"y\": " << moon_geo.y().value() << ", \"z\": " << moon_geo.z().value() << " }\n";
+  json << "    \"position\": " << moon_geo << "\n";
   json << "  }\n";
   json << "}";
 
-  // Write
   {
     std::ofstream ofs(out_path);
     ofs << json.str();
   }
 
-  // Read back and verify
   {
     std::ifstream ifs(out_path);
     std::string content((std::istreambuf_iterator<char>(ifs)), std::istreambuf_iterator<char>());
     if (!content.empty()) {
-      std::printf("Saved and loaded: %s (%zu bytes)\n", out_path.c_str(), content.size());
+      std::cout << "Saved and loaded: " << out_path << " (" << content.size() << " bytes)\n";
     } else {
-      std::puts("Error: file I/O failed.");
+      std::cout << "Error: file I/O failed.\n";
     }
   }
 }
@@ -244,7 +221,7 @@ void section_file_io(const TTJD &jd) {
 // ─────────────────────────────────────────────────────────────────────
 
 int main() {
-  std::puts("=== Siderust Manual Serialization Examples ===\n");
+  std::cout << "=== Siderust Manual Serialization Examples ===\n\n";
 
   auto jd = TTJD::J2000();
 

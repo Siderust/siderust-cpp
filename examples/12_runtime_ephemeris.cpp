@@ -24,10 +24,8 @@
 
 #include <siderust/siderust.hpp>
 
-#include <cstdio>
 #include <cstring>
 #include <fstream>
-#include <iomanip>
 #include <iostream>
 #include <stdexcept>
 #include <vector>
@@ -37,110 +35,91 @@ using TTJD = JulianDate;
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
-/// Print XYZ components and distance for any Cartesian position type.
 template <typename Pos> static void print_pos(const char *label, const Pos &p) {
-  std::cout << "  " << label << "\n"
-            << "    x = " << std::fixed << std::setprecision(8) << p.x() << "\n"
-            << "    y = " << std::fixed << std::setprecision(8) << p.y() << "\n"
-            << "    z = " << std::fixed << std::setprecision(8) << p.z() << "\n"
-            << "    |r| = " << std::fixed << std::setprecision(8) << p.distance() << "\n";
+  std::cout << "  " << label << ' ' << p << '\n';
 }
 
 // ─── section 1: load from file ───────────────────────────────────────────────
 
-/// Demonstrates `RuntimeEphemeris(path)` — basic file-based loading.
 static void demo_from_file(const std::string &bsp_path) {
-  std::puts("─────────────────────────────────────────────────────────────────");
-  std::puts("1) LOAD FROM BSP FILE");
-  std::puts("─────────────────────────────────────────────────────────────────");
+  std::cout << "─────────────────────────────────────────────────────────────────\n"
+            << "1) LOAD FROM BSP FILE\n"
+            << "─────────────────────────────────────────────────────────────────\n";
 
-  RuntimeEphemeris eph(bsp_path); // throws DataLoadError on failure
+  RuntimeEphemeris eph(bsp_path);
 
-  // J2000.0 epoch
   TTJD jd_j2000(2451545.0);
 
-  std::puts("  Positions at J2000.0 (2000-Jan-01.5 TDB):");
+  std::cout << "  Positions at J2000.0 (2000-Jan-01.5 TDB):\n";
   print_pos("Sun   barycentric [AU] :", eph.sun_barycentric(jd_j2000));
   print_pos("Earth barycentric [AU] :", eph.earth_barycentric(jd_j2000));
   print_pos("Earth heliocentric [AU]:", eph.earth_heliocentric(jd_j2000));
   print_pos("Moon  geocentric  [km] :", eph.moon_geocentric(jd_j2000));
 
-  // A second epoch: 2025-Jun-15.0 TDB
   TTJD jd_now(2460841.5);
-  std::puts("\n  Positions at 2025-Jun-15.0 TDB (JD 2460841.5):");
+  std::cout << "\n  Positions at 2025-Jun-15.0 TDB (JD 2460841.5):\n";
   print_pos("Earth heliocentric [AU]:", eph.earth_heliocentric(jd_now));
   print_pos("Moon  geocentric  [km] :", eph.moon_geocentric(jd_now));
-  std::puts("");
+  std::cout << '\n';
 }
 
 // ─── section 2: move semantics ───────────────────────────────────────────────
 
-/// Shows that `RuntimeEphemeris` is move-only and that moves transfer the
-/// underlying handle (no copy, no double-free).
 static void demo_move_semantics(const std::string &bsp_path) {
-  std::puts("─────────────────────────────────────────────────────────────────");
-  std::puts("2) MOVE SEMANTICS");
-  std::puts("─────────────────────────────────────────────────────────────────");
+  std::cout << "─────────────────────────────────────────────────────────────────\n"
+            << "2) MOVE SEMANTICS\n"
+            << "─────────────────────────────────────────────────────────────────\n";
 
   RuntimeEphemeris eph1(bsp_path);
-
-  // Move-construct into eph2; eph1 is now empty.
   RuntimeEphemeris eph2(std::move(eph1));
-  if (!eph1) { // operator bool() — eph1 no longer owns the handle
-    std::puts("  eph1 is now empty (handle transferred to eph2) ✓");
+  if (!eph1) {
+    std::cout << "  eph1 is now empty (handle transferred to eph2) ✓\n";
   }
   if (eph2) {
-    std::puts("  eph2 owns the handle ✓");
+    std::cout << "  eph2 owns the handle ✓\n";
   }
 
   TTJD jd(2451545.0);
   std::cout << "  Earth-Sun distance via eph2: " << std::fixed << std::setprecision(8)
-            << eph2.earth_heliocentric(jd).distance() << "\n";
-  std::puts("");
+            << eph2.earth_heliocentric(jd).distance() << "\n\n";
 }
 
 // ─── section 3: error handling ───────────────────────────────────────────────
 
-/// Demonstrates the `DataLoadError` exception thrown for invalid data.
 static void demo_error_handling() {
-  std::puts("─────────────────────────────────────────────────────────────────");
-  std::puts("3) ERROR HANDLING");
-  std::puts("─────────────────────────────────────────────────────────────────");
+  std::cout << "─────────────────────────────────────────────────────────────────\n"
+            << "3) ERROR HANDLING\n"
+            << "─────────────────────────────────────────────────────────────────\n";
 
-  // Attempt to load garbage bytes — should throw DataLoadError.
   const uint8_t bad_data[] = {0xDE, 0xAD, 0xBE, 0xEF, 0x00, 0x01, 0x02};
   try {
     RuntimeEphemeris eph(bad_data, sizeof(bad_data));
-    std::puts("  ERROR: expected DataLoadError was not thrown!");
+    std::cout << "  ERROR: expected DataLoadError was not thrown!\n";
   } catch (const DataLoadError &e) {
-    std::cout << "  Caught expected DataLoadError: " << e.what() << "\n";
-    std::puts("  Error handling works correctly ✓");
+    std::cout << "  Caught expected DataLoadError: " << e.what() << '\n';
+    std::cout << "  Error handling works correctly ✓\n";
   }
 
-  // Attempt to load a non-existent file path.
   try {
     RuntimeEphemeris eph("/does/not/exist/de440.bsp");
-    std::puts("  ERROR: expected DataLoadError was not thrown!");
+    std::cout << "  ERROR: expected DataLoadError was not thrown!\n";
   } catch (const DataLoadError &e) {
-    std::cout << "  Caught expected DataLoadError for missing file: " << e.what() << "\n";
-    std::puts("  Error handling works correctly ✓");
+    std::cout << "  Caught expected DataLoadError for missing file: " << e.what() << '\n';
+    std::cout << "  Error handling works correctly ✓\n";
   }
-  std::puts("");
+  std::cout << '\n';
 }
 
 // ─── section 4: load from memory buffer ─────────────────────────────────────
 
-/// Demonstrates reading a BSP file into a `std::vector<uint8_t>` and
-/// passing the buffer directly to `RuntimeEphemeris(ptr, len)`.
 static void demo_from_bytes(const std::string &bsp_path) {
-  std::puts("─────────────────────────────────────────────────────────────────");
-  std::puts("4) LOAD FROM MEMORY BUFFER");
-  std::puts("─────────────────────────────────────────────────────────────────");
+  std::cout << "─────────────────────────────────────────────────────────────────\n"
+            << "4) LOAD FROM MEMORY BUFFER\n"
+            << "─────────────────────────────────────────────────────────────────\n";
 
-  // Read entire file into memory.
   std::ifstream file(bsp_path, std::ios::binary | std::ios::ate);
   if (!file) {
-    std::puts("  [Skipped — cannot reopen BSP file for memory demo]");
+    std::cout << "  [Skipped — cannot reopen BSP file for memory demo]\n";
     return;
   }
   const auto fsize = static_cast<std::size_t>(file.tellg());
@@ -153,17 +132,15 @@ static void demo_from_bytes(const std::string &bsp_path) {
   RuntimeEphemeris eph(buf.data(), buf.size());
   TTJD jd(2451545.0);
   std::cout << "  Earth-Sun distance (from buffer): " << std::fixed << std::setprecision(8)
-            << eph.earth_heliocentric(jd).distance() << "\n";
-  std::puts("");
+            << eph.earth_heliocentric(jd).distance() << "\n\n";
 }
 
 // ─── main ────────────────────────────────────────────────────────────────────
 
 int main(int argc, char *argv[]) {
-  std::puts("╔══════════════════════════════════════════════════════════════╗");
-  std::puts("║        12 — Runtime JPL DE4xx Ephemeris Example             ║");
-  std::puts("╚══════════════════════════════════════════════════════════════╝");
-  std::puts("");
+  std::cout << "╔══════════════════════════════════════════════════════════════╗\n"
+            << "║        12 — Runtime JPL DE4xx Ephemeris Example             ║\n"
+            << "╚══════════════════════════════════════════════════════════════╝\n\n";
 
   if (argc < 2) {
     std::cerr << "Usage: " << argv[0] << " <path/to/de440.bsp>\n"
@@ -175,8 +152,6 @@ int main(int argc, char *argv[]) {
               << "\n"
               << "Section 3 (error handling) runs without a BSP file:\n";
 
-    // Still run the error-handling section so the example is useful even
-    // without a BSP file.
     demo_error_handling();
     return 1;
   }
@@ -189,10 +164,10 @@ int main(int argc, char *argv[]) {
     demo_error_handling();
     demo_from_bytes(bsp_path);
   } catch (const std::exception &ex) {
-    std::cerr << "Unhandled exception: " << ex.what() << "\n";
+    std::cerr << "Unhandled exception: " << ex.what() << '\n';
     return 1;
   }
 
-  std::puts("Done.");
+  std::cout << "Done.\n";
   return 0;
 }

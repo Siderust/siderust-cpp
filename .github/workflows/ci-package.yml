@@ -74,8 +74,8 @@ jobs:
           mkdir -p build/staging/lib
           cp siderust/target/release/libsiderust_ffi.so \
              tempoch-cpp/tempoch/tempoch-ffi/target/release/libtempoch_ffi.so \
-             tempoch-cpp/qtty-cpp/qtty/qtty-ffi/target/release/libqtty_ffi.so \
-             build/staging/lib/ || true
+             tempoch-cpp/qtty-cpp/qtty/target/release/libqtty_ffi.so \
+             build/staging/lib/
 
       - name: Generate packages (CPack)
         shell: bash

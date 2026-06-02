@@ -33,18 +33,37 @@ int main() {
     auto mjd = MJD::from_utc({2026, 7, 15, 22, 0, 0});
     Period win(mjd, mjd + qtty::Day(1.0));
 
-    qtty::Degree sun_alt = sun::altitude_at(obs, mjd).to<qtty::Degree>();
-    qtty::Degree sun_az = sun::azimuth_at(obs, mjd);
-    std::cout << "Sun alt=" << sun_alt.value() << " deg"
-              << " az=" << sun_az.value() << " deg\n";
+    std::cout << "Epoch: " << mjd << '\n';
+    std::cout << "Sun alt: " << sun::altitude_at(obs, mjd).to<qtty::Degree>() << '\n';
+    std::cout << "Sun az:  " << sun::azimuth_at(obs, mjd) << '\n';
 
     Target fixed(279.23473, 38.78369);
-    std::cout << "Target alt=" << fixed.altitude_at(obs, mjd).value() << " deg\n";
+    std::cout << "Target alt: " << fixed.altitude_at(obs, mjd).to<qtty::Degree>() << '\n';
 
     auto nights = sun::below_threshold(obs, win, qtty::Degree(-18.0));
     std::cout << "Astronomical-night periods in next 24h: " << nights.size() << "\n";
 }
 ```
+
+### Streaming and printing
+
+Coordinate types, `Geodetic`, and `qtty` quantities support `operator<<` with
+frame/center context and unit labels, for example:
+
+```cpp
+auto jd = siderust::JulianDate::J2000();
+auto mars = siderust::ephemeris::mars_heliocentric(jd);
+auto mars_eq = mars.transform<siderust::centers::Geocentric,
+                              siderust::frames::EquatorialMeanJ2000>(jd);
+
+std::cout << jd << '\n';                      // e.g. TT JD 2451545 d
+std::cout << mars << '\n';                    // Heliocentric EclipticMeanJ2000 (x=... au, ...)
+std::cout << mars_eq.to_spherical() << '\n';  // Geocentric EquatorialMeanJ2000 (ra=... deg, ...)
+```
+
+`JulianDate` / `MJD` print as `TT JD …` / `TT MJD …` via tempoch-cpp. Use
+`std::cout` in examples and tests rather than manual `.value()` formatting unless
+you need a raw scalar for computation.
 
 ## Building
 
@@ -124,6 +143,26 @@ find_package(siderust_cpp REQUIRED)
 target_link_libraries(your_target PRIVATE siderust::siderust_cpp)
 ```
 
+A reference external-consumer fixture lives under
+[`tests/installed-consumer/`](tests/installed-consumer/) and is exercised by
+the `ci-installed-consumer.yml` workflow on every push.
+
+### Runtime shared libraries (loader path)
+
+`siderust-cpp` is header-only, but every binary must load three Rust FFI shared
+libraries at runtime: `libsiderust_ffi`, `libtempoch_ffi`, and `libqtty_ffi`.
+
+| Install layout | Linux / macOS | Windows (MSVC) |
+|----------------|---------------|----------------|
+| **System packages** (`.deb` / `.rpm` into `/usr` or `/usr/local`) | The dynamic linker finds libraries in standard `lib/` paths after `ldconfig` or equivalent. No extra environment variables are usually required. | Install `siderust_ffi.dll`, `tempoch_ffi.dll`, and `qtty_ffi.dll` under `bin/` (or ensure that directory is on `PATH`). Link via the `.dll.lib` import libraries in `lib/`. |
+| **Custom CMake prefix** (`cmake --install … --prefix /opt/foo`) | Either add `/opt/foo/lib` to `LD_LIBRARY_PATH` (Linux) or `DYLD_LIBRARY_PATH` (macOS), **or** link your executable with an RPATH/`@rpath` that points at `$ORIGIN/../lib` relative to your binary. The installed-consumer CI smoke test uses the latter when built with `CMAKE_PREFIX_PATH` set to the staged prefix. | Add the install `bin/` directory to `PATH`, or copy the three DLLs next to your executable. `find_package(siderust_cpp)` sets `IMPORTED_LOCATION` (DLL) and `IMPORTED_IMPLIB` (`.dll.lib`) on `siderust::siderust_ffi`. |
+| **In-tree build** (`add_subdirectory` / local `build/`) | CMake sets `BUILD_RPATH` on examples and tests to the Cargo `target/release` directories under the submodules. | Same as custom prefix: DLLs live next to import libraries under each crate’s `target/release/`. |
+
+`find_package(siderust_cpp)` defines imported targets `siderust::siderust_cpp` and
+`siderust::siderust_ffi` so that **linking** resolves symbols; **loading** still
+requires the platform loader to locate the `.so`/`.dylib`/`.dll` files using the
+rules above.
+
 > **Note:** Pre-built `.deb` and `.rpm` packages are automatically built by CI
 > and attached to every
 > [GitHub Release](https://github.com/Siderust/siderust-cpp/releases).
@@ -183,7 +222,7 @@ Generated HTML entry point:
 ### Prerequisites
 
 - C++17 compiler (GCC 8+, Clang 7+, MSVC 2019+)
-- CMake 3.15+
+- CMake 3.21+
 - Rust toolchain (cargo) — Rust FFI libraries are built automatically
 - Internet connection for Google Test (fetched automatically)
 
