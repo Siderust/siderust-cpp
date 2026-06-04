@@ -9,7 +9,7 @@
  * satellites, etc.). Use these with `Position<centers::Bodycentric, F, U>` to
  * express positions relative to an orbiting body.
  *
- * @example
+ * # Example
  * ```cpp
  * using namespace siderust;
  *

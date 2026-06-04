@@ -2,7 +2,7 @@ DOXYFILE_ENCODING      = UTF-8
 PROJECT_NAME           = "siderust-cpp"
 PROJECT_NUMBER         = "@PROJECT_VERSION@"
 PROJECT_BRIEF          = "Header-only C++ wrapper for siderust"
-PROJECT_LOGO           =
+PROJECT_LOGO           = "@REPO_ROOT@/public/logo.webp"
 OUTPUT_DIRECTORY       = "@CMAKE_CURRENT_BINARY_DIR@/docs/doxygen"
 OUTPUT_LANGUAGE        = English
 BRIEF_MEMBER_DESC      = YES
@@ -35,8 +35,9 @@ INPUT                  = \
     "@CMAKE_CURRENT_SOURCE_DIR@/docs" \
     "@CMAKE_CURRENT_SOURCE_DIR@/docs/mainpage.md" \
     "@CMAKE_CURRENT_SOURCE_DIR@/README.md" \
-    "@CMAKE_CURRENT_SOURCE_DIR@/include/siderust"
-FILE_PATTERNS          = *.hpp *.md
+    "@CMAKE_CURRENT_SOURCE_DIR@/include/siderust" \
+    "@CMAKE_CURRENT_SOURCE_DIR@/examples"
+FILE_PATTERNS          = *.hpp *.md *.dox
 RECURSIVE              = YES
 EXAMPLE_PATH           = "@CMAKE_CURRENT_SOURCE_DIR@/examples"
 EXAMPLE_PATTERNS       = *.cpp
@@ -49,7 +50,7 @@ INCLUDE_PATH           = \
     "@CMAKE_CURRENT_SOURCE_DIR@/include" \
     "@CMAKE_CURRENT_SOURCE_DIR@/tempoch-cpp/qtty-cpp/include" \
     "@CMAKE_CURRENT_SOURCE_DIR@/siderust/siderust-ffi/include" \
-    "@CMAKE_CURRENT_SOURCE_DIR@/siderust/siderust/dev-deps/tempoch/tempoch-ffi/include"
+    "@CMAKE_CURRENT_SOURCE_DIR@/tempoch-cpp/tempoch/tempoch-ffi/include"
 
 SOURCE_BROWSER         = YES
 INLINE_SOURCES         = NO

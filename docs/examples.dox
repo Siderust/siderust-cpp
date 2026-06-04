@@ -1,0 +1,94 @@
+/**
+ * @example 01_basic_coordinates.cpp
+ * Basic coordinate construction and type-safe coordinate operations.
+ */
+
+/**
+ * @example 02_coordinate_transformations.cpp
+ * Coordinate transformation workflow across Siderust C++ types.
+ */
+
+/**
+ * @example 03_all_frames_conversions.cpp
+ * Direct frame-rotation pairs and identity rotations.
+ */
+
+/**
+ * @example 04_all_center_conversions.cpp
+ * Standard center shifts, identity shifts, and bodycentric conversions.
+ */
+
+/**
+ * @example 05_target_tracking.cpp
+ * Target hierarchy, ephemeris snapshots, Kepler propagation, and transforms.
+ */
+
+/**
+ * @example 06_night_events.cpp
+ * Night crossing events and threshold-based night periods.
+ */
+
+/**
+ * @example 07_moon_properties.cpp
+ * Moon phase properties and illumination-window searches.
+ */
+
+/**
+ * @example 08_solar_system.cpp
+ * Solar-system constants, ephemerides, and center transforms.
+ */
+
+/**
+ * @example 09_star_observability.cpp
+ * Star observability in altitude and azimuth ranges.
+ */
+
+/**
+ * @example 10_time_periods.cpp
+ * TT-default time workflows and explicit-scale conversions.
+ */
+
+/**
+ * @example 11_serde_serialization.cpp
+ * Manual JSON-like serialization using standard C++ I/O.
+ */
+
+/**
+ * @example 12_runtime_ephemeris.cpp
+ * Runtime JPL DE4xx BSP loading and planetary position queries.
+ */
+
+/**
+ * @example 13_coordinate_operations.cpp
+ * Angular separation, cartesian validation, and typed coordinate safety.
+ */
+
+/**
+ * @example 14_nutation_models.cpp
+ * Nutation model selection for the C++ bindings.
+ */
+
+/**
+ * @example 15_orbit_models.cpp
+ * Orbit model overview for the C++ bindings.
+ */
+
+/**
+ * @example 16_lambert_earth_to_mars.cpp
+ * Worked heliocentric Earth-to-Mars Lambert transfer.
+ */
+
+/**
+ * @example 17_sgp4_from_tle.cpp
+ * TLE propagation through SGP4 at selected epochs.
+ */
+
+/**
+ * @example 18_lisa_pod.cpp
+ * ESA LISA orbit parsing and inter-satellite range modelling.
+ */
+
+/**
+ * @example 19_sky_grid_sampling.cpp
+ * Hemispherical altitude/azimuth sky-grid sampling.
+ */
