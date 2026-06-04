@@ -85,6 +85,10 @@ jobs:
           cpack --config CPackConfig.cmake -G "DEB;RPM" -B packages
           ls -lh packages/
 
+      - name: Validate package dependency metadata
+        shell: bash
+        run: scripts/validate-package-metadata.sh --package-dir build/packages
+
       - name: Upload DEB package
         uses: actions/upload-artifact@v4
         with:

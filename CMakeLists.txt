@@ -364,17 +364,18 @@ if(SIDERUST_CPP_ENABLE_PACKAGING AND SIDERUST_CPP_INSTALL)
     set(CPACK_COMPONENTS_ALL "siderust-cpp")
 
     # -- DEB ---------------------------------------------------------------
-    # Dependency versions track the upstream Rust crates pulled in by the
-    # current siderust submodule (siderust Cargo.toml: qtty 0.8, tempoch 0.6).
+    # OS package dependency versions must track the packaged C++ bindings.
+    # Rust crate compatibility is owned by Cargo/submodules and must not be
+    # copied into Debian/RPM metadata.
     set(CPACK_DEBIAN_PACKAGE_MAINTAINER "VPRamon <vallespuigramon@gmail.com>")
     set(CPACK_DEBIAN_PACKAGE_SECTION    "libs")
-    set(CPACK_DEBIAN_PACKAGE_DEPENDS    "libc6 (>= 2.17), libstdc++6 (>= 9), qtty-cpp (>= 0.8), tempoch-cpp (>= 0.6)")
+    set(CPACK_DEBIAN_PACKAGE_DEPENDS    "libc6 (>= 2.17), libstdc++6 (>= 9), qtty-cpp (>= 0.4.5), tempoch-cpp (>= 0.5.2)")
     set(CPACK_DEBIAN_FILE_NAME          DEB-DEFAULT)
 
     # -- RPM ---------------------------------------------------------------
     set(CPACK_RPM_PACKAGE_LICENSE    "AGPL-3.0")
     set(CPACK_RPM_PACKAGE_GROUP      "Development/Libraries")
-    set(CPACK_RPM_PACKAGE_REQUIRES   "glibc >= 2.17, libstdc++ >= 9, qtty-cpp >= 0.8, tempoch-cpp >= 0.6")
+    set(CPACK_RPM_PACKAGE_REQUIRES   "glibc >= 2.17, libstdc++ >= 9, qtty-cpp >= 0.4.5, tempoch-cpp >= 0.5.2")
     set(CPACK_RPM_FILE_NAME          RPM-DEFAULT)
 
     set(CPACK_GENERATOR "DEB;RPM")

@@ -15,6 +15,11 @@ jobs:
       contents: write
 
     steps:
+      - name: Checkout source repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
       - name: Download DEB artifact
         uses: actions/download-artifact@v4
         with:
@@ -48,7 +53,7 @@ jobs:
         run: |
           set -euo pipefail
           sudo apt-get update
-          sudo apt-get install -y --no-install-recommends dpkg-dev createrepo-c
+          sudo apt-get install -y --no-install-recommends dpkg-dev createrepo-c rpm
 
       - name: Update APT/RPM repositories
         shell: bash
@@ -66,6 +71,14 @@ jobs:
 
           cd ../rpm
           createrepo_c .
+
+      - name: Validate staged package metadata
+        shell: bash
+        run: scripts/validate-package-metadata.sh --package-dir dist
+
+      - name: Debian bookworm install smoke test
+        shell: bash
+        run: scripts/smoke-install-debian-bookworm.sh --apt-repo-dir pages/apt --version 0.6.0
 
       - name: Commit package repository updates
         shell: bash

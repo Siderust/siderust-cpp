@@ -45,9 +45,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - uses `GNUInstallDirs` (`CMAKE_INSTALL_INCLUDEDIR` /
     `CMAKE_INSTALL_LIBDIR`) instead of hard-coded `include/` `lib/`,
   - install/packaging/tests/examples are all gated on the new options.
-- CPack DEB/RPM dependencies updated to the real upstream versions
-  pulled in by the current `siderust` submodule:
-  `qtty-cpp >= 0.8`, `tempoch-cpp >= 0.6` (was 0.4.2 / 0.3.1).
+- CPack DEB/RPM dependencies updated to the current C++ binding package
+  versions: `qtty-cpp >= 0.4.5`, `tempoch-cpp >= 0.5.2`.
 - `Dockerfile.prod` rust-builder stage now:
   - sets `CARGO_TARGET_DIR=/src/tempoch-cpp/tempoch/tempoch-ffi/target`
     when building `tempoch-ffi` so the artifact lands at the path the
