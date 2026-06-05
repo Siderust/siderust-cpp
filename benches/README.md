@@ -1,0 +1,47 @@
+# siderust-cpp benchmarks
+
+Google Benchmark executables that measure end-to-end night-period search through
+the C++ wrapper (`siderust::sun::altitude_periods` and `sun::below_threshold`).
+
+## Quick start
+
+```bash
+cmake -S . -B build -G Ninja \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DSIDERUST_CPP_BUILD_BENCHES=ON \
+  -DSIDERUST_CPP_BUILD_TESTS=OFF
+cmake --build build --target bench_night_periods
+./build/bench_night_periods
+```
+
+Filter to a single case:
+
+```bash
+./build/bench_night_periods --benchmark_filter=altitude_periods/horizon/184
+```
+
+## Performance target
+
+A typical usage is:
+
+```cpp
+const auto nights = siderust::sun::altitude_periods(
+    geo, window, qtty::Degree(-90.0), qtty::Degree(horizon));
+```
+
+For a **6-month** window (184 days) at the geometric horizon (`0°`), this should
+complete in **under 0.5 s** on a desktop CPU with a Release build. Check the
+`altitude_periods/horizon/184` row in the benchmark output.
+
+## What is measured
+
+| Benchmark | API | Meaning |
+|-----------|-----|---------|
+| `altitude_periods/<horizon>/<days>` | `sun::altitude_periods(geo, window, -90°, horizon)` | Night periods via the range query |
+| `below_threshold/<horizon>/<days>` | `sun::below_threshold(geo, window, horizon)` | Equivalent night-period fast path |
+
+Horizons: `horizon` (0°), `civil` (−6°), `nautical` (−12°), `astronomical` (−18°).
+
+Windows: 30 days (1 month), 184 days (6 months), 365 days (1 year).
+
+Site: Roque de los Muchachos (La Palma), matching the Rust `solar_altitude` bench.

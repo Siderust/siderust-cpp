@@ -83,7 +83,14 @@ cmake --build .
 
 # Run tests
 ctest --output-on-failure
+
+# Run benchmarks (night-period search)
+cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DSIDERUST_CPP_BUILD_BENCHES=ON
+cmake --build build --target bench_night_periods
+./build/bench_night_periods
 ```
+
+See [`benches/README.md`](benches/README.md) for details.
 
 ## Deployment
 
@@ -257,6 +264,9 @@ siderust-cpp/
 │   ├── body_target.hpp       ← body enum trackable adapter
 │   ├── star_target.hpp       ← star trackable adapter
 │   └── ephemeris.hpp         ← VSOP87/ELP2000 positions
+├── benches/
+│   ├── bench_night_periods.cpp
+│   └── README.md
 ├── examples/demo.cpp
 ├── tests/
 │   ├── main.cpp

@@ -21,6 +21,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # ---------------------------------------------------------------------------
 option(SIDERUST_BUILD_DOCS         "Enable Doxygen documentation target."          ${PROJECT_IS_TOP_LEVEL})
 option(SIDERUST_CPP_BUILD_TESTS    "Build siderust-cpp unit tests."                ${PROJECT_IS_TOP_LEVEL})
+option(SIDERUST_CPP_BUILD_BENCHES  "Build siderust-cpp Google Benchmark suites."   ${PROJECT_IS_TOP_LEVEL})
 option(SIDERUST_CPP_BUILD_EXAMPLES "Build siderust-cpp example programs."          ${PROJECT_IS_TOP_LEVEL})
 option(SIDERUST_CPP_INSTALL        "Generate install rules for siderust-cpp."      ${PROJECT_IS_TOP_LEVEL})
 option(SIDERUST_CPP_ENABLE_PACKAGING "Enable CPack (.deb / .rpm) packaging."       ${PROJECT_IS_TOP_LEVEL})
@@ -163,6 +164,21 @@ elseif(UNIX)
 endif()
 
 # ---------------------------------------------------------------------------
+# Google Benchmark (benches only)
+# ---------------------------------------------------------------------------
+if(SIDERUST_CPP_BUILD_BENCHES)
+    include(FetchContent)
+    FetchContent_Declare(
+        benchmark
+        GIT_REPOSITORY https://github.com/google/benchmark.git
+        GIT_TAG v1.8.5
+    )
+    set(BENCHMARK_ENABLE_TESTING OFF CACHE BOOL "" FORCE)
+    set(BENCHMARK_ENABLE_INSTALL OFF CACHE BOOL "" FORCE)
+    FetchContent_MakeAvailable(benchmark)
+endif()
+
+# ---------------------------------------------------------------------------
 # Google Test (tests only)
 # ---------------------------------------------------------------------------
 if(SIDERUST_CPP_BUILD_TESTS)
@@ -224,6 +240,20 @@ if(SIDERUST_CPP_BUILD_EXAMPLES)
     if(TARGET 18_lisa_pod_example)
         target_compile_definitions(18_lisa_pod_example PRIVATE
             SIDERUST_TEST_DATA_DIR="${CMAKE_CURRENT_SOURCE_DIR}/siderust/tests/test-data/lisa"
+        )
+    endif()
+endif()
+
+# ---------------------------------------------------------------------------
+# Benchmarks
+# ---------------------------------------------------------------------------
+if(SIDERUST_CPP_BUILD_BENCHES)
+    add_executable(bench_night_periods benches/bench_night_periods.cpp)
+    target_link_libraries(bench_night_periods PRIVATE siderust_cpp benchmark::benchmark)
+    if(DEFINED _siderust_rpath)
+        set_target_properties(bench_night_periods PROPERTIES
+            BUILD_RPATH ${_siderust_rpath}
+            INSTALL_RPATH ${_siderust_rpath}
         )
     endif()
 endif()
