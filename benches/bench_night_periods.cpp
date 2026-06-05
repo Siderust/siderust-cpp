@@ -42,6 +42,7 @@ void bench_altitude_periods(benchmark::State &state, qtty::Degree horizon) {
   const auto window = window_from_days(start, static_cast<int>(state.range(0)));
 
   for (auto _ : state) {
+    (void)_; // avoid "unused variable" warning
     const auto nights = sun::altitude_periods(geo, window, qtty::Degree(-90.0), horizon);
     benchmark::DoNotOptimize(nights.data());
     benchmark::ClobberMemory();
@@ -57,6 +58,7 @@ void bench_below_threshold(benchmark::State &state, qtty::Degree horizon) {
   const auto window = window_from_days(start, static_cast<int>(state.range(0)));
 
   for (auto _ : state) {
+    (void)_; // avoid "unused variable" warning
     const auto nights = sun::below_threshold(geo, window, horizon);
     benchmark::DoNotOptimize(nights.data());
     benchmark::ClobberMemory();
