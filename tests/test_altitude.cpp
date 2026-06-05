@@ -1,6 +1,7 @@
 #include <cmath>
 #include <gtest/gtest.h>
 #include <siderust/siderust.hpp>
+#include <vector>
 
 using namespace siderust;
 using namespace qtty::literals;
@@ -21,6 +22,18 @@ protected:
     window = Period(start, end_);
   }
 };
+
+static void ExpectEquivalentPeriods(const std::vector<Period> &actual,
+                                    const std::vector<Period> &expected,
+                                    double tolerance_days = 1e-6) {
+  ASSERT_EQ(actual.size(), expected.size());
+  for (std::size_t i = 0; i < actual.size(); ++i) {
+    EXPECT_NEAR(actual[i].start().value(), expected[i].start().value(), tolerance_days)
+        << "start mismatch at period " << i;
+    EXPECT_NEAR(actual[i].end().value(), expected[i].end().value(), tolerance_days)
+        << "end mismatch at period " << i;
+  }
+}
 
 // ============================================================================
 // Sun
@@ -69,6 +82,17 @@ TEST_F(AltitudeTest, SunAltitudePeriods) {
   auto periods = sun::altitude_periods(obs, window, -6.0_deg, 0.0_deg);
   for (auto &p : periods) {
     EXPECT_GT(p.duration().value(), 0.0);
+  }
+}
+
+TEST_F(AltitudeTest, SunBelowThresholdMatchesAltitudePeriods) {
+  const Period month_window(ModifiedJulianDate::from_utc({2026, 1, 1, 0, 0, 0}),
+                            ModifiedJulianDate::from_utc({2026, 2, 1, 0, 0, 0}));
+
+  for (const auto horizon : {0.0_deg, -6.0_deg, -12.0_deg, -18.0_deg}) {
+    const auto below = sun::below_threshold(obs, month_window, horizon);
+    const auto range = sun::altitude_periods(obs, month_window, -90.0_deg, horizon);
+    ExpectEquivalentPeriods(below, range);
   }
 }
 
