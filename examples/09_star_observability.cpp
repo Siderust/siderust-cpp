@@ -15,20 +15,18 @@
 
 using namespace siderust;
 using namespace qtty::literals;
-using TTMJD = ModifiedJulianDate;
-using TTMjdPeriod = Period;
 
 /// Intersect two sorted vectors of periods.
 /// Returns every non-empty overlap between a period in `a` and a period in `b`.
-static std::vector<TTMjdPeriod> intersect_periods(const std::vector<TTMjdPeriod> &a,
-                                                  const std::vector<TTMjdPeriod> &b) {
-  std::vector<TTMjdPeriod> result;
+static std::vector<Period<TT, MJD>> intersect_periods(const std::vector<Period<TT, MJD>> &a,
+                                                      const std::vector<Period<TT, MJD>> &b) {
+  std::vector<Period<TT, MJD>> result;
   size_t j = 0;
   for (size_t i = 0; i < a.size() && j < b.size();) {
     double lo = std::max(a[i].start().value(), b[j].start().value());
     double hi = std::min(a[i].end().value(), b[j].end().value());
     if (lo < hi) {
-      result.push_back(TTMjdPeriod(TTMJD(lo), TTMJD(hi)));
+      result.push_back(Period<TT, MJD>(Time<TT, MJD>(lo), Time<TT, MJD>(hi)));
     }
     // advance whichever period ends first
     if (a[i].end().value() < b[j].end().value())
@@ -45,9 +43,9 @@ int main() {
   const auto &observer = ROQUE_DE_LOS_MUCHACHOS();
   const auto &target = SIRIUS();
 
-  // One-night search window (MJD TT).
-  TTMJD t0(60000.0);
-  TTMjdPeriod window(t0, t0 + 1.0_d);
+  // One-night search window (Time<TT, MJD> TT).
+  Time<TT, MJD> t0(60000.0);
+  Period<TT, MJD> window(t0, t0 + 1.0_d);
 
   // Constraint 1: altitude between 25° and 65°.
   auto min_alt = 25.0_deg;
@@ -66,8 +64,8 @@ int main() {
 
   std::cout << "Observer: Roque de los Muchachos" << std::endl;
   std::cout << "Target: Sirius" << std::endl;
-  std::cout << "Window: MJD " << std::fixed << std::setprecision(1) << window.start() << " -> "
-            << window.end() << "\n"
+  std::cout << "Window: Time<TT, MJD> " << std::fixed << std::setprecision(1) << window.start()
+            << " -> " << window.end() << "\n"
             << std::endl;
 
   std::cout << "Altitude range: " << min_alt << " .. " << max_alt << std::endl;
@@ -78,7 +76,7 @@ int main() {
   for (size_t i = 0; i < observable.size(); ++i) {
     auto hours = observable[i].duration<qtty::Hour>();
     total_hours += hours.value();
-    std::cout << "  " << (i + 1) << ". MJD " << std::fixed << std::setprecision(6)
+    std::cout << "  " << (i + 1) << ". Time<TT, MJD> " << std::fixed << std::setprecision(6)
               << observable[i].start() << " -> " << observable[i].end() << "  ("
               << std::setprecision(4) << hours << ")" << std::endl;
   }

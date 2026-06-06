@@ -9,7 +9,7 @@ using namespace siderust;
 // ============================================================================
 
 TEST(Ephemeris, EarthHeliocentric) {
-  auto jd = JulianDate::J2000();
+  auto jd = Time<TT, JD>::J2000();
   auto pos = ephemeris::earth_heliocentric(jd);
 
   // Compile-time type checks
@@ -33,7 +33,7 @@ TEST(Ephemeris, EarthHeliocentric) {
 }
 
 TEST(Ephemeris, MoonGeocentric) {
-  auto jd = JulianDate::J2000();
+  auto jd = Time<TT, JD>::J2000();
   auto pos = ephemeris::moon_geocentric(jd);
 
   static_assert(

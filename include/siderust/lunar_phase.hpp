@@ -7,8 +7,8 @@
  * Wraps siderust-ffi's lunar phase API with exception-safe C++ types and
  * RAII-managed output arrays.
  *
- * All phase-geometry functions accept a Julian Date (siderust::JulianDate).
- * Search windows use the regular ModifiedJulianDate-based siderust::Period.
+ * All phase-geometry functions accept a Julian Date (siderust::Time<TT, JD>).
+ * Search windows use the regular Time<TT, MJD>-based siderust::Period<TT, MJD>.
  */
 
 #include "altitude.hpp"
@@ -71,11 +71,11 @@ struct MoonPhaseGeometry {
  * @brief A principal lunar phase event (new moon, first quarter, etc.).
  */
 struct PhaseEvent {
-  ModifiedJulianDate time; ///< Epoch of the event (ModifiedJulianDate).
-  PhaseKind kind;          ///< Which principal phase occurred.
+  Time<TT, MJD> time; ///< Epoch of the event (Time<TT, MJD>).
+  PhaseKind kind;     ///< Which principal phase occurred.
 
   static PhaseEvent from_c(const siderust_phase_event_t &c) {
-    return {ModifiedJulianDate(c.mjd), static_cast<PhaseKind>(c.kind)};
+    return {Time<TT, MJD>(c.mjd), static_cast<PhaseKind>(c.kind)};
   }
 };
 
@@ -96,12 +96,13 @@ inline std::vector<PhaseEvent> phase_events_from_c(siderust_phase_event_t *ptr, 
 
 /// Like periods_from_c but for tempoch_period_mjd_t* pointers (freed with
 /// siderust_periods_free).
-inline std::vector<Period> illum_periods_from_c(tempoch_period_mjd_t *ptr, uintptr_t count) {
-  std::vector<Period> result;
+inline std::vector<Period<TT, MJD>> illum_periods_from_c(tempoch_period_mjd_t *ptr,
+                                                         uintptr_t count) {
+  std::vector<Period<TT, MJD>> result;
   result.reserve(count);
   for (uintptr_t i = 0; i < count; ++i) {
     result.push_back(
-        Period(ModifiedJulianDate(ptr[i].start_mjd), ModifiedJulianDate(ptr[i].end_mjd)));
+        Period<TT, MJD>(Time<TT, MJD>(ptr[i].start_mjd), Time<TT, MJD>(ptr[i].end_mjd)));
   }
   siderust_periods_free(ptr, count);
   return result;
@@ -118,9 +119,9 @@ namespace moon {
 /**
  * @brief Compute geocentric Moon phase geometry at a Julian Date.
  *
- * @param jd  Julian Date (e.g. `siderust::JulianDate(2451545.0)` for J2000.0).
+ * @param jd  Julian Date (e.g. `siderust::Time<TT, JD>(2451545.0)` for J2000.0).
  */
-inline MoonPhaseGeometry phase_geocentric(const JulianDate &jd) {
+inline MoonPhaseGeometry phase_geocentric(const Time<TT, JD> &jd) {
   siderust_moon_phase_geometry_t out{};
   check_status(siderust_moon_phase_geocentric(jd.value(), &out), "moon::phase_geocentric");
   return MoonPhaseGeometry::from_c(out);
@@ -132,7 +133,7 @@ inline MoonPhaseGeometry phase_geocentric(const JulianDate &jd) {
  * @param jd    Julian Date.
  * @param site  Observer geodetic coordinates.
  */
-inline MoonPhaseGeometry phase_topocentric(const JulianDate &jd, const Geodetic &site) {
+inline MoonPhaseGeometry phase_topocentric(const Time<TT, JD> &jd, const Geodetic &site) {
   siderust_moon_phase_geometry_t out{};
   check_status(siderust_moon_phase_topocentric(jd.value(), site.to_c(), &out),
                "moon::phase_topocentric");
@@ -157,10 +158,10 @@ inline MoonPhaseLabel phase_label(const MoonPhaseGeometry &geom) {
  * @brief Find principal phase events (new moon, quarters, full moon) in a
  * window.
  *
- * @param window  ModifiedJulianDate search window.
+ * @param window  Time<TT, MJD> search window.
  * @param opts    Search tolerances (optional).
  */
-inline std::vector<PhaseEvent> find_phase_events(const Period &window,
+inline std::vector<PhaseEvent> find_phase_events(const Period<TT, MJD> &window,
                                                  const SearchOptions &opts = {}) {
   siderust_phase_event_t *ptr = nullptr;
   uintptr_t count = 0;
@@ -172,12 +173,12 @@ inline std::vector<PhaseEvent> find_phase_events(const Period &window,
 /**
  * @brief Find periods when illuminated fraction is ≥ k_min.
  *
- * @param window  ModifiedJulianDate search window.
+ * @param window  Time<TT, MJD> search window.
  * @param k_min   Minimum illuminated fraction in [0, 1].
  * @param opts    Search tolerances (optional).
  */
-inline std::vector<Period> illumination_above(const Period &window, double k_min,
-                                              const SearchOptions &opts = {}) {
+inline std::vector<Period<TT, MJD>> illumination_above(const Period<TT, MJD> &window, double k_min,
+                                                       const SearchOptions &opts = {}) {
   tempoch_period_mjd_t *ptr = nullptr;
   uintptr_t count = 0;
   check_status(siderust_moon_illumination_above(window.c_inner(), k_min, opts.to_c(), &ptr, &count),
@@ -188,12 +189,12 @@ inline std::vector<Period> illumination_above(const Period &window, double k_min
 /**
  * @brief Find periods when illuminated fraction is ≤ k_max.
  *
- * @param window  ModifiedJulianDate search window.
+ * @param window  Time<TT, MJD> search window.
  * @param k_max   Maximum illuminated fraction in [0, 1].
  * @param opts    Search tolerances (optional).
  */
-inline std::vector<Period> illumination_below(const Period &window, double k_max,
-                                              const SearchOptions &opts = {}) {
+inline std::vector<Period<TT, MJD>> illumination_below(const Period<TT, MJD> &window, double k_max,
+                                                       const SearchOptions &opts = {}) {
   tempoch_period_mjd_t *ptr = nullptr;
   uintptr_t count = 0;
   check_status(siderust_moon_illumination_below(window.c_inner(), k_max, opts.to_c(), &ptr, &count),
@@ -204,13 +205,14 @@ inline std::vector<Period> illumination_below(const Period &window, double k_max
 /**
  * @brief Find periods when illuminated fraction is within [k_min, k_max].
  *
- * @param window  ModifiedJulianDate search window.
+ * @param window  Time<TT, MJD> search window.
  * @param k_min   Minimum illuminated fraction in [0, 1].
  * @param k_max   Maximum illuminated fraction in [0, 1].
  * @param opts    Search tolerances (optional).
  */
-inline std::vector<Period> illumination_range(const Period &window, double k_min, double k_max,
-                                              const SearchOptions &opts = {}) {
+inline std::vector<Period<TT, MJD>> illumination_range(const Period<TT, MJD> &window, double k_min,
+                                                       double k_max,
+                                                       const SearchOptions &opts = {}) {
   tempoch_period_mjd_t *ptr = nullptr;
   uintptr_t count = 0;
   check_status(

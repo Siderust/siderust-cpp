@@ -2,6 +2,7 @@
 #include <siderust/siderust.hpp>
 
 using namespace siderust;
+using namespace qtty::literals;
 
 // ============================================================================
 // Star
@@ -35,21 +36,20 @@ TEST(Bodies, StarMoveSemantics) {
 
 TEST(Bodies, StarCreate) {
   auto s = Star::create("TestStar",
-                        100.0,    // distance_ly
-                        1.0,      // mass_solar
-                        1.0,      // radius_solar
-                        1.0,      // luminosity_solar
-                        180.0,    // ra_deg
-                        45.0,     // dec_deg
-                        2451545.0 // epoch_jd (J2000)
-  );
+                        StellarProperties{qtty::LightYear(100.0), SolarMass{1.0}, SolarRadius{1.0},
+                                          SolarLuminosity{1.0}},
+                        spherical::direction::ICRS(180.0_deg, 45.0_deg), Time<TT, JD>::J2000());
   EXPECT_EQ(s.name(), "TestStar");
   EXPECT_NEAR(s.distance_ly(), 100.0, 1e-6);
 }
 
 TEST(Bodies, StarCreateWithProperMotion) {
-  ProperMotion pm(0.001, -0.002, RaConvention::MuAlphaStar);
-  auto s = Star::create("PMStar", 50.0, 1.0, 1.0, 1.0, 100.0, 30.0, 2451545.0, pm);
+  ProperMotion pm{AngularRate{0.001_deg, qtty::Day(365.25)},
+                  AngularRate{-0.002_deg, qtty::Day(365.25)}, RaConvention::MuAlphaStar};
+  auto s = Star::create("PMStar",
+                        StellarProperties{qtty::LightYear(50.0), SolarMass{1.0}, SolarRadius{1.0},
+                                          SolarLuminosity{1.0}},
+                        spherical::direction::ICRS(100.0_deg, 30.0_deg), Time<TT, JD>::J2000(), pm);
   EXPECT_EQ(s.name(), "PMStar");
 }
 
@@ -89,7 +89,7 @@ TEST(Bodies, AllPlanets) {
 TEST(Bodies, BodyTargetSunAltitude) {
   BodyTarget sun(Body::Sun);
   auto obs = geodetic(2.35, 48.85, 35.0);
-  auto mjd = ModifiedJulianDate(60000.5);
+  auto mjd = Time<TT, MJD>(60000.5);
   auto alt = sun.altitude_at(obs, mjd);
   EXPECT_TRUE(std::isfinite(alt.value()));
   EXPECT_GT(alt.value(), -90.0);
@@ -99,7 +99,7 @@ TEST(Bodies, BodyTargetSunAltitude) {
 TEST(Bodies, BodyTargetMarsAltitude) {
   BodyTarget mars(Body::Mars);
   auto obs = geodetic(2.35, 48.85, 35.0);
-  auto mjd = ModifiedJulianDate(60000.5);
+  auto mjd = Time<TT, MJD>(60000.5);
   auto alt = mars.altitude_at(obs, mjd);
   EXPECT_TRUE(std::isfinite(alt.value()));
   EXPECT_GT(alt.value(), -90.0);
@@ -108,7 +108,7 @@ TEST(Bodies, BodyTargetMarsAltitude) {
 
 TEST(Bodies, BodyTargetAllBodiesAltitude) {
   auto obs = geodetic(-17.89, 28.76, 2326.0); // ORM
-  auto mjd = ModifiedJulianDate(60000.5);
+  auto mjd = Time<TT, MJD>(60000.5);
   std::vector<Body> all = {Body::Sun,     Body::Moon,   Body::Mercury, Body::Venus,  Body::Mars,
                            Body::Jupiter, Body::Saturn, Body::Uranus,  Body::Neptune};
   for (auto b : all) {
@@ -121,7 +121,7 @@ TEST(Bodies, BodyTargetAllBodiesAltitude) {
 TEST(Bodies, BodyTargetAzimuth) {
   BodyTarget sun(Body::Sun);
   auto obs = geodetic(2.35, 48.85, 35.0);
-  auto mjd = ModifiedJulianDate(60000.5);
+  auto mjd = Time<TT, MJD>(60000.5);
   auto az = sun.azimuth_at(obs, mjd);
   EXPECT_GE(az.value(), 0.0);
   EXPECT_LT(az.value(), 360.0);
@@ -130,7 +130,7 @@ TEST(Bodies, BodyTargetAzimuth) {
 TEST(Bodies, BodyTargetJupiterAzimuth) {
   BodyTarget jup(Body::Jupiter);
   auto obs = geodetic(2.35, 48.85, 35.0);
-  auto mjd = ModifiedJulianDate(60000.5);
+  auto mjd = Time<TT, MJD>(60000.5);
   auto az = jup.azimuth_at(obs, mjd);
   EXPECT_TRUE(std::isfinite(az.value()));
   EXPECT_GE(az.value(), 0.0);
@@ -140,7 +140,7 @@ TEST(Bodies, BodyTargetJupiterAzimuth) {
 TEST(Bodies, BodyTargetAboveThreshold) {
   BodyTarget sun(Body::Sun);
   auto obs = geodetic(2.35, 48.85, 35.0);
-  auto window = Period(ModifiedJulianDate(60000.0), ModifiedJulianDate(60001.0));
+  auto window = Period<TT, MJD>(Time<TT, MJD>(60000.0), Time<TT, MJD>(60001.0));
   auto periods = sun.above_threshold(obs, window, qtty::Degree(0.0));
   // Sun should be above horizon for some portion of the day
   EXPECT_GT(periods.size(), 0u);
@@ -148,7 +148,7 @@ TEST(Bodies, BodyTargetAboveThreshold) {
 
 TEST(Bodies, BodyTargetPolymorphic) {
   auto obs = geodetic(2.35, 48.85, 35.0);
-  auto mjd = ModifiedJulianDate(60000.5);
+  auto mjd = Time<TT, MJD>(60000.5);
 
   std::vector<std::unique_ptr<Target>> targets;
   targets.push_back(std::make_unique<BodyTarget>(Body::Sun));
@@ -162,14 +162,14 @@ TEST(Bodies, BodyTargetPolymorphic) {
 
 TEST(Bodies, BodyNamespaceAltitudeAt) {
   auto obs = geodetic(2.35, 48.85, 35.0);
-  auto mjd = ModifiedJulianDate(60000.5);
+  auto mjd = Time<TT, MJD>(60000.5);
   auto rad = body::altitude_at(Body::Saturn, obs, mjd);
   EXPECT_TRUE(std::isfinite(rad.value()));
 }
 
 TEST(Bodies, BodyNamespaceAzimuthAt) {
   auto obs = geodetic(2.35, 48.85, 35.0);
-  auto mjd = ModifiedJulianDate(60000.5);
+  auto mjd = Time<TT, MJD>(60000.5);
   auto rad = body::azimuth_at(Body::Venus, obs, mjd);
   EXPECT_TRUE(std::isfinite(rad.value()));
   EXPECT_GE(rad.value(), 0.0);
@@ -183,7 +183,7 @@ TEST(Bodies, StarTargetAltitude) {
   const auto &vega = VEGA();
   StarTarget st(vega);
   auto obs = geodetic(2.35, 48.85, 35.0);
-  auto mjd = ModifiedJulianDate(60000.5);
+  auto mjd = Time<TT, MJD>(60000.5);
   auto alt = st.altitude_at(obs, mjd);
   EXPECT_TRUE(std::isfinite(alt.value()));
   EXPECT_GT(alt.value(), -90.0);
@@ -192,7 +192,7 @@ TEST(Bodies, StarTargetAltitude) {
 
 TEST(Bodies, StarTargetPolymorphicWithBodyTarget) {
   auto obs = geodetic(2.35, 48.85, 35.0);
-  auto mjd = ModifiedJulianDate(60000.5);
+  auto mjd = Time<TT, MJD>(60000.5);
 
   std::vector<std::unique_ptr<Target>> targets;
   targets.push_back(std::make_unique<BodyTarget>(Body::Sun));

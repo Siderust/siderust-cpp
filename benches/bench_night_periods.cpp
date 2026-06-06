@@ -32,13 +32,13 @@ constexpr HorizonCase kHorizons[] = {
     {"astronomical", qtty::Degree(-18.0)},
 };
 
-Period window_from_days(const ModifiedJulianDate &start, int days) {
-  return Period(start, start + qtty::Day(static_cast<double>(days)));
+Period<TT, MJD> window_from_days(const Time<TT, MJD> &start, int days) {
+  return Period<TT, MJD>(start, start + qtty::Day(static_cast<double>(days)));
 }
 
 void bench_altitude_periods(benchmark::State &state, qtty::Degree horizon) {
   const auto geo = ROQUE_DE_LOS_MUCHACHOS();
-  const auto start = ModifiedJulianDate::from_utc({2026, 1, 1, 0, 0, 0});
+  const auto start = Time<TT, MJD>::from_utc({2026, 1, 1, 0, 0, 0});
   const auto window = window_from_days(start, static_cast<int>(state.range(0)));
 
   for (auto _ : state) {
@@ -54,7 +54,7 @@ void bench_altitude_periods(benchmark::State &state, qtty::Degree horizon) {
 
 void bench_below_threshold(benchmark::State &state, qtty::Degree horizon) {
   const auto geo = ROQUE_DE_LOS_MUCHACHOS();
-  const auto start = ModifiedJulianDate::from_utc({2026, 1, 1, 0, 0, 0});
+  const auto start = Time<TT, MJD>::from_utc({2026, 1, 1, 0, 0, 0});
   const auto window = window_from_days(start, static_cast<int>(state.range(0)));
 
   for (auto _ : state) {

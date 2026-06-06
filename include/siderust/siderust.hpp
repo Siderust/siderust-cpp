@@ -14,7 +14,7 @@
  *
  * // Typed coordinates with compile-time frame/center
  * spherical::direction::ICRS vega_icrs(qtty::Degree(279.23473), qtty::Degree(38.78369));
- * auto jd = JulianDate::from_utc({2026, 7, 15, 22, 0, 0});
+ * auto jd = Time<TT, JD>::from_utc({2026, 7, 15, 22, 0, 0});
  *
  * // Template-targeted transform  — invalid pairs won't compile
  * auto ecl = vega_icrs.to_frame<EclipticMeanJ2000>(jd);   //

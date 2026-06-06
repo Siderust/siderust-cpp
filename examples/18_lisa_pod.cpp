@@ -46,12 +46,12 @@ struct OrbitPoint {
   double vx, vy, vz;
 };
 
-using Orbit = std::vector<OrbitPoint>;
-using OrbitSet = std::array<Orbit, 3>;
+using Trajectory = std::vector<OrbitPoint>;
+using TrajectorySet = std::array<Trajectory, 3>;
 
 static double jd_to_j2000s(double jd) { return (jd - J2000_JD) * 86'400.0; }
 
-static Orbit orbit_from_oem(const std::string &path) {
+static Trajectory orbit_from_oem(const std::string &path) {
   std::ifstream f{path};
   if (!f)
     throw std::runtime_error("cannot open: " + path);
@@ -62,7 +62,7 @@ static Orbit orbit_from_oem(const std::string &path) {
   if (states.empty())
     throw std::runtime_error("OEM file contains no states: " + path);
 
-  Orbit pts;
+  Trajectory pts;
   pts.reserve(states.size());
   for (auto &sv : states) {
     pts.push_back({jd_to_j2000s(sv.epoch_jd), sv.pos_km[0], sv.pos_km[1], sv.pos_km[2],
@@ -74,7 +74,7 @@ static Orbit orbit_from_oem(const std::string &path) {
   return pts;
 }
 
-static OrbitPoint hermite_interp(const Orbit &pts, double t) {
+static OrbitPoint hermite_interp(const Trajectory &pts, double t) {
   if (pts.empty())
     throw std::out_of_range("orbit is empty");
 
@@ -135,9 +135,9 @@ static OrbitPoint hermite_interp(const Orbit &pts, double t) {
 }
 
 struct LisaEphemerisProvider {
-  OrbitSet orbits;
+  TrajectorySet orbits;
 
-  const Orbit &orbit_for(int naif) const {
+  const Trajectory &orbit_for(int naif) const {
     switch (naif) {
     case -1001:
       return orbits[0];

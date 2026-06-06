@@ -11,20 +11,20 @@ static const double PI = 3.14159265358979323846;
 class AltitudeTest : public ::testing::Test {
 protected:
   Geodetic obs;
-  ModifiedJulianDate start;
-  ModifiedJulianDate end_;
-  Period window{ModifiedJulianDate(0.0), ModifiedJulianDate(1.0)};
+  Time<TT, MJD> start;
+  Time<TT, MJD> end_;
+  Period<TT, MJD> window{Time<TT, MJD>(0.0), Time<TT, MJD>(1.0)};
 
   void SetUp() override {
     obs = ROQUE_DE_LOS_MUCHACHOS();
-    start = ModifiedJulianDate::from_utc({2026, 7, 15, 18, 0, 0});
+    start = Time<TT, MJD>::from_utc({2026, 7, 15, 18, 0, 0});
     end_ = start + 1.0_d; // 24 hours
-    window = Period(start, end_);
+    window = Period<TT, MJD>(start, end_);
   }
 };
 
-static void ExpectEquivalentPeriods(const std::vector<Period> &actual,
-                                    const std::vector<Period> &expected,
+static void ExpectEquivalentPeriods(const std::vector<Period<TT, MJD>> &actual,
+                                    const std::vector<Period<TT, MJD>> &expected,
                                     double tolerance_days = 1e-6) {
   ASSERT_EQ(actual.size(), expected.size());
   for (std::size_t i = 0; i < actual.size(); ++i) {
@@ -86,8 +86,8 @@ TEST_F(AltitudeTest, SunAltitudePeriods) {
 }
 
 TEST_F(AltitudeTest, SunBelowThresholdMatchesAltitudePeriods) {
-  const Period month_window(ModifiedJulianDate::from_utc({2026, 1, 1, 0, 0, 0}),
-                            ModifiedJulianDate::from_utc({2026, 2, 1, 0, 0, 0}));
+  const Period<TT, MJD> month_window(Time<TT, MJD>::from_utc({2026, 1, 1, 0, 0, 0}),
+                                     Time<TT, MJD>::from_utc({2026, 2, 1, 0, 0, 0}));
 
   for (const auto horizon : {0.0_deg, -6.0_deg, -12.0_deg, -18.0_deg}) {
     const auto below = sun::below_threshold(obs, month_window, horizon);
@@ -147,6 +147,15 @@ TEST_F(AltitudeTest, IcrsAboveThreshold) {
   const spherical::direction::ICRS vega_icrs(279.23_deg, 38.78_deg);
   auto periods = icrs_altitude::above_threshold(vega_icrs, obs, window, 30.0_deg);
   EXPECT_GT(periods.size(), 0u);
+}
+
+TEST_F(AltitudeTest, IcrsAltitudePeriods) {
+  const spherical::direction::ICRS vega_icrs(279.23_deg, 38.78_deg);
+  auto periods = icrs_altitude::altitude_periods(vega_icrs, obs, window, 30.0_deg, 80.0_deg);
+  EXPECT_GT(periods.size(), 0u);
+  for (const auto &period : periods) {
+    EXPECT_LT(period.start().value(), period.end().value());
+  }
 }
 
 // ============================================================================

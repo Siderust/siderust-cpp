@@ -25,7 +25,7 @@ TEST(TypedCoordinates, IcrsDirToEcliptic) {
   using namespace siderust::frames;
 
   spherical::direction::ICRS vega(qtty::Degree(279.23473), qtty::Degree(38.78369));
-  auto jd = JulianDate::J2000();
+  auto jd = Time<TT, JD>::J2000();
 
   // Compile-time typed transform: ICRS -> EclipticMeanJ2000
   auto ecl = vega.to_frame<EclipticMeanJ2000>(jd);
@@ -41,7 +41,7 @@ TEST(TypedCoordinates, IcrsDirRoundtrip) {
   using namespace siderust::frames;
 
   spherical::direction::ICRS icrs(qtty::Degree(100.0), qtty::Degree(30.0));
-  auto jd = JulianDate::J2000();
+  auto jd = Time<TT, JD>::J2000();
 
   auto ecl = icrs.to_frame<EclipticMeanJ2000>(jd);
   auto back = ecl.to_frame<ICRS>(jd);
@@ -55,7 +55,7 @@ TEST(TypedCoordinates, ToShorthand) {
   using namespace siderust::frames;
 
   spherical::direction::ICRS icrs(qtty::Degree(100.0), qtty::Degree(30.0));
-  auto jd = JulianDate::J2000();
+  auto jd = Time<TT, JD>::J2000();
 
   // .to<Target>(jd) is a shorthand for .to_frame<Target>(jd)
   auto ecl = icrs.to<EclipticMeanJ2000>(jd);
@@ -68,7 +68,7 @@ TEST(TypedCoordinates, IcrsDirToHorizontal) {
   using namespace siderust::frames;
 
   spherical::direction::ICRS vega(qtty::Degree(279.23473), qtty::Degree(38.78369));
-  auto jd = JulianDate::from_utc({2026, 7, 15, 22, 0, 0});
+  auto jd = Time<TT, JD>::from_utc({2026, 7, 15, 22, 0, 0});
   auto obs = ROQUE_DE_LOS_MUCHACHOS();
 
   auto hor = vega.to_horizontal(jd, obs);
@@ -82,7 +82,7 @@ TEST(TypedCoordinates, EquatorialToIcrs) {
   using namespace siderust::frames;
 
   spherical::direction::EquatorialMeanJ2000 eq(qtty::Degree(100.0), qtty::Degree(30.0));
-  auto jd = JulianDate::J2000();
+  auto jd = Time<TT, JD>::J2000();
 
   auto icrs = eq.to_frame<ICRS>(jd);
   static_assert(std::is_same_v<decltype(icrs), spherical::direction::ICRS>);
@@ -97,7 +97,7 @@ TEST(TypedCoordinates, MultiHopTransform) {
 
   // EquatorialMeanOfDate -> EquatorialTrueOfDate (through hub)
   spherical::Direction<EquatorialMeanOfDate> mean_od(qtty::Degree(100.0), qtty::Degree(30.0));
-  auto jd = JulianDate::J2000();
+  auto jd = Time<TT, JD>::J2000();
 
   auto true_od = mean_od.to_frame<EquatorialTrueOfDate>(jd);
   static_assert(std::is_same_v<decltype(true_od), spherical::Direction<EquatorialTrueOfDate>>);
@@ -111,7 +111,7 @@ TEST(TypedCoordinates, DirectionToFrameWithDefaultContextMatchesDefaultPath) {
   using namespace siderust::frames;
 
   spherical::direction::ICRS icrs(qtty::Degree(100.0), qtty::Degree(30.0));
-  auto jd = JulianDate(2458850.0);
+  auto jd = Time<TT, JD>(2458850.0);
   AstroContext ctx;
 
   auto direct = icrs.to_frame<EquatorialTrueOfDate>(jd);
@@ -125,7 +125,7 @@ TEST(TypedCoordinates, DirectionToFrameWithDifferentModelsChangesResult) {
   using namespace siderust::frames;
 
   cartesian::Direction<ICRS> icrs(0.6, -0.3, 0.74);
-  auto jd = JulianDate(2458850.0);
+  auto jd = Time<TT, JD>(2458850.0);
   AstroContext ctx;
 
   auto with_nutation = icrs.to_frame_with<EquatorialTrueOfDate>(jd, ctx.with_model<Iau2006A>());
@@ -141,7 +141,7 @@ TEST(TypedCoordinates, SameFrameIdentity) {
   using namespace siderust::frames;
 
   spherical::direction::ICRS icrs(qtty::Degree(123.456), qtty::Degree(-45.678));
-  auto jd = JulianDate::J2000();
+  auto jd = Time<TT, JD>::J2000();
 
   auto same = icrs.to_frame<ICRS>(jd);
   EXPECT_DOUBLE_EQ(same.ra().value(), 123.456);
@@ -224,7 +224,7 @@ TEST(TypedCoordinates, CartesianDirToFrameRoundtrip) {
 
   // Unit vector along X in ICRS
   cartesian::Direction<ICRS> dir_icrs(1.0, 0.0, 0.0);
-  auto jd = JulianDate::J2000();
+  auto jd = Time<TT, JD>::J2000();
 
   auto dir_ecl = dir_icrs.to_frame<EclipticMeanJ2000>(jd);
   static_assert(std::is_same_v<decltype(dir_ecl), cartesian::Direction<EclipticMeanJ2000>>);
@@ -240,7 +240,7 @@ TEST(TypedCoordinates, CartesianDirToFrameIdentity) {
   using namespace siderust::frames;
 
   cartesian::Direction<ICRS> dir(0.6, 0.8, 0.0);
-  auto jd = JulianDate::J2000();
+  auto jd = Time<TT, JD>::J2000();
 
   auto same = dir.to_frame<ICRS>(jd);
   static_assert(std::is_same_v<decltype(same), cartesian::Direction<ICRS>>);
@@ -254,7 +254,7 @@ TEST(TypedCoordinates, CartesianDirToFramePreservesLength) {
 
   // The rotation must preserve vector length
   cartesian::Direction<ICRS> dir(0.6, 0.8, 0.0);
-  auto jd = JulianDate::J2000();
+  auto jd = Time<TT, JD>::J2000();
 
   auto ecl = dir.to_frame<EclipticMeanJ2000>(jd);
   double len = std::sqrt(ecl.x * ecl.x + ecl.y * ecl.y + ecl.z * ecl.z);
@@ -270,7 +270,7 @@ TEST(TypedCoordinates, CartesianPosToFrameRoundtrip) {
   using AU = qtty::AstronomicalUnit;
 
   cartesian::Position<centers::Heliocentric, EclipticMeanJ2000, AU> pos(1.0, 0.5, 0.2);
-  auto jd = JulianDate::J2000();
+  auto jd = Time<TT, JD>::J2000();
 
   auto pos_icrs = pos.to_frame<ICRS>(jd);
   static_assert(
@@ -289,7 +289,7 @@ TEST(TypedCoordinates, CartesianPosToFrameSameCenterPreserved) {
 
   // Frame-only transform preserves center
   cartesian::Position<centers::Barycentric, EclipticMeanJ2000, AU> pos(1.0, 0.0, 0.0);
-  auto jd = JulianDate::J2000();
+  auto jd = Time<TT, JD>::J2000();
 
   auto transformed = pos.to_frame<EquatorialMeanJ2000>(jd);
   static_assert(std::is_same_v<decltype(transformed),
@@ -311,7 +311,7 @@ TEST(TypedCoordinates, SphericalPosToFrameRoundtrip) {
 
   spherical::Position<centers::Heliocentric, EclipticMeanJ2000, AU> sph(
       qtty::Degree(30.0), qtty::Degree(10.0), AU(1.5));
-  auto jd = JulianDate::J2000();
+  auto jd = Time<TT, JD>::J2000();
 
   auto sph_icrs = sph.to_frame<ICRS>(jd);
   static_assert(
@@ -330,7 +330,7 @@ TEST(TypedCoordinates, SphericalPosToFramePreservesDistance) {
 
   spherical::Position<centers::Barycentric, ICRS, AU> sph(qtty::Degree(100.0), qtty::Degree(45.0),
                                                           AU(2.3));
-  auto jd = JulianDate::J2000();
+  auto jd = Time<TT, JD>::J2000();
 
   auto ecl = sph.to_frame<EclipticMeanJ2000>(jd);
   // Distance must be unchanged by a frame rotation
@@ -343,7 +343,7 @@ TEST(TypedCoordinates, SphericalPosToFrameShorthand) {
 
   spherical::Position<centers::Heliocentric, ICRS, AU> sph(qtty::Degree(50.0), qtty::Degree(20.0),
                                                            AU(1.0));
-  auto jd = JulianDate::J2000();
+  auto jd = Time<TT, JD>::J2000();
 
   // .to<Target>(jd) shorthand
   auto ecl = sph.to<EclipticMeanJ2000>(jd);
@@ -393,9 +393,9 @@ TEST(TypedCoordinates, ToHorizontalPreciseConsistency) {
   using namespace siderust::frames;
 
   spherical::Direction<ICRS> vega(qtty::Degree(279.2348), qtty::Degree(38.7836));
-  auto jd = JulianDate::J2000();
+  auto jd = Time<TT, JD>::J2000();
   auto ctx = TimeContext::with_builtin_eop();
-  auto jd_ut1 = Time<scale::TT>::from_encoded(jd).to_with<scale::UT1>(ctx).to<format::JD>();
+  auto jd_ut1 = TimeAxis<TT>::from_encoded(jd).to_with<UT1>(ctx).to<JD>();
   auto obs = ROQUE_DE_LOS_MUCHACHOS();
 
   auto hor_basic = vega.to_horizontal(jd, obs);
@@ -411,9 +411,9 @@ TEST(TypedCoordinates, ToHorizontalPreciseReturnType) {
   using namespace siderust::frames;
 
   spherical::Direction<EquatorialMeanJ2000> dir(qtty::Degree(90.0), qtty::Degree(10.0));
-  auto jd = JulianDate::J2000();
+  auto jd = Time<TT, JD>::J2000();
   auto ctx = TimeContext::with_builtin_eop();
-  auto jd_ut1 = Time<scale::TT>::from_encoded(jd).to_with<scale::UT1>(ctx).to<format::JD>();
+  auto jd_ut1 = TimeAxis<TT>::from_encoded(jd).to_with<UT1>(ctx).to<JD>();
   auto obs = ROQUE_DE_LOS_MUCHACHOS();
 
   [[maybe_unused]] auto hor = dir.to_horizontal_precise(jd, jd_ut1, obs);

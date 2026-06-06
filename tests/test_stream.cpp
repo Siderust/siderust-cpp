@@ -85,8 +85,8 @@ TEST(StreamOutput, Geodetic) {
   EXPECT_NE(s.find("lat="), std::string::npos);
 }
 
-TEST(StreamOutput, JulianDate) {
-  const auto s = stream_to_string(JulianDate::J2000());
+TEST(StreamOutput, TimeTtJd) {
+  const auto s = stream_to_string(Time<TT, JD>::J2000());
   EXPECT_NE(s.find("TT"), std::string::npos);
   EXPECT_NE(s.find("JD"), std::string::npos);
 }

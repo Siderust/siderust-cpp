@@ -44,11 +44,11 @@ enum class AzimuthExtremumKind : int32_t {
  * @brief An azimuth bearing-crossing event.
  */
 struct AzimuthCrossingEvent {
-  ModifiedJulianDate time;     ///< Epoch of the crossing (ModifiedJulianDate).
+  Time<TT, MJD> time;          ///< Epoch of the crossing (Time<TT, MJD>).
   CrossingDirection direction; ///< Whether the azimuth is increasing or decreasing.
 
   static AzimuthCrossingEvent from_c(const siderust_azimuth_crossing_event_t &c) {
-    return {ModifiedJulianDate(c.mjd), static_cast<CrossingDirection>(c.direction)};
+    return {Time<TT, MJD>(c.mjd), static_cast<CrossingDirection>(c.direction)};
   }
 };
 
@@ -56,12 +56,12 @@ struct AzimuthCrossingEvent {
  * @brief An azimuth extremum event.
  */
 struct AzimuthExtremum {
-  ModifiedJulianDate time;  ///< Epoch of the extremum (ModifiedJulianDate).
+  Time<TT, MJD> time;       ///< Epoch of the extremum (Time<TT, MJD>).
   qtty::Degree azimuth;     ///< Azimuth at the extremum (degrees, N-clockwise).
   AzimuthExtremumKind kind; ///< Maximum or minimum.
 
   static AzimuthExtremum from_c(const siderust_azimuth_extremum_t &c) {
-    return {ModifiedJulianDate(c.mjd), qtty::Degree(c.azimuth_deg),
+    return {Time<TT, MJD>(c.mjd), qtty::Degree(c.azimuth_deg),
             static_cast<AzimuthExtremumKind>(c.kind)};
   }
 };
@@ -102,10 +102,10 @@ inline std::vector<AzimuthExtremum> az_extrema_from_c(siderust_azimuth_extremum_
 namespace sun {
 
 /**
- * @brief Compute the Sun's azimuth (degrees, N-clockwise) at a given ModifiedJulianDate
+ * @brief Compute the Sun's azimuth (degrees, N-clockwise) at a given Time<TT, MJD>
  * instant.
  */
-inline qtty::Degree azimuth_at(const Geodetic &obs, const ModifiedJulianDate &mjd) {
+inline qtty::Degree azimuth_at(const Geodetic &obs, const Time<TT, MJD> &mjd) {
   double out;
   check_status(siderust_azimuth_at(detail::make_body_subject(SIDERUST_BODY_SUN), obs.to_c(),
                                    mjd.value(), &out),
@@ -117,7 +117,7 @@ inline qtty::Degree azimuth_at(const Geodetic &obs, const ModifiedJulianDate &mj
  * @brief Find epochs when the Sun crosses a given bearing.
  */
 inline std::vector<AzimuthCrossingEvent> azimuth_crossings(const Geodetic &obs,
-                                                           const Period &window,
+                                                           const Period<TT, MJD> &window,
                                                            qtty::Degree bearing,
                                                            const SearchOptions &opts = {}) {
   siderust_azimuth_crossing_event_t *ptr = nullptr;
@@ -132,7 +132,8 @@ inline std::vector<AzimuthCrossingEvent> azimuth_crossings(const Geodetic &obs,
 /**
  * @brief Find azimuth extrema (northernmost / southernmost) for the Sun.
  */
-inline std::vector<AzimuthExtremum> azimuth_extrema(const Geodetic &obs, const Period &window,
+inline std::vector<AzimuthExtremum> azimuth_extrema(const Geodetic &obs,
+                                                    const Period<TT, MJD> &window,
                                                     const SearchOptions &opts = {}) {
   siderust_azimuth_extremum_t *ptr = nullptr;
   uintptr_t count = 0;
@@ -146,9 +147,9 @@ inline std::vector<AzimuthExtremum> azimuth_extrema(const Geodetic &obs, const P
  * @brief Find periods when the Sun's azimuth is within [min_bearing,
  * max_bearing].
  */
-inline std::vector<Period> in_azimuth_range(const Geodetic &obs, const Period &window,
-                                            qtty::Degree min_bearing, qtty::Degree max_bearing,
-                                            const SearchOptions &opts = {}) {
+inline std::vector<Period<TT, MJD>>
+in_azimuth_range(const Geodetic &obs, const Period<TT, MJD> &window, qtty::Degree min_bearing,
+                 qtty::Degree max_bearing, const SearchOptions &opts = {}) {
   tempoch_period_mjd_t *ptr = nullptr;
   uintptr_t count = 0;
   check_status(siderust_in_azimuth_range(detail::make_body_subject(SIDERUST_BODY_SUN), obs.to_c(),
@@ -162,9 +163,9 @@ inline std::vector<Period> in_azimuth_range(const Geodetic &obs, const Period &w
  * @brief Find periods when the Sun's azimuth is outside [min_bearing,
  * max_bearing].
  */
-inline std::vector<Period> outside_azimuth_range(const Geodetic &obs, const Period &window,
-                                                 qtty::Degree min_bearing, qtty::Degree max_bearing,
-                                                 const SearchOptions &opts = {}) {
+inline std::vector<Period<TT, MJD>>
+outside_azimuth_range(const Geodetic &obs, const Period<TT, MJD> &window, qtty::Degree min_bearing,
+                      qtty::Degree max_bearing, const SearchOptions &opts = {}) {
   tempoch_period_mjd_t *ptr = nullptr;
   uintptr_t count = 0;
   check_status(siderust_outside_azimuth_range(detail::make_body_subject(SIDERUST_BODY_SUN),
@@ -183,10 +184,10 @@ inline std::vector<Period> outside_azimuth_range(const Geodetic &obs, const Peri
 namespace moon {
 
 /**
- * @brief Compute the Moon's azimuth (degrees, N-clockwise) at a given ModifiedJulianDate
+ * @brief Compute the Moon's azimuth (degrees, N-clockwise) at a given Time<TT, MJD>
  * instant.
  */
-inline qtty::Degree azimuth_at(const Geodetic &obs, const ModifiedJulianDate &mjd) {
+inline qtty::Degree azimuth_at(const Geodetic &obs, const Time<TT, MJD> &mjd) {
   double out;
   check_status(siderust_azimuth_at(detail::make_body_subject(SIDERUST_BODY_MOON), obs.to_c(),
                                    mjd.value(), &out),
@@ -198,7 +199,7 @@ inline qtty::Degree azimuth_at(const Geodetic &obs, const ModifiedJulianDate &mj
  * @brief Find epochs when the Moon crosses a given bearing.
  */
 inline std::vector<AzimuthCrossingEvent> azimuth_crossings(const Geodetic &obs,
-                                                           const Period &window,
+                                                           const Period<TT, MJD> &window,
                                                            qtty::Degree bearing,
                                                            const SearchOptions &opts = {}) {
   siderust_azimuth_crossing_event_t *ptr = nullptr;
@@ -213,7 +214,8 @@ inline std::vector<AzimuthCrossingEvent> azimuth_crossings(const Geodetic &obs,
 /**
  * @brief Find azimuth extrema (northernmost / southernmost) for the Moon.
  */
-inline std::vector<AzimuthExtremum> azimuth_extrema(const Geodetic &obs, const Period &window,
+inline std::vector<AzimuthExtremum> azimuth_extrema(const Geodetic &obs,
+                                                    const Period<TT, MJD> &window,
                                                     const SearchOptions &opts = {}) {
   siderust_azimuth_extremum_t *ptr = nullptr;
   uintptr_t count = 0;
@@ -227,9 +229,9 @@ inline std::vector<AzimuthExtremum> azimuth_extrema(const Geodetic &obs, const P
  * @brief Find periods when the Moon's azimuth is within [min_bearing,
  * max_bearing].
  */
-inline std::vector<Period> in_azimuth_range(const Geodetic &obs, const Period &window,
-                                            qtty::Degree min_bearing, qtty::Degree max_bearing,
-                                            const SearchOptions &opts = {}) {
+inline std::vector<Period<TT, MJD>>
+in_azimuth_range(const Geodetic &obs, const Period<TT, MJD> &window, qtty::Degree min_bearing,
+                 qtty::Degree max_bearing, const SearchOptions &opts = {}) {
   tempoch_period_mjd_t *ptr = nullptr;
   uintptr_t count = 0;
   check_status(siderust_in_azimuth_range(detail::make_body_subject(SIDERUST_BODY_MOON), obs.to_c(),
@@ -243,9 +245,9 @@ inline std::vector<Period> in_azimuth_range(const Geodetic &obs, const Period &w
  * @brief Find periods when the Moon's azimuth is outside [min_bearing,
  * max_bearing].
  */
-inline std::vector<Period> outside_azimuth_range(const Geodetic &obs, const Period &window,
-                                                 qtty::Degree min_bearing, qtty::Degree max_bearing,
-                                                 const SearchOptions &opts = {}) {
+inline std::vector<Period<TT, MJD>>
+outside_azimuth_range(const Geodetic &obs, const Period<TT, MJD> &window, qtty::Degree min_bearing,
+                      qtty::Degree max_bearing, const SearchOptions &opts = {}) {
   tempoch_period_mjd_t *ptr = nullptr;
   uintptr_t count = 0;
   check_status(siderust_outside_azimuth_range(detail::make_body_subject(SIDERUST_BODY_MOON),
@@ -264,10 +266,10 @@ inline std::vector<Period> outside_azimuth_range(const Geodetic &obs, const Peri
 namespace star_altitude {
 
 /**
- * @brief Compute a star's azimuth (degrees, N-clockwise) at a given ModifiedJulianDate
+ * @brief Compute a star's azimuth (degrees, N-clockwise) at a given Time<TT, MJD>
  * instant.
  */
-inline qtty::Degree azimuth_at(const Star &s, const Geodetic &obs, const ModifiedJulianDate &mjd) {
+inline qtty::Degree azimuth_at(const Star &s, const Geodetic &obs, const Time<TT, MJD> &mjd) {
   double out;
   check_status(
       siderust_azimuth_at(detail::make_star_subject(s.c_handle()), obs.to_c(), mjd.value(), &out),
@@ -279,7 +281,7 @@ inline qtty::Degree azimuth_at(const Star &s, const Geodetic &obs, const Modifie
  * @brief Find epochs when a star crosses a given azimuth bearing.
  */
 inline std::vector<AzimuthCrossingEvent> azimuth_crossings(const Star &s, const Geodetic &obs,
-                                                           const Period &window,
+                                                           const Period<TT, MJD> &window,
                                                            qtty::Degree bearing,
                                                            const SearchOptions &opts = {}) {
   siderust_azimuth_crossing_event_t *ptr = nullptr;
@@ -294,10 +296,11 @@ inline std::vector<AzimuthCrossingEvent> azimuth_crossings(const Star &s, const 
 /**
  * @brief Find periods when a star's azimuth is within [min, max] (degrees).
  */
-inline std::vector<Period> in_azimuth_range(const Star &s, const Geodetic &obs,
-                                            const Period &window, qtty::Degree min_bearing,
-                                            qtty::Degree max_bearing,
-                                            const SearchOptions &opts = {}) {
+inline std::vector<Period<TT, MJD>> in_azimuth_range(const Star &s, const Geodetic &obs,
+                                                     const Period<TT, MJD> &window,
+                                                     qtty::Degree min_bearing,
+                                                     qtty::Degree max_bearing,
+                                                     const SearchOptions &opts = {}) {
   tempoch_period_mjd_t *ptr = nullptr;
   uintptr_t count = 0;
   check_status(siderust_in_azimuth_range(detail::make_star_subject(s.c_handle()), obs.to_c(),
@@ -310,10 +313,11 @@ inline std::vector<Period> in_azimuth_range(const Star &s, const Geodetic &obs,
 /**
  * @brief Find periods when a star's azimuth is outside [min, max] (degrees).
  */
-inline std::vector<Period> outside_azimuth_range(const Star &s, const Geodetic &obs,
-                                                 const Period &window, qtty::Degree min_bearing,
-                                                 qtty::Degree max_bearing,
-                                                 const SearchOptions &opts = {}) {
+inline std::vector<Period<TT, MJD>> outside_azimuth_range(const Star &s, const Geodetic &obs,
+                                                          const Period<TT, MJD> &window,
+                                                          qtty::Degree min_bearing,
+                                                          qtty::Degree max_bearing,
+                                                          const SearchOptions &opts = {}) {
   tempoch_period_mjd_t *ptr = nullptr;
   uintptr_t count = 0;
   check_status(siderust_outside_azimuth_range(detail::make_star_subject(s.c_handle()), obs.to_c(),
@@ -335,7 +339,7 @@ namespace icrs_altitude {
  * @brief Compute azimuth (degrees, N-clockwise) for a fixed ICRS direction.
  */
 inline qtty::Degree azimuth_at(const spherical::direction::ICRS &dir, const Geodetic &obs,
-                               const ModifiedJulianDate &mjd) {
+                               const Time<TT, MJD> &mjd) {
   double out;
   check_status(
       siderust_azimuth_at(detail::make_icrs_subject(dir.to_c()), obs.to_c(), mjd.value(), &out),
@@ -347,16 +351,18 @@ inline qtty::Degree azimuth_at(const spherical::direction::ICRS &dir, const Geod
  * @brief Backward-compatible RA/Dec overload.
  */
 inline qtty::Degree azimuth_at(qtty::Degree ra, qtty::Degree dec, const Geodetic &obs,
-                               const ModifiedJulianDate &mjd) {
+                               const Time<TT, MJD> &mjd) {
   return azimuth_at(spherical::direction::ICRS(ra, dec), obs, mjd);
 }
 
 /**
  * @brief Find epochs when an ICRS direction crosses a given azimuth bearing.
  */
-inline std::vector<AzimuthCrossingEvent>
-azimuth_crossings(const spherical::direction::ICRS &dir, const Geodetic &obs, const Period &window,
-                  qtty::Degree bearing, const SearchOptions &opts = {}) {
+inline std::vector<AzimuthCrossingEvent> azimuth_crossings(const spherical::direction::ICRS &dir,
+                                                           const Geodetic &obs,
+                                                           const Period<TT, MJD> &window,
+                                                           qtty::Degree bearing,
+                                                           const SearchOptions &opts = {}) {
   siderust_azimuth_crossing_event_t *ptr = nullptr;
   uintptr_t count = 0;
   check_status(siderust_azimuth_crossings(detail::make_icrs_subject(dir.to_c()), obs.to_c(),
@@ -369,9 +375,11 @@ azimuth_crossings(const spherical::direction::ICRS &dir, const Geodetic &obs, co
 /**
  * @brief Backward-compatible RA/Dec overload.
  */
-inline std::vector<AzimuthCrossingEvent>
-azimuth_crossings(qtty::Degree ra, qtty::Degree dec, const Geodetic &obs, const Period &window,
-                  qtty::Degree bearing, const SearchOptions &opts = {}) {
+inline std::vector<AzimuthCrossingEvent> azimuth_crossings(qtty::Degree ra, qtty::Degree dec,
+                                                           const Geodetic &obs,
+                                                           const Period<TT, MJD> &window,
+                                                           qtty::Degree bearing,
+                                                           const SearchOptions &opts = {}) {
   return azimuth_crossings(spherical::direction::ICRS(ra, dec), obs, window, bearing, opts);
 }
 

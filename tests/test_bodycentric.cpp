@@ -17,10 +17,15 @@ constexpr double J2000 = 2451545.0;
 constexpr double KM_PER_AU = 149597870.7;
 
 // Satellite orbit at 0.0001 AU (~14 960 km) geocentric
-Orbit satellite_orbit() { return {0.0001_au, 0.0, 0.0_deg, 0.0_deg, 0.0_deg, 0.0_deg, J2000}; }
+KeplerianOrbit satellite_orbit() {
+  return {0.0001_au, Eccentricity{0.0}, 0.0_deg, 0.0_deg, 0.0_deg, 0.0_deg, Time<TT, JD>(J2000)};
+}
 
 // Approximate Mars heliocentric orbit
-Orbit mars_orbit() { return {1.524_au, 0.0934, 1.85_deg, 49.56_deg, 286.5_deg, 19.41_deg, J2000}; }
+KeplerianOrbit mars_orbit() {
+  return {1.524_au,  Eccentricity{0.0934}, 1.85_deg, 49.56_deg, 286.5_deg,
+          19.41_deg, Time<TT, JD>(J2000)};
+}
 
 double vec_magnitude(double x, double y, double z) { return std::sqrt(x * x + y * y + z * z); }
 
@@ -31,7 +36,7 @@ double vec_magnitude(double x, double y, double z) { return std::sqrt(x * x + y 
 // ============================================================================
 
 TEST(BodycentricTransforms, KeplerPositionGeocentricOrbit) {
-  const JulianDate jd(J2000);
+  const Time<TT, JD> jd(J2000);
   auto pos = kepler_position<Geocentric>(satellite_orbit(), jd);
 
   // Satellite at 0.0001 AU — distance should be close to 0.0001 AU
@@ -44,7 +49,7 @@ TEST(BodycentricTransforms, KeplerPositionGeocentricOrbit) {
 }
 
 TEST(BodycentricTransforms, KeplerPositionHeliocentricOrbit) {
-  const JulianDate jd(J2000);
+  const Time<TT, JD> jd(J2000);
   auto pos = kepler_position(mars_orbit(), jd); // default C = Heliocentric
 
   double r = std::sqrt(pos.x().value() * pos.x().value() + pos.y().value() * pos.y().value() +
@@ -59,7 +64,7 @@ TEST(BodycentricTransforms, KeplerPositionHeliocentricOrbit) {
 // ============================================================================
 
 TEST(BodycentricTransforms, GeocentricToBodycentricGeoOrbit) {
-  const JulianDate jd(J2000);
+  const Time<TT, JD> jd(J2000);
   BodycentricParams params = BodycentricParams::geocentric(satellite_orbit());
 
   // Target at 0.001 AU from Earth
@@ -84,7 +89,7 @@ TEST(BodycentricTransforms, GeocentricToBodycentricGeoOrbit) {
 // ============================================================================
 
 TEST(BodycentricTransforms, HeliocentricToBodycentricHelioOrbit) {
-  const JulianDate jd(J2000);
+  const Time<TT, JD> jd(J2000);
   BodycentricParams params = BodycentricParams::heliocentric(mars_orbit());
 
   auto earth_helio = ephemeris::earth_heliocentric(jd);
@@ -102,7 +107,7 @@ TEST(BodycentricTransforms, HeliocentricToBodycentricHelioOrbit) {
 // ============================================================================
 
 TEST(BodycentricTransforms, RoundTripGeocentricBodycentric) {
-  const JulianDate jd(J2000);
+  const Time<TT, JD> jd(J2000);
   BodycentricParams params = BodycentricParams::geocentric(satellite_orbit());
 
   cartesian::Position<Geocentric, EclipticMeanJ2000, AstronomicalUnit> original(0.001, 0.002,
@@ -117,7 +122,7 @@ TEST(BodycentricTransforms, RoundTripGeocentricBodycentric) {
 }
 
 TEST(BodycentricTransforms, RoundTripHeliocentricBodycentric) {
-  const JulianDate jd(J2000);
+  const Time<TT, JD> jd(J2000);
   BodycentricParams params = BodycentricParams::heliocentric(mars_orbit());
 
   cartesian::Position<Geocentric, EclipticMeanJ2000, AstronomicalUnit> original(0.005, 0.003,
@@ -136,8 +141,8 @@ TEST(BodycentricTransforms, RoundTripHeliocentricBodycentric) {
 // ============================================================================
 
 TEST(BodycentricTransforms, BodyOwnPositionAtOrigin) {
-  const JulianDate jd(J2000);
-  Orbit orbit = satellite_orbit();
+  const Time<TT, JD> jd(J2000);
+  KeplerianOrbit orbit = satellite_orbit();
   BodycentricParams params = BodycentricParams::geocentric(orbit);
 
   // Get the satellite's own geocentric position
@@ -157,7 +162,7 @@ TEST(BodycentricTransforms, BodyOwnPositionAtOrigin) {
 // ============================================================================
 
 TEST(BodycentricTransforms, HeliocentricOrbitWithGeocentricOrbit) {
-  const JulianDate jd(J2000);
+  const Time<TT, JD> jd(J2000);
   // Geocentric orbit for the body, but heliocentric position for the target
   BodycentricParams params = BodycentricParams::geocentric(satellite_orbit());
 
@@ -233,7 +238,7 @@ TEST(BodycentricFFI, KeplerPositionReturnsFinite) {
 // ============================================================================
 
 TEST(BodycentricTransforms, VenusHeliocentricIsFinite) {
-  const JulianDate jd(J2000);
+  const Time<TT, JD> jd(J2000);
   auto venus = ephemeris::venus_heliocentric(jd);
   EXPECT_TRUE(std::isfinite(venus.x().value()));
   EXPECT_TRUE(std::isfinite(venus.y().value()));

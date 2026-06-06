@@ -19,16 +19,13 @@
 
 using namespace siderust;
 using namespace qtty::literals;
-using TTJD = JulianDate;
-using TTMJD = ModifiedJulianDate;
-using TTMjdPeriod = Period;
 
 template <typename T> static CivilTime to_utc_civil(const T &time) {
   return time.template to<scale::UTC>().to_civil();
 }
 
-/// Helper: print a list of MJD periods with their durations.
-void print_periods(const std::string &label, const std::vector<TTMjdPeriod> &periods) {
+/// Helper: print a list of Time<TT, MJD> periods with their durations.
+void print_periods(const std::string &label, const std::vector<Period<TT, MJD>> &periods) {
   std::cout << "\n" << label << ": " << periods.size() << " period(s)" << std::endl;
   for (const auto &p : periods) {
     auto dur_h = p.duration<qtty::Hour>();
@@ -47,9 +44,9 @@ int main() {
   Geodetic site{qtty::Degree(lon), qtty::Degree(lat), qtty::Meter(h_m)};
 
   // Use a fixed date for reproducibility: 2026-03-01 00:00 UTC
-  auto jd = JulianDate::from_utc({2026, 3, 1, 0, 0, 0});
+  auto jd = Time<TT, JD>::from_utc({2026, 3, 1, 0, 0, 0});
   auto mjd = jd.to<format::MJD>();
-  auto window = TTMjdPeriod(mjd, mjd + qtty::Day(35.0));
+  auto window = Period<TT, MJD>(mjd, mjd + qtty::Day(35.0));
   SearchOptions opts{};
 
   // =========================================================================

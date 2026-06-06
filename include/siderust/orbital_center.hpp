@@ -14,14 +14,14 @@
  * using namespace siderust;
  *
  * // Define Mars's heliocentric orbit
- * Orbit mars_orbit = {
+ * KeplerianOrbit mars_orbit = {
  *     1.524,    // semi_major_axis_au
  *     0.0934,   // eccentricity
  *     1.85,     // inclination_deg
  *     49.56,    // lon_ascending_node_deg
- *     286.5,    // arg_perihelion_deg
+ *     286.5,    // arg_periapsis_deg
  *     19.41,    // mean_anomaly_deg
- *     2451545.0 // epoch_jd (J2000)
+ *     Time<TT, JD>::J2000()
  * };
  *
  * // Create parameters: Mars as center of a heliocentric orbit
@@ -77,14 +77,14 @@ enum class OrbitReferenceCenter : std::uint8_t {
  * ```cpp
  * // Approximate L2 orbit (1.5M km from Earth on opposite side of Sun)
  * // In practice, L2 is a quasi-periodic Halo orbit, but we approximate here
- * Orbit l2_approx = {
+ * KeplerianOrbit l2_approx = {
  *     1.0,      // semi_major_axis_au (~1 AU from Sun, like Earth)
  *     0.01,     // eccentricity (small: stable near L2)
  *     0.0,      // inclination_deg
  *     0.0,      // lon_ascending_node_deg
- *     0.0,      // arg_perihelion_deg
+ *     0.0,      // arg_periapsis_deg
  *     0.0,      // mean_anomaly_deg
- *     2451545.0 // epoch_jd (J2000)
+ *     Time<TT, JD>::J2000()
  * };
  * BodycentricParams l2_center = BodycentricParams::heliocentric(l2_approx);
  *
@@ -94,7 +94,7 @@ enum class OrbitReferenceCenter : std::uint8_t {
  */
 struct BodycentricParams {
   /// Keplerian orbital elements of the body.
-  Orbit orbit;
+  KeplerianOrbit orbit;
 
   /// Which standard center the orbit is defined relative to.
   OrbitReferenceCenter orbit_center;
@@ -105,7 +105,7 @@ struct BodycentricParams {
    * @param orb The Keplerian orbital elements.
    * @param center The reference center for the orbit.
    */
-  BodycentricParams(const Orbit &orb, OrbitReferenceCenter center)
+  BodycentricParams(const KeplerianOrbit &orb, OrbitReferenceCenter center)
       : orbit(orb), orbit_center(center) {}
 
   /**
@@ -116,7 +116,7 @@ struct BodycentricParams {
    * @param orb Heliocentric orbital elements.
    * @return BodycentricParams with Heliocentric reference.
    */
-  static BodycentricParams heliocentric(const Orbit &orb) {
+  static BodycentricParams heliocentric(const KeplerianOrbit &orb) {
     return BodycentricParams(orb, OrbitReferenceCenter::Heliocentric);
   }
 
@@ -128,7 +128,7 @@ struct BodycentricParams {
    * @param orb Geocentric orbital elements.
    * @return BodycentricParams with Geocentric reference.
    */
-  static BodycentricParams geocentric(const Orbit &orb) {
+  static BodycentricParams geocentric(const KeplerianOrbit &orb) {
     return BodycentricParams(orb, OrbitReferenceCenter::Geocentric);
   }
 
@@ -138,19 +138,15 @@ struct BodycentricParams {
    * @param orb Barycentric orbital elements.
    * @return BodycentricParams with Barycentric reference.
    */
-  static BodycentricParams barycentric(const Orbit &orb) {
+  static BodycentricParams barycentric(const KeplerianOrbit &orb) {
     return BodycentricParams(orb, OrbitReferenceCenter::Barycentric);
   }
 
   /// Default: circular 1 AU heliocentric orbit (placeholder).
   BodycentricParams()
-      : orbit{qtty::AstronomicalUnit(1.0),
-              0.0,
-              qtty::Degree(0.0),
-              qtty::Degree(0.0),
-              qtty::Degree(0.0),
-              qtty::Degree(0.0),
-              2451545.0},
+      : orbit{qtty::AstronomicalUnit(1.0), Eccentricity{0.0}, qtty::Degree(0.0),
+              qtty::Degree(0.0),           qtty::Degree(0.0), qtty::Degree(0.0),
+              Time<TT, JD>::J2000()},
         orbit_center(OrbitReferenceCenter::Heliocentric) {}
 
   /// Convert to C FFI struct for passing to siderust_to_bodycentric /

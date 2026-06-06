@@ -25,10 +25,11 @@
  * using namespace siderust::centers;
  * using qtty::AstronomicalUnit;
  *
- * auto jd = JulianDate::J2000;
+ * auto jd = Time<TT, JD>::J2000();
  *
  * // ISS-like geocentric orbit
- * Orbit iss_orbit{0.0000426, 0.001, 51.6, 0.0, 0.0, 0.0, jd.value()};
+ * KeplerianOrbit iss_orbit{0.0000426_au, Eccentricity{0.001}, 51.6_deg,
+ *                           0.0_deg, 0.0_deg, 0.0_deg, jd};
  * BodycentricParams iss_params = BodycentricParams::geocentric(iss_orbit);
  *
  * // Moon's approximate geocentric position
@@ -104,7 +105,7 @@ template <typename F, typename U = qtty::AstronomicalUnit> struct BodycentricPos
    * @param jd  Julian Date (same as the forward transform).
    * @return Geocentric position in the same frame and unit.
    */
-  cartesian::Position<centers::Geocentric, F, U> to_geocentric(const JulianDate &jd) const;
+  cartesian::Position<centers::Geocentric, F, U> to_geocentric(const Time<TT, JD> &jd) const;
 };
 
 // ============================================================================
@@ -134,7 +135,8 @@ template <typename F, typename U = qtty::AstronomicalUnit> struct BodycentricPos
  */
 template <typename C, typename F, typename U>
 inline BodycentricPos<F, U> to_bodycentric(const cartesian::Position<C, F, U> &pos,
-                                           const BodycentricParams &params, const JulianDate &jd) {
+                                           const BodycentricParams &params,
+                                           const Time<TT, JD> &jd) {
   static_assert(centers::is_center_v<C>, "C must be a valid center tag");
 
   siderust_cartesian_pos_t c_pos = pos.to_c();
@@ -153,7 +155,7 @@ inline BodycentricPos<F, U> to_bodycentric(const cartesian::Position<C, F, U> &p
 
 template <typename F, typename U>
 inline cartesian::Position<centers::Geocentric, F, U>
-BodycentricPos<F, U>::to_geocentric(const JulianDate &jd) const {
+BodycentricPos<F, U>::to_geocentric(const Time<TT, JD> &jd) const {
   siderust_cartesian_pos_t c_pos = pos.to_c();
   SiderustBodycentricParams c_params = params.to_c();
   siderust_cartesian_pos_t c_out{};

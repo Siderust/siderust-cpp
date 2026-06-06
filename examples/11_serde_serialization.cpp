@@ -30,7 +30,6 @@ using namespace siderust;
 using namespace siderust::frames;
 using namespace siderust::centers;
 using namespace qtty::literals;
-using TTJD = JulianDate;
 // ─── JSON formatting helpers ────────────────────────────────────────────────
 
 inline std::string json_number(double v, int prec = 6) {
@@ -47,7 +46,7 @@ void section_times() {
   std::cout << "1) TIME OBJECTS\n"
             << "---------------\n";
 
-  auto jd = TTJD::J2000();
+  auto jd = Time<TT, JD>::J2000();
   auto mjd = jd.to<format::MJD>();
   auto jd_plus1 = jd + qtty::Day(1.0);
   auto jd_plus7 = jd + qtty::Day(7.0);
@@ -105,8 +104,8 @@ void section_coordinates() {
 
 struct BodySnapshotJSON {
   std::string name;
-  TTJD epoch;
-  Orbit orbit;
+  Time<TT, JD> epoch;
+  KeplerianOrbit orbit;
   cartesian::position::EclipticMeanJ2000<qtty::AstronomicalUnit> helio_ecl;
 
   std::string to_json(int indent = 2) const {
@@ -117,13 +116,13 @@ struct BodySnapshotJSON {
        << pad << "\"epoch\": " << json_number(epoch.value(), 1) << ",\n"
        << pad << "\"orbit\": {\n"
        << pad << "  \"semi_major_axis_au\": " << json_number(orbit.semi_major_axis.value()) << ",\n"
-       << pad << "  \"eccentricity\": " << json_number(orbit.eccentricity) << ",\n"
+       << pad << "  \"eccentricity\": " << json_number(orbit.eccentricity.value) << ",\n"
        << pad << "  \"inclination_deg\": " << json_number(orbit.inclination.value()) << ",\n"
        << pad << "  \"lon_ascending_node_deg\": " << json_number(orbit.lon_ascending_node.value())
        << ",\n"
-       << pad << "  \"arg_perihelion_deg\": " << json_number(orbit.arg_perihelion.value()) << ",\n"
+       << pad << "  \"arg_periapsis_deg\": " << json_number(orbit.arg_periapsis.value()) << ",\n"
        << pad << "  \"mean_anomaly_deg\": " << json_number(orbit.mean_anomaly.value()) << ",\n"
-       << pad << "  \"epoch_jd\": " << json_number(orbit.epoch_jd, 1) << "\n"
+       << pad << "  \"epoch_jd\": " << json_number(orbit.epoch.value(), 1) << "\n"
        << pad << "},\n"
        << pad << "\"heliocentric_ecliptic\": {\n"
        << pad << "  \"x\": " << json_number(helio_ecl.x().value()) << ",\n"
@@ -135,14 +134,15 @@ struct BodySnapshotJSON {
   }
 };
 
-void section_body_objects(const TTJD &jd) {
+void section_body_objects(const Time<TT, JD> &jd) {
   std::cout << "3) BODY-RELATED OBJECTS\n"
             << "-----------------------\n";
 
   BodySnapshotJSON earth_snap{"Earth", jd, EARTH().orbit, ephemeris::earth_heliocentric(jd)};
 
   // Halley's comet
-  Orbit halley_orb{17.834_au, 0.96714, 162.26_deg, 58.42_deg, 111.33_deg, 38.38_deg, 2446467.4};
+  KeplerianOrbit halley_orb{17.834_au, Eccentricity{0.96714},  162.26_deg, 58.42_deg, 111.33_deg,
+                            38.38_deg, Time<TT, JD>(2446467.4)};
   auto halley_pos = kepler_position(halley_orb, jd);
   BodySnapshotJSON halley_snap{"Halley", jd, halley_orb, halley_pos};
 
@@ -156,7 +156,7 @@ void section_body_objects(const TTJD &jd) {
 
 // ─── Section 4: Target objects ──────────────────────────────────────────────
 
-void section_targets(const TTJD &jd) {
+void section_targets(const Time<TT, JD> &jd) {
   std::cout << "4) TARGET OBJECTS\n"
             << "-----------------\n";
 
@@ -179,7 +179,7 @@ void section_targets(const TTJD &jd) {
 
 // ─── Section 5: File I/O ────────────────────────────────────────────────────
 
-void section_file_io(const TTJD &jd) {
+void section_file_io(const Time<TT, JD> &jd) {
   std::cout << "5) FILE I/O\n"
             << "----------\n";
 
@@ -223,7 +223,7 @@ void section_file_io(const TTJD &jd) {
 int main() {
   std::cout << "=== Siderust Manual Serialization Examples ===\n\n";
 
-  auto jd = TTJD::J2000();
+  auto jd = Time<TT, JD>::J2000();
 
   section_times();
   section_coordinates();

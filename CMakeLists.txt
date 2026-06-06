@@ -250,8 +250,16 @@ endif()
 if(SIDERUST_CPP_BUILD_BENCHES)
     add_executable(bench_night_periods benches/bench_night_periods.cpp)
     target_link_libraries(bench_night_periods PRIVATE siderust_cpp benchmark::benchmark)
+
+    add_executable(bench_icrs_altitude_periods benches/bench_icrs_altitude_periods.cpp)
+    target_link_libraries(bench_icrs_altitude_periods PRIVATE siderust_cpp benchmark::benchmark)
+
     if(DEFINED _siderust_rpath)
         set_target_properties(bench_night_periods PROPERTIES
+            BUILD_RPATH ${_siderust_rpath}
+            INSTALL_RPATH ${_siderust_rpath}
+        )
+        set_target_properties(bench_icrs_altitude_periods PROPERTIES
             BUILD_RPATH ${_siderust_rpath}
             INSTALL_RPATH ${_siderust_rpath}
         )

@@ -70,35 +70,38 @@ public:
   // ------------------------------------------------------------------
 
   /**
-   * @brief Compute altitude (degrees) at a given ModifiedJulianDate instant.
+   * @brief Compute altitude (degrees) at a given Time<TT, MJD> instant.
    */
-  virtual qtty::Degree altitude_at(const Geodetic &obs, const ModifiedJulianDate &mjd) const = 0;
+  virtual qtty::Degree altitude_at(const Geodetic &obs, const Time<TT, MJD> &mjd) const = 0;
 
   /**
    * @brief Find periods when the object is above a threshold altitude.
    */
-  virtual std::vector<Period> above_threshold(const Geodetic &obs, const Period &window,
-                                              qtty::Degree threshold,
-                                              const SearchOptions &opts = {}) const = 0;
+  virtual std::vector<Period<TT, MJD>> above_threshold(const Geodetic &obs,
+                                                       const Period<TT, MJD> &window,
+                                                       qtty::Degree threshold,
+                                                       const SearchOptions &opts = {}) const = 0;
 
   /**
    * @brief Find periods when the object is below a threshold altitude.
    */
-  virtual std::vector<Period> below_threshold(const Geodetic &obs, const Period &window,
-                                              qtty::Degree threshold,
-                                              const SearchOptions &opts = {}) const = 0;
+  virtual std::vector<Period<TT, MJD>> below_threshold(const Geodetic &obs,
+                                                       const Period<TT, MJD> &window,
+                                                       qtty::Degree threshold,
+                                                       const SearchOptions &opts = {}) const = 0;
 
   /**
    * @brief Find threshold-crossing events (rising / setting).
    */
-  virtual std::vector<CrossingEvent> crossings(const Geodetic &obs, const Period &window,
+  virtual std::vector<CrossingEvent> crossings(const Geodetic &obs, const Period<TT, MJD> &window,
                                                qtty::Degree threshold,
                                                const SearchOptions &opts = {}) const = 0;
 
   /**
    * @brief Find culmination (local altitude extremum) events.
    */
-  virtual std::vector<CulminationEvent> culminations(const Geodetic &obs, const Period &window,
+  virtual std::vector<CulminationEvent> culminations(const Geodetic &obs,
+                                                     const Period<TT, MJD> &window,
                                                      const SearchOptions &opts = {}) const = 0;
 
   // ------------------------------------------------------------------
@@ -106,15 +109,15 @@ public:
   // ------------------------------------------------------------------
 
   /**
-   * @brief Compute azimuth (degrees, N-clockwise) at a given ModifiedJulianDate instant.
+   * @brief Compute azimuth (degrees, N-clockwise) at a given Time<TT, MJD> instant.
    */
-  virtual qtty::Degree azimuth_at(const Geodetic &obs, const ModifiedJulianDate &mjd) const = 0;
+  virtual qtty::Degree azimuth_at(const Geodetic &obs, const Time<TT, MJD> &mjd) const = 0;
 
   /**
    * @brief Find epochs when the object crosses a given azimuth bearing.
    */
   virtual std::vector<AzimuthCrossingEvent>
-  azimuth_crossings(const Geodetic &obs, const Period &window, qtty::Degree bearing,
+  azimuth_crossings(const Geodetic &obs, const Period<TT, MJD> &window, qtty::Degree bearing,
                     const SearchOptions &opts = {}) const = 0;
 
   // Non-copyable, movable from base

@@ -10,7 +10,6 @@
 
 using namespace siderust;
 using namespace siderust::frames;
-using TTJD = JulianDate;
 
 namespace {
 
@@ -22,7 +21,7 @@ double chord_delta(const cartesian::Direction<EquatorialTrueOfDate> &a,
 } // namespace
 
 int main() {
-  const TTJD jd(2458850.0);
+  const Time<TT, JD> jd(2458850.0);
   const cartesian::Direction<ICRS> icrs(0.6, -0.3, 0.74);
 
   std::cout << "=== Nutation Model Selection ===\n\n";

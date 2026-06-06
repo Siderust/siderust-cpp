@@ -25,13 +25,12 @@ using namespace qtty::literals;
 
 using F = EclipticMeanJ2000;
 using U = qtty::AstronomicalUnit;
-using TTJD = JulianDate;
 
 // ─── Standard center shifts ──────────────────────────────────────────────────
 
 /// Show a center conversion C1→C2, round-trip C1→C2→C1, and the error.
 template <typename C1, typename C2>
-void show_center_conversion(const TTJD &jd, const cartesian::Position<C1, F, U> &src) {
+void show_center_conversion(const Time<TT, JD> &jd, const cartesian::Position<C1, F, U> &src) {
   auto out = src.template to_center<C2>(jd);
   auto back = out.template to_center<C1>(jd);
   auto err = (src - back).magnitude();
@@ -48,7 +47,7 @@ void show_center_conversion(const TTJD &jd, const cartesian::Position<C1, F, U> 
 ///
 /// Round-trip: C → Bodycentric → Geocentric → C.
 template <typename C>
-void show_bodycentric_conversion(const char *label, const TTJD &jd,
+void show_bodycentric_conversion(const char *label, const Time<TT, JD> &jd,
                                  const cartesian::Position<C, F, U> &src,
                                  const BodycentricParams &params) {
   auto bary = to_bodycentric(src, params, jd);
@@ -66,7 +65,7 @@ void show_bodycentric_conversion(const char *label, const TTJD &jd,
 // ─────────────────────────────────────────────────────────────────────
 
 int main() {
-  TTJD jd(2460000.5);
+  Time<TT, JD> jd(2460000.5);
   std::cout << "Center conversion demo at JD(TT) = " << std::fixed << std::setprecision(1) << jd
             << "\n"
             << std::endl;
@@ -97,13 +96,13 @@ int main() {
   // ── Bodycentric: Mars-like orbit (heliocentric reference) ──────────────────
   std::cout << "\n── Bodycentric – Mars-like orbit (heliocentric ref) "
                "───────────────────\n";
-  Orbit mars_orbit{1.524_au,  // semi_major_axis
-                   0.0934,    // eccentricity
-                   1.85_deg,  // inclination
-                   49.56_deg, // lon_ascending_node
-                   286.5_deg, // arg_perihelion
-                   19.41_deg, // mean_anomaly
-                   jd.value()};
+  KeplerianOrbit mars_orbit{1.524_au,             // semi_major_axis
+                            Eccentricity{0.0934}, // eccentricity
+                            1.85_deg,             // inclination
+                            49.56_deg,            // lon_ascending_node
+                            286.5_deg,            // arg_periapsis
+                            19.41_deg,            // mean_anomaly
+                            jd};
   auto mars_params = BodycentricParams::heliocentric(mars_orbit);
 
   show_bodycentric_conversion("Heliocentric", jd, p_helio, mars_params);
@@ -113,13 +112,13 @@ int main() {
   // ── Bodycentric: ISS-like orbit (geocentric reference) ────────────────────
   std::cout << "\n── Bodycentric – ISS-like orbit (geocentric ref) "
                "──────────────────────\n";
-  Orbit iss_orbit{0.0000426_au, // ~6 378 km in AU
-                  0.001,        // eccentricity
-                  51.6_deg,     // inclination
-                  0.0_deg,      // lon_ascending_node
-                  0.0_deg,      // arg_perihelion
-                  0.0_deg,      // mean_anomaly
-                  jd.value()};
+  KeplerianOrbit iss_orbit{0.0000426_au,        // ~6 378 km in AU
+                           Eccentricity{0.001}, // eccentricity
+                           51.6_deg,            // inclination
+                           0.0_deg,             // lon_ascending_node
+                           0.0_deg,             // arg_periapsis
+                           0.0_deg,             // mean_anomaly
+                           jd};
   auto iss_params = BodycentricParams::geocentric(iss_orbit);
 
   show_bodycentric_conversion("Heliocentric", jd, p_helio, iss_params);

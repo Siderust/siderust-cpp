@@ -22,16 +22,33 @@ namespace siderust {
  * @brief Proper motion for a star (equatorial).
  */
 struct ProperMotion {
-  double pm_ra_deg_yr;     ///< RA proper motion (deg/yr).
-  double pm_dec_deg_yr;    ///< Dec proper motion (deg/yr).
+  AngularRate ra;          ///< RA proper motion.
+  AngularRate dec;         ///< Dec proper motion.
   RaConvention convention; ///< RA rate convention.
 
-  ProperMotion(double ra, double dec, RaConvention conv = RaConvention::MuAlphaStar)
-      : pm_ra_deg_yr(ra), pm_dec_deg_yr(dec), convention(conv) {}
-
   siderust_proper_motion_t to_c() const {
-    return {pm_ra_deg_yr, pm_dec_deg_yr, static_cast<siderust_ra_convention_t>(convention)};
+    return {ra.deg_per_day() * 365.25, dec.deg_per_day() * 365.25,
+            static_cast<siderust_ra_convention_t>(convention)};
   }
+};
+
+struct SolarMass {
+  double value;
+};
+
+struct SolarRadius {
+  double value;
+};
+
+struct SolarLuminosity {
+  double value;
+};
+
+struct StellarProperties {
+  qtty::LightYear distance;
+  SolarMass mass;
+  SolarRadius radius;
+  SolarLuminosity luminosity;
 };
 
 // ============================================================================
@@ -44,10 +61,11 @@ struct ProperMotion {
 struct Planet {
   qtty::Kilogram mass;    ///< Planet mass.
   qtty::Kilometer radius; ///< Mean equatorial radius.
-  Orbit orbit;
+  KeplerianOrbit orbit;
 
   static Planet from_c(const siderust_planet_t &c) {
-    return {qtty::Kilogram(c.mass_kg), qtty::Kilometer(c.radius_km), Orbit::from_c(c.orbit)};
+    return {qtty::Kilogram(c.mass_kg), qtty::Kilometer(c.radius_km),
+            KeplerianOrbit::from_c(c.orbit)};
   }
 };
 
@@ -205,18 +223,14 @@ public:
    * @brief Create a custom star.
    *
    * @param name           Star name.
-   * @param distance_ly    Distance in light-years.
-   * @param mass_solar     Mass in solar masses.
-   * @param radius_solar   Radius in solar radii.
-   * @param luminosity_solar Luminosity in solar luminosities.
-   * @param ra_deg         Right ascension (J2000) in degrees.
-   * @param dec_deg        Declination (J2000) in degrees.
-   * @param epoch_jd       Epoch of coordinates (Julian Date).
+   * @param properties     Distance and stellar properties.
+   * @param position       ICRS direction.
+   * @param epoch          Epoch of coordinates.
    * @param pm             Optional proper motion.
    */
-  static Star create(const std::string &name, double distance_ly, double mass_solar,
-                     double radius_solar, double luminosity_solar, double ra_deg, double dec_deg,
-                     double epoch_jd, const std::optional<ProperMotion> &pm = std::nullopt) {
+  static Star create(std::string name, StellarProperties properties,
+                     spherical::direction::ICRS position, Time<TT, JD> epoch,
+                     std::optional<ProperMotion> pm = std::nullopt) {
     SiderustStar *h = nullptr;
     const siderust_proper_motion_t *pm_ptr = nullptr;
     siderust_proper_motion_t pm_c{};
@@ -224,8 +238,10 @@ public:
       pm_c = pm->to_c();
       pm_ptr = &pm_c;
     }
-    check_status(siderust_star_create(name.c_str(), distance_ly, mass_solar, radius_solar,
-                                      luminosity_solar, ra_deg, dec_deg, epoch_jd, pm_ptr, &h),
+    check_status(siderust_star_create(name.c_str(), properties.distance.value(),
+                                      properties.mass.value, properties.radius.value,
+                                      properties.luminosity.value, position.ra().value(),
+                                      position.dec().value(), epoch.value(), pm_ptr, &h),
                  "Star::create");
     return Star(h);
   }

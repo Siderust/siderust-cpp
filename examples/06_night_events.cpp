@@ -18,8 +18,6 @@
 
 using namespace siderust;
 using namespace qtty::literals;
-using TTMJD = ModifiedJulianDate;
-using TTMjdPeriod = Period;
 
 template <typename T> static CivilTime to_utc_civil(const T &time) {
   return time.template to<scale::UTC>().to_civil();
@@ -35,13 +33,13 @@ constexpr auto NAUTICAL = qtty::Degree(-12.0);
 constexpr auto ASTRONOMICAL = qtty::Degree(-18.0);
 } // namespace twilight
 
-static TTMjdPeriod week_from_mjd(const TTMJD &start) {
+static Period<TT, MJD> week_from_mjd(const Time<TT, MJD> &start) {
   auto end = start + qtty::Day(7.0);
-  return TTMjdPeriod(start, end);
+  return Period<TT, MJD>(start, end);
 }
 
-static void print_events_for_type(const Geodetic &site, const TTMjdPeriod &week, const char *name,
-                                  qtty::Degree threshold) {
+static void print_events_for_type(const Geodetic &site, const Period<TT, MJD> &week,
+                                  const char *name, qtty::Degree threshold) {
   auto events = sun::crossings(site, week, threshold);
   int downs = 0, raises = 0;
 
@@ -64,8 +62,8 @@ static void print_events_for_type(const Geodetic &site, const TTMjdPeriod &week,
   std::cout << "  summary: down=" << downs << " raise=" << raises << std::endl;
 }
 
-static void print_periods_for_type(const Geodetic &site, const TTMjdPeriod &week, const char *name,
-                                   qtty::Degree threshold) {
+static void print_periods_for_type(const Geodetic &site, const Period<TT, MJD> &week,
+                                   const char *name, qtty::Degree threshold) {
   auto periods = sun::below_threshold(site, week, threshold);
   std::cout << std::left << std::setw(18) << name << " night periods (Sun < " << std::fixed
             << std::setprecision(3) << threshold << "): " << periods.size() << std::endl;
@@ -86,8 +84,8 @@ int main(int argc, char *argv[]) {
 
   Geodetic site{qtty::Degree(lon_deg), qtty::Degree(lat_deg), qtty::Meter(height_m)};
 
-  // Fixed start date: 2024-06-01 00:00 UTC  (MJD ≈ 60461)
-  auto mjd_start = ModifiedJulianDate::from_utc({2024, 6, 1, 0, 0, 0});
+  // Fixed start date: 2024-06-01 00:00 UTC  (Time<TT, MJD> ≈ 60461)
+  auto mjd_start = Time<TT, MJD>::from_utc({2024, 6, 1, 0, 0, 0});
   auto week = week_from_mjd(mjd_start);
 
   struct NightType {
