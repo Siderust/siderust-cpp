@@ -2,6 +2,7 @@
 #include <siderust/siderust.hpp>
 
 #include <type_traits>
+#include <utility>
 
 using namespace siderust;
 
@@ -15,9 +16,9 @@ TEST(Time, ReexportsExposeExplicitScaleTypes) {
 TEST(Time, TtJulianDateRoundtripsThroughUtcConvenience) {
   auto jd_tt = Time<TT, JD>::from_utc({2026, 7, 15, 22, 0, 0});
   auto roundtrip = jd_tt.to_utc();
-  auto mjd_tt = jd_tt.to<TT, MJD>();
 
-  static_assert(std::is_same_v<decltype(mjd_tt), Time<TT, MJD>>);
+  static_assert(
+      std::is_same_v<decltype(std::declval<Time<TT, JD>>().to<TT, MJD>()), Time<TT, MJD>>);
 
   EXPECT_EQ(roundtrip.year, 2026);
   EXPECT_EQ(roundtrip.month, 7);
