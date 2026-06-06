@@ -17,8 +17,9 @@
 #include <cstdlib>
 
 int main() {
+  using namespace siderust;
   // J2000.0 = 2000-01-01 12:00:00 UTC (close enough — exact J2000 is TT).
-  const auto mjd = siderust::Time<TT, MJD>::from_utc({2000, 1, 1, 12, 0, 0});
+  const auto mjd = Time<TT, MJD>::from_utc({2000, 1, 1, 12, 0, 0});
   const double mjd_value = mjd.value();
 
   std::printf("siderust-cpp installed-consumer smoke: J2000 MJD = %.6f\n", mjd_value);
