@@ -78,7 +78,7 @@ jobs:
 
       - name: Debian bookworm install smoke test
         shell: bash
-        run: scripts/smoke-install-debian-bookworm.sh --apt-repo-dir pages/apt --version 0.6.0
+        run: scripts/smoke-install-debian-bookworm.sh --apt-repo-dir pages/apt --version "${GITHUB_REF_NAME#v}"
 
       - name: Commit package repository updates
         shell: bash
