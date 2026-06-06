@@ -59,7 +59,7 @@ template <typename C, typename F, typename U>
 template <typename Target>
 std::enable_if_t<siderust::frames::has_frame_transform_v<F, Target>,
                  siderust::spherical::Position<C, Target, U>>
-spherical::Position<C, F, U>::to_frame(const JulianDate &jd) const {
+spherical::Position<C, F, U>::to_frame(const Time<TT, JD> &jd) const {
   if constexpr (std::is_same_v<F, Target>) {
     return *this;
   } else {
@@ -71,7 +71,7 @@ template <typename C, typename F, typename U>
 template <typename Target>
 std::enable_if_t<siderust::frames::has_frame_transform_v<F, Target>,
                  siderust::spherical::Position<C, Target, U>>
-spherical::Position<C, F, U>::to_frame_with(const JulianDate &jd, const AstroContext &ctx) const {
+spherical::Position<C, F, U>::to_frame_with(const Time<TT, JD> &jd, const AstroContext &ctx) const {
   if constexpr (std::is_same_v<F, Target>) {
     return *this;
   } else {

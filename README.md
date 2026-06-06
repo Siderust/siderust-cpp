@@ -8,10 +8,10 @@ Modern, header-only C++17 wrapper for **siderust** — a high-precision astronom
 
 | Module | What you get |
 |--------|-------------|
-| **Time** (`time.hpp`) | `UTC`, `CivilTime`, TT-default `JulianDate` / `MJD` / `Period`, plus explicit `Time<scale::S>` and `TimeContext` |
+| **Time** (`time.hpp`) | Public tags (`TT`, `UTC`, `JD`, `MJD`, `Unix`, `GPS`), `Time<Scale, Format>`, `Period<Scale, Format>`, `CivilTime`, and `TimeContext` |
 | **Coordinates** (`coordinates.hpp`) | Modular typed API (`coordinates/{geodetic,spherical,cartesian,types}.hpp`) plus selective alias headers under `coordinates/types/{spherical,cartesian}/...` |
 | **Frames & Centers** (`frames.hpp`, `centers.hpp`) | Compile-time frame/center tags and transform capability traits |
-| **Orbits** (`orbit.hpp`) | `KeplerianOrbit`, `MeanMotionOrbit`, `ConicOrbit`, `PreparedOrbit`, plus compatibility alias `Orbit` |
+| **Orbits** (`orbit.hpp`) | `KeplerianOrbit`, `MeanMotionOrbit`, `ConicOrbit`, `PreparedOrbit` |
 | **Bodies** (`bodies.hpp`) | `Star` (RAII, catalog + custom), `Planet` (8 planets), `ProperMotion`, planet orbit data |
 | **Observatories** (`observatories.hpp`) | Named sites: Roque de los Muchachos, Paranal, Mauna Kea, La Silla |
 | **Altitude** (`altitude.hpp`) | Sun / Moon / Star / ICRS altitude: instant, above/below threshold, crossings, culminations |
@@ -30,8 +30,8 @@ int main() {
     using namespace siderust;
 
     auto obs = ROQUE_DE_LOS_MUCHACHOS;
-    auto mjd = MJD::from_utc({2026, 7, 15, 22, 0, 0});
-    Period win(mjd, mjd + qtty::Day(1.0));
+    auto mjd = Time<TT, MJD>::from_utc({2026, 7, 15, 22, 0, 0});
+    Period<TT, MJD> win(mjd, mjd + qtty::Day(1.0));
 
     std::cout << "Epoch: " << mjd << '\n';
     std::cout << "Sun alt: " << sun::altitude_at(obs, mjd).to<qtty::Degree>() << '\n';
@@ -51,7 +51,7 @@ Coordinate types, `Geodetic`, and `qtty` quantities support `operator<<` with
 frame/center context and unit labels, for example:
 
 ```cpp
-auto jd = siderust::JulianDate::J2000();
+auto jd = siderust::Time<TT, JD>::J2000();
 auto mars = siderust::ephemeris::mars_heliocentric(jd);
 auto mars_eq = mars.transform<siderust::centers::Geocentric,
                               siderust::frames::EquatorialMeanJ2000>(jd);
@@ -61,7 +61,7 @@ std::cout << mars << '\n';                    // Heliocentric EclipticMeanJ2000 
 std::cout << mars_eq.to_spherical() << '\n';  // Geocentric EquatorialMeanJ2000 (ra=... deg, ...)
 ```
 
-`JulianDate` / `MJD` print as `TT JD …` / `TT MJD …` via tempoch-cpp. Use
+`Time<TT, JD>` / `Time<TT, MJD>` print as `TT JD …` / `TT Time<TT, MJD> …` via tempoch-cpp. Use
 `std::cout` in examples and tests rather than manual `.value()` formatting unless
 you need a raw scalar for computation.
 
@@ -83,7 +83,15 @@ cmake --build .
 
 # Run tests
 ctest --output-on-failure
+
+# Run benchmarks (night periods and fixed ICRS altitude windows)
+cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DSIDERUST_CPP_BUILD_BENCHES=ON
+cmake --build build --target bench_night_periods bench_icrs_altitude_periods
+./build/bench_night_periods
+./build/bench_icrs_altitude_periods
 ```
+
+See [`benches/README.md`](benches/README.md) for details.
 
 ## Deployment
 
@@ -239,7 +247,7 @@ siderust-cpp/
 ├── include/siderust/
 │   ├── siderust.hpp          ← umbrella header
 │   ├── ffi_core.hpp          ← error handling, enums
-│   ├── time.hpp              ← UTC, CivilTime, TT-default encoded dates, explicit `Time<scale::S>`
+│   ├── time.hpp              ← time tags, `Time<Scale, Format>`, `Period<Scale, Format>`
 │   ├── coordinates.hpp       ← coordinate umbrella header
 │   ├── coordinates/
 │   │   ├── geodetic.hpp
@@ -257,6 +265,10 @@ siderust-cpp/
 │   ├── body_target.hpp       ← body enum trackable adapter
 │   ├── star_target.hpp       ← star trackable adapter
 │   └── ephemeris.hpp         ← VSOP87/ELP2000 positions
+├── benches/
+│   ├── bench_night_periods.cpp
+│   ├── bench_icrs_altitude_periods.cpp
+│   └── README.md
 ├── examples/demo.cpp
 ├── tests/
 │   ├── main.cpp
@@ -272,9 +284,9 @@ siderust-cpp/
 
 ## Time API
 
-- Default astronomy-facing code should use `JulianDate`, `MJD`, and `Period`, all pinned to TT.
-- Civil construction is available directly through `JulianDate::from_utc(...)` and `MJD::from_utc(...)`.
-- Advanced mixed-scale work stays explicit with `Time<scale::S>` and named aliases such as `UT1JulianDate`.
+- Default astronomy-facing code should use `Time<TT, JD>`, `Time<TT, MJD>`, and `Period<TT, MJD>`, all pinned to TT.
+- Civil construction is available directly through `Time<TT, JD>::from_utc(...)` and `Time<TT, MJD>::from_utc(...)`.
+- Advanced mixed-scale work stays explicit with `Time<Scale, Format>` and `time.to<Scale, Format>()`.
 
 ## Architecture
 

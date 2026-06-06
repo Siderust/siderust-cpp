@@ -109,7 +109,7 @@ public:
    * @brief Sun's barycentric position (EclipticMeanJ2000, AU).
    */
   cartesian::position::HelioBarycentric<qtty::AstronomicalUnit>
-  sun_barycentric(const JulianDate &jd) const {
+  sun_barycentric(const Time<TT, JD> &jd) const {
     siderust_cartesian_pos_t out;
     check_status(siderust_runtime_ephemeris_sun_barycentric(handle_, jd.value(), &out),
                  "RuntimeEphemeris::sun_barycentric");
@@ -120,7 +120,7 @@ public:
    * @brief Earth's barycentric position (EclipticMeanJ2000, AU).
    */
   cartesian::position::GeoBarycentric<qtty::AstronomicalUnit>
-  earth_barycentric(const JulianDate &jd) const {
+  earth_barycentric(const Time<TT, JD> &jd) const {
     siderust_cartesian_pos_t out;
     check_status(siderust_runtime_ephemeris_earth_barycentric(handle_, jd.value(), &out),
                  "RuntimeEphemeris::earth_barycentric");
@@ -131,7 +131,7 @@ public:
    * @brief Earth's heliocentric position (EclipticMeanJ2000, AU).
    */
   cartesian::position::EclipticMeanJ2000<qtty::AstronomicalUnit>
-  earth_heliocentric(const JulianDate &jd) const {
+  earth_heliocentric(const Time<TT, JD> &jd) const {
     siderust_cartesian_pos_t out;
     check_status(siderust_runtime_ephemeris_earth_heliocentric(handle_, jd.value(), &out),
                  "RuntimeEphemeris::earth_heliocentric");
@@ -141,7 +141,8 @@ public:
   /**
    * @brief Moon's geocentric position (EclipticMeanJ2000, km).
    */
-  cartesian::position::MoonGeocentric<qtty::Kilometer> moon_geocentric(const JulianDate &jd) const {
+  cartesian::position::MoonGeocentric<qtty::Kilometer>
+  moon_geocentric(const Time<TT, JD> &jd) const {
     siderust_cartesian_pos_t out;
     check_status(siderust_runtime_ephemeris_moon_geocentric(handle_, jd.value(), &out),
                  "RuntimeEphemeris::moon_geocentric");
@@ -154,7 +155,7 @@ public:
    * Returns the first-order time derivative of the Earth's barycentric
    * position as provided by the loaded JPL DE kernel.
    */
-  CartesianVelocity earth_barycentric_velocity(const JulianDate &jd) const {
+  CartesianVelocity earth_barycentric_velocity(const Time<TT, JD> &jd) const {
     siderust_cartesian_vel_t out{};
     check_status(siderust_runtime_ephemeris_earth_barycentric_velocity(handle_, jd.value(), &out),
                  "RuntimeEphemeris::earth_barycentric_velocity");

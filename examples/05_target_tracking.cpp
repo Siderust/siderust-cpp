@@ -26,16 +26,15 @@ using namespace siderust;
 using namespace siderust::frames;
 using namespace siderust::centers;
 using namespace qtty::literals;
-using TTJD = JulianDate;
 
 // ─── Helper: simple coordinate snapshot (mirrors Rust's Target<T>) ──────────
 
 /// A timestamped position snapshot, optionally with proper motion.
 template <typename P> struct Snapshot {
   P position;
-  TTJD time;
+  Time<TT, JD> time;
 
-  void update(P new_pos, TTJD new_time) {
+  void update(P new_pos, Time<TT, JD> new_time) {
     position = new_pos;
     time = new_time;
   }
@@ -43,15 +42,16 @@ template <typename P> struct Snapshot {
 
 // ─── Halley's comet orbit (hardcoded from the Rust `HALLEY` constant) ───────
 
-inline Orbit halley_orbit() {
+inline KeplerianOrbit halley_orbit() {
   // a = 17.834 AU, e = 0.96714, i = 162.26°, Ω = 58.42°, ω = 111.33°,
   // M = 38.38° at epoch JD 2446467.4 (≈1986 Feb 9).
-  return {17.834_au, 0.96714, 162.26_deg, 58.42_deg, 111.33_deg, 38.38_deg, 2446467.4};
+  return {17.834_au, Eccentricity{0.96714},  162.26_deg, 58.42_deg, 111.33_deg,
+          38.38_deg, Time<TT, JD>(2446467.4)};
 }
 
 // ─── Section 1: Trackable objects ───────────────────────────────────────────
 
-void section_trackable_objects(const TTJD &jd, const TTJD &jd_next) {
+void section_trackable_objects(const Time<TT, JD> &jd, const Time<TT, JD> &jd_next) {
   std::cout << "1) Trackable objects (ICRS, star, Sun, planet, Moon)\n";
 
   // ICRS direction — time-invariant target
@@ -90,7 +90,7 @@ void section_trackable_objects(const TTJD &jd, const TTJD &jd_next) {
 
 // ─── Section 2: Target snapshots ────────────────────────────────────────────
 
-void section_target_snapshots(const TTJD &jd, const TTJD &jd_next) {
+void section_target_snapshots(const Time<TT, JD> &jd, const Time<TT, JD> &jd_next) {
   std::cout << "2) Target snapshots for arbitrary sky objects\n";
 
   // Mars heliocentric snapshot (VSOP87 ephemeris)
@@ -113,7 +113,8 @@ void section_target_snapshots(const TTJD &jd, const TTJD &jd_next) {
             << ": r = " << std::setprecision(6) << halley_snap.position.distance() << std::endl;
 
   // DemoSat — satellite-like custom object with a geocentric orbit
-  Orbit demosat_orbit{1.0002_au, 0.001, 0.1_deg, 35.0_deg, 80.0_deg, 10.0_deg, jd.value()};
+  KeplerianOrbit demosat_orbit{
+      1.0002_au, Eccentricity{0.001}, 0.1_deg, 35.0_deg, 80.0_deg, 10.0_deg, jd};
   auto demosat_pos = kepler_position(demosat_orbit, jd);
   Snapshot<cartesian::position::EclipticMeanJ2000<qtty::AstronomicalUnit>> demosat_snap{demosat_pos,
                                                                                         jd};
@@ -129,25 +130,26 @@ void section_target_snapshots(const TTJD &jd, const TTJD &jd_next) {
 /// Computes: RA' = RA + μα* · Δt / cos(dec),  Dec' = Dec + μδ · Δt
 /// where Δt is in Julian years since the reference epoch.
 inline spherical::direction::ICRS apply_proper_motion(const spherical::direction::ICRS &pos,
-                                                      const ProperMotion &pm, const TTJD &epoch,
-                                                      const TTJD &target_epoch) {
+                                                      const ProperMotion &pm,
+                                                      const Time<TT, JD> &epoch,
+                                                      const Time<TT, JD> &target_epoch) {
   constexpr double JULIAN_YEAR = 365.25; // days
   double dt_years = (target_epoch.value() - epoch.value()) / JULIAN_YEAR;
 
   double ra_deg = pos.ra().value();
   double dec_deg = pos.dec().value();
 
-  // ProperMotion rates in deg/yr (already stored as deg/yr in the struct)
+  // ProperMotion rates in deg/yr.
   // MuAlphaStar convention: pm_ra is already μα* = μα·cos(δ), so divide by
   // cos(δ)
   double cos_dec = std::cos(dec_deg * constants::pi / 180.0);
-  double dra = (cos_dec > 1e-12) ? pm.pm_ra_deg_yr * dt_years / cos_dec : 0.0;
-  double ddec = pm.pm_dec_deg_yr * dt_years;
+  double dra = (cos_dec > 1e-12) ? pm.ra.deg_per_day() * 365.25 * dt_years / cos_dec : 0.0;
+  double ddec = pm.dec.deg_per_day() * 365.25 * dt_years;
 
   return spherical::direction::ICRS(qtty::Degree(ra_deg + dra), qtty::Degree(dec_deg + ddec));
 }
 
-void section_target_with_proper_motion(const TTJD &jd) {
+void section_target_with_proper_motion(const Time<TT, JD> &jd) {
   std::cout << "3) Target with proper motion (stellar-style target)\n";
 
   // Betelgeuse approximate ICRS coordinates at J2000
@@ -157,7 +159,9 @@ void section_target_with_proper_motion(const TTJD &jd) {
   // Proper motion: µα* = 27.54 mas/yr, µδ = 10.86 mas/yr
   // Convert mas/yr → deg/yr
   constexpr double MAS_TO_DEG = 1.0 / 3600000.0;
-  ProperMotion pm(27.54 * MAS_TO_DEG, 10.86 * MAS_TO_DEG);
+  ProperMotion pm{AngularRate{qtty::Degree(27.54 * MAS_TO_DEG), qtty::Day(365.25)},
+                  AngularRate{qtty::Degree(10.86 * MAS_TO_DEG), qtty::Day(365.25)},
+                  RaConvention::MuAlphaStar};
 
   std::cout << "  Betelgeuse-like target at J2000: " << betelgeuse_pos << '\n';
 
@@ -171,7 +175,7 @@ void section_target_with_proper_motion(const TTJD &jd) {
 
 // ─── Section 4: Frame + center transforms ───────────────────────────────────
 
-void section_target_transform(const TTJD &jd) {
+void section_target_transform(const Time<TT, JD> &jd) {
   std::cout << "4) Target conversion across frame + center\n";
 
   // Mars heliocentric ecliptic → geocentric equatorial
@@ -188,7 +192,7 @@ void section_target_transform(const TTJD &jd) {
 // ─────────────────────────────────────────────────────────────────────
 
 int main() {
-  auto jd = TTJD::J2000();
+  auto jd = Time<TT, JD>::J2000();
   auto jd_next = jd + qtty::Day(1.0);
 
   std::cout << "Target + Trackable examples\n"

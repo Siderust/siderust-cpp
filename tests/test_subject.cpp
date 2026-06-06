@@ -10,12 +10,24 @@
 #include <siderust/siderust.hpp>
 
 using namespace siderust;
+using namespace qtty::literals;
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
 static Geodetic paris() { return Geodetic(2.35, 48.85, 35.0); }
-static ModifiedJulianDate mid_day() { return ModifiedJulianDate(60000.5); }
-static Period one_day() { return Period(ModifiedJulianDate(60000.0), ModifiedJulianDate(60001.0)); }
+static Time<TT, MJD> mid_day() { return Time<TT, MJD>(60000.5); }
+static Period<TT, MJD> one_day() {
+  return Period<TT, MJD>(Time<TT, MJD>(60000.0), Time<TT, MJD>(60001.0));
+}
+static ProperMotion no_motion() {
+  return {AngularRate{qtty::Degree(0.0), qtty::Day(365.25)},
+          AngularRate{qtty::Degree(0.0), qtty::Day(365.25)}, RaConvention::MuAlphaStar};
+}
+
+static ProperMotion barnard_motion() {
+  return {AngularRate{qtty::Degree(-798.58e-3), qtty::Day(365.25)},
+          AngularRate{qtty::Degree(10337.8e-3), qtty::Day(365.25)}, RaConvention::MuAlphaStar};
+}
 
 // ── altitude_at ──────────────────────────────────────────────────────────────
 
@@ -212,32 +224,33 @@ TEST(SubjectTest, StarAltitudeConsistency) {
 
 TEST(ProperMotionTarget, Construction) {
   // Barnard's star approximate Hipparcos values
-  EXPECT_NO_THROW(ProperMotionTarget(269.4521, 4.6933, JulianDate::J2000(), -798.58e-3, 10337.8e-3,
-                                     RaConvention::MuAlphaStar, "Barnard"));
+  EXPECT_NO_THROW(ProperMotionTarget(spherical::direction::ICRS(269.4521_deg, 4.6933_deg),
+                                     Time<TT, JD>::J2000(), barnard_motion(), "Barnard"));
 }
 
 TEST(ProperMotionTarget, Name) {
-  ProperMotionTarget t(100.0, 20.0, JulianDate::J2000(), 0.0, 0.0, RaConvention::MuAlphaStar,
-                       "TestStar");
+  ProperMotionTarget t(spherical::direction::ICRS(100.0_deg, 20.0_deg), Time<TT, JD>::J2000(),
+                       no_motion(), "TestStar");
   EXPECT_EQ(t.name(), "TestStar");
 }
 
 TEST(ProperMotionTarget, AutoName) {
-  ProperMotionTarget t(100.0, 20.0, JulianDate::J2000(), 0.0, 0.0, RaConvention::MuAlphaStar);
+  ProperMotionTarget t(spherical::direction::ICRS(100.0_deg, 20.0_deg), Time<TT, JD>::J2000(),
+                       no_motion());
   auto n = t.name();
   // Auto-generated name should be non-empty.
   EXPECT_FALSE(n.empty());
 }
 
-TEST(ProperMotionTarget, EpochJd) {
-  auto epoch = JulianDate::J2000();
-  ProperMotionTarget t(100.0, 20.0, epoch, 0.0, 0.0, RaConvention::MuAlphaStar);
-  // epoch_jd() should round-trip the construction epoch.
-  EXPECT_NEAR(t.epoch_jd(), epoch.value(), 1.0);
+TEST(ProperMotionTarget, EpochAccessor) {
+  auto epoch = Time<TT, JD>::J2000();
+  ProperMotionTarget t(spherical::direction::ICRS(100.0_deg, 20.0_deg), epoch, no_motion());
+  EXPECT_NEAR(t.epoch().value(), epoch.value(), 1.0);
 }
 
 TEST(ProperMotionTarget, DataPayload) {
-  ProperMotionTarget t(100.0, 20.0, JulianDate::J2000(), 0.0, 0.0, RaConvention::MuAlphaStar);
+  ProperMotionTarget t(spherical::direction::ICRS(100.0_deg, 20.0_deg), Time<TT, JD>::J2000(),
+                       no_motion());
   auto d = t.data();
   // Verify RA is approximately 100°.
   EXPECT_NEAR(d.coord.spherical_dir.azimuth_deg, 100.0, 1.0);
@@ -245,15 +258,15 @@ TEST(ProperMotionTarget, DataPayload) {
 }
 
 TEST(ProperMotionTarget, AltitudeAtDoesNotCrash) {
-  ProperMotionTarget barnard(269.4521, 4.6933, JulianDate::J2000(), -798.58e-3, 10337.8e-3,
-                             RaConvention::MuAlphaStar);
+  ProperMotionTarget barnard(spherical::direction::ICRS(269.4521_deg, 4.6933_deg),
+                             Time<TT, JD>::J2000(), barnard_motion());
   EXPECT_NO_THROW(barnard.altitude_at(paris(), mid_day()));
 }
 
-TEST(DirectionTarget, EpochJdAccessor) {
-  auto epoch = JulianDate::J2000();
+TEST(DirectionTarget, EpochAccessor) {
+  auto epoch = Time<TT, JD>::J2000();
   ICRSTarget t(spherical::direction::ICRS(qtty::Degree(0.0), qtty::Degree(0.0)), epoch);
-  EXPECT_NEAR(t.epoch_jd(), epoch.value(), 1.0);
+  EXPECT_NEAR(t.epoch().value(), epoch.value(), 1.0);
 }
 
 TEST(DirectionTarget, DataAccessor) {

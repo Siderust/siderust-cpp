@@ -166,7 +166,7 @@ public:
    */
   template <typename Target>
   std::enable_if_t<frames::has_frame_transform_v<F, Target>, Direction<Target>>
-  to_frame(const JulianDate &jd) const {
+  to_frame(const Time<TT, JD> &jd) const {
     if constexpr (std::is_same_v<F, Target>) {
       return Direction<Target>(azimuth_, polar_);
     } else {
@@ -184,7 +184,7 @@ public:
    */
   template <typename Target>
   std::enable_if_t<frames::has_frame_transform_v<F, Target>, Direction<Target>>
-  to_frame_with(const JulianDate &jd, const AstroContext &ctx) const {
+  to_frame_with(const Time<TT, JD> &jd, const AstroContext &ctx) const {
     if constexpr (std::is_same_v<F, Target>) {
       return Direction<Target>(azimuth_, polar_);
     } else {
@@ -202,7 +202,7 @@ public:
    * @brief Shorthand: `.to<Target>(jd)` (calls `to_frame`).
    */
   template <typename Target>
-  auto to(const JulianDate &jd) const -> decltype(this->template to_frame<Target>(jd)) {
+  auto to(const Time<TT, JD> &jd) const -> decltype(this->template to_frame<Target>(jd)) {
     return to_frame<Target>(jd);
   }
 
@@ -225,7 +225,7 @@ public:
    */
   template <typename F_ = F>
   std::enable_if_t<frames::has_horizontal_transform_v<F_>, Direction<frames::Horizontal>>
-  to_horizontal(const JulianDate &jd, const Geodetic &observer) const {
+  to_horizontal(const Time<TT, JD> &jd, const Geodetic &observer) const {
     siderust_spherical_dir_t out;
     check_status(siderust_spherical_dir_to_horizontal(polar_.value(), azimuth_.value(),
                                                       frames::FrameTraits<F>::ffi_id, jd.value(),
@@ -239,7 +239,7 @@ public:
    */
   template <typename F_ = F>
   std::enable_if_t<frames::has_horizontal_transform_v<F_>, Direction<frames::Horizontal>>
-  to_horizontal_with(const JulianDate &jd, const Geodetic &observer,
+  to_horizontal_with(const Time<TT, JD> &jd, const Geodetic &observer,
                      const AstroContext &ctx) const {
     siderust_spherical_dir_t out;
     detail::OwnedFfiContext fctx(ctx);
@@ -263,7 +263,7 @@ public:
    */
   template <typename F_ = F>
   std::enable_if_t<frames::has_horizontal_transform_v<F_>, Direction<frames::Horizontal>>
-  to_horizontal_precise(const JulianDate &jd_tt, const UT1JulianDate &jd_ut1,
+  to_horizontal_precise(const Time<TT, JD> &jd_tt, const Time<UT1, JD> &jd_ut1,
                         const Geodetic &observer) const {
     siderust_spherical_dir_t out;
     check_status(siderust_spherical_dir_to_horizontal_precise(
@@ -363,17 +363,17 @@ public:
    */
   template <typename Target>
   std::enable_if_t<frames::has_frame_transform_v<F, Target>, Position<C, Target, U>>
-  to_frame(const JulianDate &jd) const;
+  to_frame(const Time<TT, JD> &jd) const;
 
   template <typename Target>
   std::enable_if_t<frames::has_frame_transform_v<F, Target>, Position<C, Target, U>>
-  to_frame_with(const JulianDate &jd, const AstroContext &ctx) const;
+  to_frame_with(const Time<TT, JD> &jd, const AstroContext &ctx) const;
 
   /**
    * @brief Shorthand: `.to<Target>(jd)` (calls `to_frame`).
    */
   template <typename Target>
-  auto to(const JulianDate &jd) const -> decltype(this->template to_frame<Target>(jd)) {
+  auto to(const Time<TT, JD> &jd) const -> decltype(this->template to_frame<Target>(jd)) {
     return to_frame<Target>(jd);
   }
 

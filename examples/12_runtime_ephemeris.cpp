@@ -31,7 +31,6 @@
 #include <vector>
 
 using namespace siderust;
-using TTJD = JulianDate;
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
@@ -48,7 +47,7 @@ static void demo_from_file(const std::string &bsp_path) {
 
   RuntimeEphemeris eph(bsp_path);
 
-  TTJD jd_j2000(2451545.0);
+  Time<TT, JD> jd_j2000(2451545.0);
 
   std::cout << "  Positions at J2000.0 (2000-Jan-01.5 TDB):\n";
   print_pos("Sun   barycentric [AU] :", eph.sun_barycentric(jd_j2000));
@@ -56,7 +55,7 @@ static void demo_from_file(const std::string &bsp_path) {
   print_pos("Earth heliocentric [AU]:", eph.earth_heliocentric(jd_j2000));
   print_pos("Moon  geocentric  [km] :", eph.moon_geocentric(jd_j2000));
 
-  TTJD jd_now(2460841.5);
+  Time<TT, JD> jd_now(2460841.5);
   std::cout << "\n  Positions at 2025-Jun-15.0 TDB (JD 2460841.5):\n";
   print_pos("Earth heliocentric [AU]:", eph.earth_heliocentric(jd_now));
   print_pos("Moon  geocentric  [km] :", eph.moon_geocentric(jd_now));
@@ -79,7 +78,7 @@ static void demo_move_semantics(const std::string &bsp_path) {
     std::cout << "  eph2 owns the handle ✓\n";
   }
 
-  TTJD jd(2451545.0);
+  Time<TT, JD> jd(2451545.0);
   std::cout << "  Earth-Sun distance via eph2: " << std::fixed << std::setprecision(8)
             << eph2.earth_heliocentric(jd).distance() << "\n\n";
 }
@@ -130,7 +129,7 @@ static void demo_from_bytes(const std::string &bsp_path) {
   std::cout << "  Loaded " << fsize << " bytes into memory\n";
 
   RuntimeEphemeris eph(buf.data(), buf.size());
-  TTJD jd(2451545.0);
+  Time<TT, JD> jd(2451545.0);
   std::cout << "  Earth-Sun distance (from buffer): " << std::fixed << std::setprecision(8)
             << eph.earth_heliocentric(jd).distance() << "\n\n";
 }

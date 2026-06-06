@@ -98,7 +98,7 @@ using spherical_direction_frame_t = typename spherical_direction_frame<T>::type;
  * ### Example — named ICRS target
  * @code
  * ICRSTarget vega{ spherical::direction::ICRS{ 279.2348_deg, +38.7836_deg },
- *                  JulianDate::J2000(), "Vega" };
+ *                  Time<TT, JD>::J2000(), "Vega" };
  * std::cout << vega.name() << "\n";  // "Vega"
  * @endcode
  *
@@ -139,7 +139,8 @@ public:
    * @param label  Optional human-readable name.  If empty, a default
    *               "Frame(lon°, lat°)" string is generated from the direction.
    */
-  explicit DirectionTarget(C dir, JulianDate epoch = JulianDate::J2000(), std::string label = "")
+  explicit DirectionTarget(C dir, Time<TT, JD> epoch = Time<TT, JD>::J2000(),
+                           std::string label = "")
       : m_dir_(dir), m_epoch_(epoch), label_(std::move(label)) {
     // Convert to ICRS for the FFI; identity transform when already ICRS.
     if constexpr (std::is_same_v<Frame, frames::ICRS>) {
@@ -215,7 +216,7 @@ public:
   const C &direction() const { return m_dir_; }
 
   /// Epoch of the coordinate.
-  JulianDate epoch() const { return m_epoch_; }
+  Time<TT, JD> epoch() const { return m_epoch_; }
 
   /// The ICRS direction used for FFI calls (equals `direction()` when C is
   /// already `spherical::direction::ICRS`).
@@ -238,11 +239,11 @@ public:
   // ------------------------------------------------------------------
 
   /**
-   * @brief Compute altitude (degrees) at a given ModifiedJulianDate instant.
+   * @brief Compute altitude (degrees) at a given Time<TT, MJD> instant.
    *
    * @note The Rust FFI returns radians; this method converts to degrees.
    */
-  qtty::Degree altitude_at(const Geodetic &obs, const ModifiedJulianDate &mjd) const override {
+  qtty::Degree altitude_at(const Geodetic &obs, const Time<TT, MJD> &mjd) const override {
     double out{};
     check_status(siderust_altitude_at(detail::make_generic_target_subject(handle_), obs.to_c(),
                                       mjd.value(), &out),
@@ -253,9 +254,9 @@ public:
   /**
    * @brief Find periods when the target is above a threshold altitude.
    */
-  std::vector<Period> above_threshold(const Geodetic &obs, const Period &window,
-                                      qtty::Degree threshold,
-                                      const SearchOptions &opts = {}) const override {
+  std::vector<Period<TT, MJD>> above_threshold(const Geodetic &obs, const Period<TT, MJD> &window,
+                                               qtty::Degree threshold,
+                                               const SearchOptions &opts = {}) const override {
     tempoch_period_mjd_t *ptr = nullptr;
     uintptr_t count = 0;
     check_status(siderust_above_threshold(detail::make_generic_target_subject(handle_), obs.to_c(),
@@ -268,9 +269,9 @@ public:
   /**
    * @brief Find periods when the target is below a threshold altitude.
    */
-  std::vector<Period> below_threshold(const Geodetic &obs, const Period &window,
-                                      qtty::Degree threshold,
-                                      const SearchOptions &opts = {}) const override {
+  std::vector<Period<TT, MJD>> below_threshold(const Geodetic &obs, const Period<TT, MJD> &window,
+                                               qtty::Degree threshold,
+                                               const SearchOptions &opts = {}) const override {
     tempoch_period_mjd_t *ptr = nullptr;
     uintptr_t count = 0;
     check_status(siderust_below_threshold(detail::make_generic_target_subject(handle_), obs.to_c(),
@@ -283,7 +284,7 @@ public:
   /**
    * @brief Find threshold-crossing events (rising / setting).
    */
-  std::vector<CrossingEvent> crossings(const Geodetic &obs, const Period &window,
+  std::vector<CrossingEvent> crossings(const Geodetic &obs, const Period<TT, MJD> &window,
                                        qtty::Degree threshold,
                                        const SearchOptions &opts = {}) const override {
     siderust_crossing_event_t *ptr = nullptr;
@@ -297,7 +298,7 @@ public:
   /**
    * @brief Find culmination (local altitude extremum) events.
    */
-  std::vector<CulminationEvent> culminations(const Geodetic &obs, const Period &window,
+  std::vector<CulminationEvent> culminations(const Geodetic &obs, const Period<TT, MJD> &window,
                                              const SearchOptions &opts = {}) const override {
     siderust_culmination_event_t *ptr = nullptr;
     uintptr_t count = 0;
@@ -312,9 +313,9 @@ public:
   // ------------------------------------------------------------------
 
   /**
-   * @brief Compute azimuth (degrees, N-clockwise) at a given ModifiedJulianDate instant.
+   * @brief Compute azimuth (degrees, N-clockwise) at a given Time<TT, MJD> instant.
    */
-  qtty::Degree azimuth_at(const Geodetic &obs, const ModifiedJulianDate &mjd) const override {
+  qtty::Degree azimuth_at(const Geodetic &obs, const Time<TT, MJD> &mjd) const override {
     double out{};
     check_status(siderust_azimuth_at(detail::make_generic_target_subject(handle_), obs.to_c(),
                                      mjd.value(), &out),
@@ -326,7 +327,7 @@ public:
    * @brief Find epochs when the target crosses a given azimuth bearing.
    */
   std::vector<AzimuthCrossingEvent>
-  azimuth_crossings(const Geodetic &obs, const Period &window, qtty::Degree bearing,
+  azimuth_crossings(const Geodetic &obs, const Period<TT, MJD> &window, qtty::Degree bearing,
                     const SearchOptions &opts = {}) const override {
     siderust_azimuth_crossing_event_t *ptr = nullptr;
     uintptr_t count = 0;
@@ -340,13 +341,6 @@ public:
   /// Access the underlying C handle (advanced use).
   const SiderustGenericTarget *c_handle() const { return handle_; }
 
-  /// Epoch of the coordinate (Julian Date, queried from the FFI handle).
-  double epoch_jd() const {
-    double out{};
-    check_status(siderust_generic_target_epoch_jd(handle_, &out), "DirectionTarget::epoch_jd");
-    return out;
-  }
-
   /// Raw coordinate payload stored in the FFI handle.
   SiderustGenericTargetData data() const {
     SiderustGenericTargetData out{};
@@ -356,18 +350,19 @@ public:
 
 private:
   C m_dir_;
-  JulianDate m_epoch_;
+  Time<TT, JD> m_epoch_;
   spherical::direction::ICRS m_icrs_;
   std::string label_;
   SiderustGenericTarget *handle_ = nullptr;
 
-  /// Build a Period vector from a tempoch_period_mjd_t* array.
-  static std::vector<Period> detail_periods_from_c(tempoch_period_mjd_t *ptr, uintptr_t count) {
-    std::vector<Period> result;
+  /// Build a Period<TT, MJD> vector from a tempoch_period_mjd_t* array.
+  static std::vector<Period<TT, MJD>> detail_periods_from_c(tempoch_period_mjd_t *ptr,
+                                                            uintptr_t count) {
+    std::vector<Period<TT, MJD>> result;
     result.reserve(count);
     for (uintptr_t i = 0; i < count; ++i) {
       result.push_back(
-          Period(ModifiedJulianDate(ptr[i].start_mjd), ModifiedJulianDate(ptr[i].end_mjd)));
+          Period<TT, MJD>(Time<TT, MJD>(ptr[i].start_mjd), Time<TT, MJD>(ptr[i].end_mjd)));
     }
     siderust_periods_free(ptr, count);
     return result;
@@ -413,12 +408,13 @@ using EclipticMeanJ2000Target = DirectionTarget<spherical::direction::EclipticMe
  * using namespace siderust;
  * // Barnard's star (Hipparcos values)
  * ProperMotionTarget barnard{
- *     269.4521_deg,    // RA
- *     +4.6933_deg,     // Dec
- *     JulianDate::J2000(),
- *     -798.58e-3_deg,  // µα★ (deg/yr)
- *     +10337.8e-3_deg, // µδ (deg/yr)
- *     RaConvention::MuAlphaStar,
+ *     spherical::direction::ICRS{269.4521_deg, +4.6933_deg},
+ *     Time<TT, JD>::J2000(),
+ *     ProperMotion{
+ *         AngularRate{-798.58e-3_deg, qtty::Day(365.25)},
+ *         AngularRate{+10337.8e-3_deg, qtty::Day(365.25)},
+ *         RaConvention::MuAlphaStar,
+ *     },
  * };
  * auto alt = barnard.altitude_at(obs, now);
  * @endcode
@@ -426,24 +422,17 @@ using EclipticMeanJ2000Target = DirectionTarget<spherical::direction::EclipticMe
 class ProperMotionTarget : public Target {
 public:
   /**
-   * @brief Construct a proper-motion target from ICRS coordinates and rates.
-   *
-   * @param ra_deg       Right ascension (degrees).
-   * @param dec_deg      Declination (degrees).
-   * @param epoch        Coordinate epoch.
-   * @param pm_ra_deg_yr Proper motion in RA (deg/yr) — see `convention`.
-   * @param pm_dec_deg_yr Proper motion in Dec (deg/yr).
-   * @param convention   Which RA PM convention the rates use.
-   * @param label        Optional human-readable name.
+   * @brief Construct a proper-motion target from an ICRS direction and typed rates.
    */
-  ProperMotionTarget(double ra_deg, double dec_deg, JulianDate epoch, double pm_ra_deg_yr,
-                     double pm_dec_deg_yr, RaConvention convention = RaConvention::MuAlphaStar,
-                     std::string label = "")
-      : epoch_(epoch), label_(std::move(label)) {
+  ProperMotionTarget(spherical::direction::ICRS position, Time<TT, JD> epoch,
+                     ProperMotion proper_motion, std::string label = "")
+      : position_(position), epoch_(epoch), proper_motion_(proper_motion),
+        label_(std::move(label)) {
     SiderustGenericTarget *h = nullptr;
+    const auto pm = proper_motion_.to_c();
     check_status(siderust_generic_target_create_icrs_with_pm(
-                     ra_deg, dec_deg, epoch.value(), pm_ra_deg_yr, pm_dec_deg_yr,
-                     static_cast<siderust_ra_convention_t>(convention), &h),
+                     position_.ra().value(), position_.dec().value(), epoch.value(),
+                     pm.pm_ra_deg_yr, pm.pm_dec_deg_yr, pm.ra_convention, &h),
                  "ProperMotionTarget::ProperMotionTarget");
     handle_ = h;
   }
@@ -456,7 +445,8 @@ public:
   }
 
   ProperMotionTarget(ProperMotionTarget &&other) noexcept
-      : epoch_(other.epoch_), label_(std::move(other.label_)), handle_(other.handle_) {
+      : position_(other.position_), epoch_(other.epoch_), proper_motion_(other.proper_motion_),
+        label_(std::move(other.label_)), handle_(other.handle_) {
     other.handle_ = nullptr;
   }
 
@@ -464,7 +454,9 @@ public:
     if (this != &other) {
       if (handle_)
         siderust_generic_target_free(handle_);
+      position_ = other.position_;
       epoch_ = other.epoch_;
+      proper_motion_ = other.proper_motion_;
       label_ = std::move(other.label_);
       handle_ = other.handle_;
       other.handle_ = nullptr;
@@ -480,9 +472,7 @@ public:
   std::string name() const override {
     if (!label_.empty())
       return label_;
-    double jd{};
     SiderustGenericTargetData d{};
-    siderust_generic_target_epoch_jd(handle_, &jd);
     siderust_generic_target_get_data(handle_, &d);
     std::ostringstream ss;
     ss << "ProperMotion(" << d.coord.spherical_dir.azimuth_deg << "\xc2\xb0, "
@@ -492,12 +482,14 @@ public:
 
   // -- Accessors -------------------------------------------------------------
 
-  /// Epoch Julian Date queried from the FFI handle.
-  double epoch_jd() const {
-    double out{};
-    check_status(siderust_generic_target_epoch_jd(handle_, &out), "ProperMotionTarget::epoch_jd");
-    return out;
-  }
+  /// Coordinate epoch.
+  Time<TT, JD> epoch() const { return epoch_; }
+
+  /// ICRS position at the coordinate epoch.
+  const spherical::direction::ICRS &position() const { return position_; }
+
+  /// Proper motion rates.
+  const ProperMotion &proper_motion() const { return proper_motion_; }
 
   /// Raw coordinate payload stored in the FFI handle.
   SiderustGenericTargetData data() const {
@@ -508,7 +500,7 @@ public:
 
   // -- Altitude tracking (implements Trackable) ------------------------------
 
-  qtty::Degree altitude_at(const Geodetic &obs, const ModifiedJulianDate &mjd) const override {
+  qtty::Degree altitude_at(const Geodetic &obs, const Time<TT, MJD> &mjd) const override {
     double out{};
     check_status(siderust_altitude_at(detail::make_generic_target_subject(handle_), obs.to_c(),
                                       mjd.value(), &out),
@@ -516,9 +508,9 @@ public:
     return qtty::Radian(out).to<qtty::Degree>();
   }
 
-  std::vector<Period> above_threshold(const Geodetic &obs, const Period &window,
-                                      qtty::Degree threshold,
-                                      const SearchOptions &opts = {}) const override {
+  std::vector<Period<TT, MJD>> above_threshold(const Geodetic &obs, const Period<TT, MJD> &window,
+                                               qtty::Degree threshold,
+                                               const SearchOptions &opts = {}) const override {
     tempoch_period_mjd_t *ptr = nullptr;
     uintptr_t count = 0;
     check_status(siderust_above_threshold(detail::make_generic_target_subject(handle_), obs.to_c(),
@@ -528,9 +520,9 @@ public:
     return detail_periods_from_c(ptr, count);
   }
 
-  std::vector<Period> below_threshold(const Geodetic &obs, const Period &window,
-                                      qtty::Degree threshold,
-                                      const SearchOptions &opts = {}) const override {
+  std::vector<Period<TT, MJD>> below_threshold(const Geodetic &obs, const Period<TT, MJD> &window,
+                                               qtty::Degree threshold,
+                                               const SearchOptions &opts = {}) const override {
     tempoch_period_mjd_t *ptr = nullptr;
     uintptr_t count = 0;
     check_status(siderust_below_threshold(detail::make_generic_target_subject(handle_), obs.to_c(),
@@ -540,7 +532,7 @@ public:
     return detail_periods_from_c(ptr, count);
   }
 
-  std::vector<CrossingEvent> crossings(const Geodetic &obs, const Period &window,
+  std::vector<CrossingEvent> crossings(const Geodetic &obs, const Period<TT, MJD> &window,
                                        qtty::Degree threshold,
                                        const SearchOptions &opts = {}) const override {
     siderust_crossing_event_t *ptr = nullptr;
@@ -551,7 +543,7 @@ public:
     return detail::crossings_from_c(ptr, count);
   }
 
-  std::vector<CulminationEvent> culminations(const Geodetic &obs, const Period &window,
+  std::vector<CulminationEvent> culminations(const Geodetic &obs, const Period<TT, MJD> &window,
                                              const SearchOptions &opts = {}) const override {
     siderust_culmination_event_t *ptr = nullptr;
     uintptr_t count = 0;
@@ -563,7 +555,7 @@ public:
 
   // -- Azimuth tracking (implements Trackable) -------------------------------
 
-  qtty::Degree azimuth_at(const Geodetic &obs, const ModifiedJulianDate &mjd) const override {
+  qtty::Degree azimuth_at(const Geodetic &obs, const Time<TT, MJD> &mjd) const override {
     double out{};
     check_status(siderust_azimuth_at(detail::make_generic_target_subject(handle_), obs.to_c(),
                                      mjd.value(), &out),
@@ -572,7 +564,7 @@ public:
   }
 
   std::vector<AzimuthCrossingEvent>
-  azimuth_crossings(const Geodetic &obs, const Period &window, qtty::Degree bearing,
+  azimuth_crossings(const Geodetic &obs, const Period<TT, MJD> &window, qtty::Degree bearing,
                     const SearchOptions &opts = {}) const override {
     siderust_azimuth_crossing_event_t *ptr = nullptr;
     uintptr_t count = 0;
@@ -584,16 +576,19 @@ public:
   }
 
 private:
-  JulianDate epoch_;
+  spherical::direction::ICRS position_;
+  Time<TT, JD> epoch_;
+  ProperMotion proper_motion_;
   std::string label_;
   SiderustGenericTarget *handle_ = nullptr;
 
-  static std::vector<Period> detail_periods_from_c(tempoch_period_mjd_t *ptr, uintptr_t count) {
-    std::vector<Period> result;
+  static std::vector<Period<TT, MJD>> detail_periods_from_c(tempoch_period_mjd_t *ptr,
+                                                            uintptr_t count) {
+    std::vector<Period<TT, MJD>> result;
     result.reserve(count);
     for (uintptr_t i = 0; i < count; ++i) {
       result.push_back(
-          Period(ModifiedJulianDate(ptr[i].start_mjd), ModifiedJulianDate(ptr[i].end_mjd)));
+          Period<TT, MJD>(Time<TT, MJD>(ptr[i].start_mjd), Time<TT, MJD>(ptr[i].end_mjd)));
     }
     siderust_periods_free(ptr, count);
     return result;

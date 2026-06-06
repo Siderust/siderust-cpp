@@ -29,7 +29,6 @@ using namespace siderust;
 using namespace siderust::frames;
 using namespace siderust::centers;
 using namespace qtty::literals;
-using TTJD = JulianDate;
 
 // ─── Kepler's 3rd law: compute orbital period from semi-major axis ──────────
 
@@ -37,20 +36,20 @@ using TTJD = JulianDate;
 static constexpr double GM_SUN_AU3_DAY2 = 0.01720209895 * 0.01720209895;
 
 /// Sidereal period via Kepler's 3rd law: T = 2π √(a³/μ) [days].
-inline qtty::Day orbit_period(const Orbit &orb) {
+inline qtty::Day orbit_period(const KeplerianOrbit &orb) {
   double a = orb.semi_major_axis.value();
   double T = 2.0 * constants::pi * std::sqrt(a * a * a / GM_SUN_AU3_DAY2);
   return qtty::Day(T);
 }
 
-// ─── JulianDate from system clock ───────────────────────────────────────────
+// ─── Time<TT, JD> from system clock ───────────────────────────────────────────
 
 /// Approximate current TT Julian Date using the Unix encoding bridge.
-inline TTJD jd_now() {
+inline Time<TT, JD> jd_now() {
   using namespace std::chrono;
   auto unix_sec =
       duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count() / 1000.0;
-  return UnixTime(unix_sec).to<scale::TT>().to<format::JD>();
+  return Time<UTC, Unix>(unix_sec).to<scale::TT>().to<format::JD>();
 }
 
 // ─── Sections ───────────────────────────────────────────────────────────────
@@ -69,19 +68,19 @@ void section_planet_constants_and_periods() {
   };
 
   std::cout << std::left << std::setw(8) << "Planet" << std::right << std::setw(10) << "a [AU]"
-            << std::setw(10) << "e" << std::setw(10) << "Period" << '\n';
+            << std::setw(10) << "e" << std::setw(10) << "Period<TT, MJD>" << '\n';
   std::cout << std::string(38, '-') << '\n';
   for (auto &[name, p] : planets) {
     auto period = orbit_period(p->orbit);
     std::cout << std::left << std::setw(8) << name << std::right << std::fixed
               << std::setprecision(6) << std::setw(10) << p->orbit.semi_major_axis.value()
-              << std::setw(10) << p->orbit.eccentricity << std::setw(10) << std::setprecision(2)
-              << period << '\n';
+              << std::setw(10) << p->orbit.eccentricity.value << std::setw(10)
+              << std::setprecision(2) << period << '\n';
   }
   std::cout << '\n';
 }
 
-void section_vsop87_positions(const TTJD &jd) {
+void section_vsop87_positions(const Time<TT, JD> &jd) {
   std::cout << "2) VSOP87 EPHEMERIDES (HELIOCENTRIC + BARYCENTRIC)\n"
             << "-----------------------------------------------\n";
 
@@ -105,7 +104,7 @@ void section_vsop87_positions(const TTJD &jd) {
   std::cout << "\nJupiter barycentric position at J2000:\n  " << jupiter_bary << "\n\n";
 }
 
-void section_center_transforms(const TTJD &jd) {
+void section_center_transforms(const Time<TT, JD> &jd) {
   std::cout << "3) CENTER TRANSFORMS (HELIOCENTRIC -> GEOCENTRIC)\n"
             << "-----------------------------------------------\n";
 
@@ -119,7 +118,7 @@ void section_center_transforms(const TTJD &jd) {
   std::cout << '\n';
 }
 
-void section_moon(const TTJD &jd) {
+void section_moon(const Time<TT, JD> &jd) {
   std::cout << "4) MOON (ELP2000)\n"
             << "-----------------\n";
 
@@ -130,7 +129,7 @@ void section_moon(const TTJD &jd) {
   std::cout << '\n';
 }
 
-void section_trait_dispatch(const TTJD &jd) {
+void section_trait_dispatch(const Time<TT, JD> &jd) {
   std::cout << "5) EPHEMERIS DISPATCH (all inner planets)\n"
             << "-----------------------------------------\n";
 
@@ -163,10 +162,10 @@ void section_custom_planet() {
   std::cout << "6) CUSTOM PLANET + ORBITAL PERIOD\n"
             << "---------------------------------\n";
 
-  Planet demo_world{
-      qtty::Kilogram(5.972e24 * 2.0), // mass: double the Earth
-      qtty::Kilometer(6371.0 * 1.3),  // radius: 30% bigger
-      Orbit{1.4_au, 0.07, 4.0_deg, 120.0_deg, 80.0_deg, 10.0_deg, TTJD::J2000().value()}};
+  Planet demo_world{qtty::Kilogram(5.972e24 * 2.0), // mass: double the Earth
+                    qtty::Kilometer(6371.0 * 1.3),  // radius: 30% bigger
+                    KeplerianOrbit{1.4_au, Eccentricity{0.07}, 4.0_deg, 120.0_deg, 80.0_deg,
+                                   10.0_deg, Time<TT, JD>::J2000()}};
 
   auto period = orbit_period(demo_world.orbit);
 
@@ -181,7 +180,7 @@ void section_custom_planet() {
             << std::endl;
 }
 
-void section_current_snapshot(const TTJD &now) {
+void section_current_snapshot(const Time<TT, JD> &now) {
   std::cout << "7) CURRENT SNAPSHOT\n"
             << "-------------------\n";
 
@@ -204,7 +203,7 @@ void section_current_snapshot(const TTJD &now) {
 // ─────────────────────────────────────────────────────────────────────
 
 int main() {
-  auto jd = TTJD::J2000();
+  auto jd = Time<TT, JD>::J2000();
   auto now = jd_now();
 
   std::cout << "=== Siderust Solar System Module Tour ===\n\n";

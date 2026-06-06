@@ -14,7 +14,7 @@ using AU = qtty::AstronomicalUnit;
 int main() {
   std::cout << "=== Coordinate Transformations Example ===\n\n";
 
-  const auto jd = JulianDate::J2000();
+  const auto jd = Time<TT, JD>::J2000();
   std::cout << "Reference epoch: " << jd << "\n\n";
 
   cartesian::Position<Heliocentric, EclipticMeanJ2000, AU> pos_ecliptic(1.0, 0.0, 0.0);

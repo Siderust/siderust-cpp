@@ -88,7 +88,7 @@ template <typename F> struct Direction {
    */
   template <typename Target>
   std::enable_if_t<frames::has_frame_transform_v<F, Target>, Direction<Target>>
-  to_frame(const JulianDate &jd) const {
+  to_frame(const Time<TT, JD> &jd) const {
     if constexpr (std::is_same_v<F, Target>) {
       return Direction<Target>(x, y, z);
     } else {
@@ -106,7 +106,7 @@ template <typename F> struct Direction {
    */
   template <typename Target>
   std::enable_if_t<frames::has_frame_transform_v<F, Target>, Direction<Target>>
-  to_frame_with(const JulianDate &jd, const AstroContext &ctx) const {
+  to_frame_with(const Time<TT, JD> &jd, const AstroContext &ctx) const {
     if constexpr (std::is_same_v<F, Target>) {
       return Direction<Target>(x, y, z);
     } else {
@@ -124,7 +124,7 @@ template <typename F> struct Direction {
    * @brief Shorthand: `.to<Target>(jd)` (calls `to_frame`).
    */
   template <typename Target>
-  auto to(const JulianDate &jd) const -> decltype(this->template to_frame<Target>(jd)) {
+  auto to(const Time<TT, JD> &jd) const -> decltype(this->template to_frame<Target>(jd)) {
     return to_frame<Target>(jd);
   }
 };
@@ -221,7 +221,7 @@ template <typename F, typename U> struct Displacement {
    */
   template <typename Target>
   std::enable_if_t<frames::has_frame_transform_v<F, Target>, Displacement<Target, U>>
-  to_frame(const JulianDate &jd) const {
+  to_frame(const Time<TT, JD> &jd) const {
     if constexpr (std::is_same_v<F, Target>) {
       return Displacement<Target, U>(comp_x, comp_y, comp_z);
     } else {
@@ -240,7 +240,7 @@ template <typename F, typename U> struct Displacement {
    */
   template <typename Target>
   std::enable_if_t<frames::has_frame_transform_v<F, Target>, Displacement<Target, U>>
-  to_frame_with(const JulianDate &jd, const AstroContext &ctx) const {
+  to_frame_with(const Time<TT, JD> &jd, const AstroContext &ctx) const {
     if constexpr (std::is_same_v<F, Target>) {
       return Displacement<Target, U>(comp_x, comp_y, comp_z);
     } else {
@@ -346,7 +346,7 @@ template <typename C, typename F, typename U> struct Position {
    */
   template <typename Target>
   std::enable_if_t<frames::has_frame_transform_v<F, Target>, Position<C, Target, U>>
-  to_frame(const JulianDate &jd) const {
+  to_frame(const Time<TT, JD> &jd) const {
     if constexpr (std::is_same_v<F, Target>) {
       return *this;
     } else {
@@ -363,7 +363,7 @@ template <typename C, typename F, typename U> struct Position {
    */
   template <typename Target>
   std::enable_if_t<frames::has_frame_transform_v<F, Target>, Position<C, Target, U>>
-  to_frame_with(const JulianDate &jd, const AstroContext &ctx) const {
+  to_frame_with(const Time<TT, JD> &jd, const AstroContext &ctx) const {
     if constexpr (std::is_same_v<F, Target>) {
       return *this;
     } else {
@@ -380,7 +380,7 @@ template <typename C, typename F, typename U> struct Position {
    * @brief Shorthand: `.to<Target>(jd)` (calls `to_frame`).
    */
   template <typename Target>
-  auto to(const JulianDate &jd) const -> decltype(this->template to_frame<Target>(jd)) {
+  auto to(const Time<TT, JD> &jd) const -> decltype(this->template to_frame<Target>(jd)) {
     return to_frame<Target>(jd);
   }
 
@@ -398,7 +398,7 @@ template <typename C, typename F, typename U> struct Position {
    */
   template <typename TargetC>
   std::enable_if_t<centers::has_center_transform_v<C, TargetC>, Position<TargetC, F, U>>
-  to_center(const JulianDate &jd) const {
+  to_center(const Time<TT, JD> &jd) const {
     if constexpr (std::is_same_v<C, TargetC>) {
       return *this;
     } else if constexpr (std::is_same_v<F, frames::EclipticMeanJ2000>) {
@@ -433,7 +433,7 @@ template <typename C, typename F, typename U> struct Position {
   std::enable_if_t<frames::has_frame_transform_v<F, TargetF> &&
                        centers::has_center_transform_v<C, TargetC>,
                    Position<TargetC, TargetF, U>>
-  transform(const JulianDate &jd) const {
+  transform(const Time<TT, JD> &jd) const {
     auto ecl = to_frame<frames::EclipticMeanJ2000>(jd);
     auto shifted = ecl.template to_center<TargetC>(jd);
     return shifted.template to_frame<TargetF>(jd);

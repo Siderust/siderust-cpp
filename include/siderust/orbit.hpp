@@ -38,41 +38,50 @@ enum class ConicKind : std::uint8_t {
   Hyperbolic = 1,
 };
 
+struct Eccentricity {
+  double value;
+};
+
+struct AngularRate {
+  qtty::Degree angle;
+  qtty::Day per;
+
+  double deg_per_day() const { return angle.value() / per.value(); }
+};
+
 struct KeplerianOrbit {
   qtty::AstronomicalUnit semi_major_axis;
-  double eccentricity;
+  Eccentricity eccentricity;
   qtty::Degree inclination;
   qtty::Degree lon_ascending_node;
-  qtty::Degree arg_perihelion;
+  qtty::Degree arg_periapsis;
   qtty::Degree mean_anomaly;
-  double epoch_jd;
+  Time<TT, JD> epoch;
 
   static KeplerianOrbit from_c(const siderust_orbit_t &c) {
     return {qtty::AstronomicalUnit(c.semi_major_axis_au),
-            c.eccentricity,
+            Eccentricity{c.eccentricity},
             qtty::Degree(c.inclination_deg),
             qtty::Degree(c.lon_ascending_node_deg),
             qtty::Degree(c.arg_periapsis_deg),
             qtty::Degree(c.mean_anomaly_deg),
-            c.epoch_jd};
+            Time<TT, JD>(c.epoch_jd)};
   }
 
   siderust_orbit_t to_c() const {
     return {semi_major_axis.value(),
-            eccentricity,
+            eccentricity.value,
             inclination.value(),
             lon_ascending_node.value(),
-            arg_perihelion.value(),
+            arg_periapsis.value(),
             mean_anomaly.value(),
-            epoch_jd};
+            epoch.value()};
   }
 };
 
-using Orbit = KeplerianOrbit;
-
 template <typename C = centers::Heliocentric>
 inline cartesian::Position<C, frames::EclipticMeanJ2000, qtty::AstronomicalUnit>
-kepler_position(const KeplerianOrbit &orbit, const JulianDate &jd) {
+kepler_position(const KeplerianOrbit &orbit, const Time<TT, JD> &jd) {
   static_assert(centers::is_center_v<C>, "C must be a valid center tag (default: Heliocentric)");
   siderust_cartesian_pos_t c_out{};
   check_status(siderust_kepler_position_ex(orbit.to_c(), detail::orbit_ref_center_id<C>(),
@@ -85,35 +94,35 @@ kepler_position(const KeplerianOrbit &orbit, const JulianDate &jd) {
 
 struct MeanMotionOrbit {
   qtty::AstronomicalUnit semi_major_axis;
-  double eccentricity;
+  Eccentricity eccentricity;
   qtty::Degree inclination;
   qtty::Degree lon_ascending_node;
   qtty::Degree arg_periapsis;
-  double mean_motion_deg_per_day;
-  double epoch_jd;
+  AngularRate mean_motion;
+  Time<TT, JD> epoch;
 
   static MeanMotionOrbit from_c(const siderust_mean_motion_orbit_t &c) {
     return {qtty::AstronomicalUnit(c.semi_major_axis_au),
-            c.eccentricity,
+            Eccentricity{c.eccentricity},
             qtty::Degree(c.inclination_deg),
             qtty::Degree(c.lon_ascending_node_deg),
             qtty::Degree(c.arg_periapsis_deg),
-            c.mean_motion_deg_per_day,
-            c.epoch_jd};
+            AngularRate{qtty::Degree(c.mean_motion_deg_per_day), qtty::Day(1.0)},
+            Time<TT, JD>(c.epoch_jd)};
   }
 
   siderust_mean_motion_orbit_t to_c() const {
     return {semi_major_axis.value(),
-            eccentricity,
+            eccentricity.value,
             inclination.value(),
             lon_ascending_node.value(),
             arg_periapsis.value(),
-            mean_motion_deg_per_day,
-            epoch_jd};
+            mean_motion.deg_per_day(),
+            epoch.value()};
   }
 
   cartesian::Position<centers::Heliocentric, frames::EclipticMeanJ2000, qtty::AstronomicalUnit>
-  position_at(const JulianDate &jd) const {
+  position_at(const Time<TT, JD> &jd) const {
     siderust_cartesian_pos_t out{};
     check_status(siderust_mean_motion_position(to_c(), jd.value(), &out),
                  "MeanMotionOrbit::position_at");
@@ -124,39 +133,39 @@ struct MeanMotionOrbit {
 
 struct ConicOrbit {
   qtty::AstronomicalUnit periapsis_distance;
-  double eccentricity;
+  Eccentricity eccentricity;
   qtty::Degree inclination;
   qtty::Degree lon_ascending_node;
   qtty::Degree arg_periapsis;
   qtty::Degree mean_anomaly;
-  double epoch_jd;
+  Time<TT, JD> epoch;
 
   static ConicOrbit from_c(const siderust_conic_orbit_t &c) {
     return {qtty::AstronomicalUnit(c.periapsis_distance_au),
-            c.eccentricity,
+            Eccentricity{c.eccentricity},
             qtty::Degree(c.inclination_deg),
             qtty::Degree(c.lon_ascending_node_deg),
             qtty::Degree(c.arg_periapsis_deg),
             qtty::Degree(c.mean_anomaly_deg),
-            c.epoch_jd};
+            Time<TT, JD>(c.epoch_jd)};
   }
 
   siderust_conic_orbit_t to_c() const {
     return {periapsis_distance.value(),
-            eccentricity,
+            eccentricity.value,
             inclination.value(),
             lon_ascending_node.value(),
             arg_periapsis.value(),
             mean_anomaly.value(),
-            epoch_jd};
+            epoch.value()};
   }
 
   constexpr ConicKind kind() const {
-    return eccentricity < 1.0 ? ConicKind::Elliptic : ConicKind::Hyperbolic;
+    return eccentricity.value < 1.0 ? ConicKind::Elliptic : ConicKind::Hyperbolic;
   }
 
   cartesian::Position<centers::Heliocentric, frames::EclipticMeanJ2000, qtty::AstronomicalUnit>
-  position_at(const JulianDate &jd) const {
+  position_at(const Time<TT, JD> &jd) const {
     siderust_cartesian_pos_t out{};
     check_status(siderust_conic_position(to_c(), jd.value(), &out), "ConicOrbit::position_at");
     return {qtty::AstronomicalUnit(out.x), qtty::AstronomicalUnit(out.y),
@@ -201,7 +210,7 @@ public:
   explicit operator bool() const { return handle_ != nullptr; }
 
   cartesian::Position<centers::Heliocentric, frames::EclipticMeanJ2000, qtty::AstronomicalUnit>
-  position_at(const JulianDate &jd) const {
+  position_at(const Time<TT, JD> &jd) const {
     siderust_cartesian_pos_t out{};
     check_status(siderust_prepared_orbit_position(handle_, jd.value(), &out),
                  "PreparedOrbit::position_at");

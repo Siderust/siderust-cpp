@@ -5,6 +5,41 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.0] - 2026/06/06
+
+### Added
+
+- Optional `SIDERUST_CPP_BUILD_BENCHES` CMake path with Google Benchmark
+  targets for night-period searches and fixed-ICRS altitude-period searches.
+- `benches/README.md` with benchmark build commands, filters, and the
+  six-month night-period performance target.
+- Coverage for `sun::below_threshold(...)` equivalence with
+  `sun::altitude_periods(...)` across horizon, civil, nautical, and
+  astronomical thresholds.
+- C++ test coverage for fixed-ICRS altitude periods.
+
+### Changed
+
+- Public event and tracking APIs now use explicit `Time<TT, MJD>` and
+  `Period<TT, MJD>` types instead of the older `ModifiedJulianDate` /
+  unparameterized `Period` aliases.
+- `SearchOptions` now stores typed `qtty::Day` tolerances and optional scan
+  steps rather than raw day doubles plus a separate presence flag.
+- `DirectionTarget` and `ProperMotionTarget` now keep typed epoch and target
+  state locally and expose typed accessors (`epoch()`, `position()`,
+  `proper_motion()`) instead of querying raw `epoch_jd()` values from the FFI
+  handle.
+- `ProperMotionTarget` construction now takes a typed ICRS direction and
+  `ProperMotion` object instead of raw RA/Dec and degree-per-year doubles.
+- README, examples, and tests were updated to the explicit `Time<Scale, Format>`
+  and `Period<Scale, Format>` API style.
+- Vendored `siderust` and `tempoch-cpp` submodules were advanced to the current
+  snapshots used by this release.
+
+### Fixed
+
+- Cleaned up compiler warnings in examples, headers, and tests.
+
 ## [0.6.0] - 2026/06/02
 
 ### Added

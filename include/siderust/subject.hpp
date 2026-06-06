@@ -146,7 +146,7 @@ private:
  * @brief Altitude at an instant (radians) for any subject.
  */
 inline qtty::Radian altitude_at(const Subject &subj, const Geodetic &obs,
-                                const ModifiedJulianDate &mjd) {
+                                const Time<TT, MJD> &mjd) {
   double out;
   check_status(siderust_altitude_at(subj.c_inner(), obs.to_c(), mjd.value(), &out),
                "altitude_at(Subject)");
@@ -156,9 +156,10 @@ inline qtty::Radian altitude_at(const Subject &subj, const Geodetic &obs,
 /**
  * @brief Periods when a subject is above a threshold altitude.
  */
-inline std::vector<Period> above_threshold(const Subject &subj, const Geodetic &obs,
-                                           const Period &window, qtty::Degree threshold,
-                                           const SearchOptions &opts = {}) {
+inline std::vector<Period<TT, MJD>> above_threshold(const Subject &subj, const Geodetic &obs,
+                                                    const Period<TT, MJD> &window,
+                                                    qtty::Degree threshold,
+                                                    const SearchOptions &opts = {}) {
   tempoch_period_mjd_t *ptr = nullptr;
   uintptr_t count = 0;
   check_status(siderust_above_threshold(subj.c_inner(), obs.to_c(), window.c_inner(),
@@ -170,9 +171,10 @@ inline std::vector<Period> above_threshold(const Subject &subj, const Geodetic &
 /**
  * @brief Periods when a subject is below a threshold altitude.
  */
-inline std::vector<Period> below_threshold(const Subject &subj, const Geodetic &obs,
-                                           const Period &window, qtty::Degree threshold,
-                                           const SearchOptions &opts = {}) {
+inline std::vector<Period<TT, MJD>> below_threshold(const Subject &subj, const Geodetic &obs,
+                                                    const Period<TT, MJD> &window,
+                                                    qtty::Degree threshold,
+                                                    const SearchOptions &opts = {}) {
   tempoch_period_mjd_t *ptr = nullptr;
   uintptr_t count = 0;
   check_status(siderust_below_threshold(subj.c_inner(), obs.to_c(), window.c_inner(),
@@ -185,7 +187,7 @@ inline std::vector<Period> below_threshold(const Subject &subj, const Geodetic &
  * @brief Threshold-crossing events for a subject.
  */
 inline std::vector<CrossingEvent> crossings(const Subject &subj, const Geodetic &obs,
-                                            const Period &window, qtty::Degree threshold,
+                                            const Period<TT, MJD> &window, qtty::Degree threshold,
                                             const SearchOptions &opts = {}) {
   siderust_crossing_event_t *ptr = nullptr;
   uintptr_t count = 0;
@@ -199,7 +201,7 @@ inline std::vector<CrossingEvent> crossings(const Subject &subj, const Geodetic 
  * @brief Culmination (local extrema) events for a subject.
  */
 inline std::vector<CulminationEvent> culminations(const Subject &subj, const Geodetic &obs,
-                                                  const Period &window,
+                                                  const Period<TT, MJD> &window,
                                                   const SearchOptions &opts = {}) {
   siderust_culmination_event_t *ptr = nullptr;
   uintptr_t count = 0;
@@ -214,9 +216,9 @@ inline std::vector<CulminationEvent> culminations(const Subject &subj, const Geo
  *
  * Only valid for `Body` subjects.  Will throw for `Star`/`Icrs`/`Target`.
  */
-inline std::vector<Period> altitude_periods(const Subject &subj, const Geodetic &obs,
-                                            const Period &window, qtty::Degree min_alt,
-                                            qtty::Degree max_alt) {
+inline std::vector<Period<TT, MJD>> altitude_periods(const Subject &subj, const Geodetic &obs,
+                                                     const Period<TT, MJD> &window,
+                                                     qtty::Degree min_alt, qtty::Degree max_alt) {
   siderust_altitude_query_t q = {obs.to_c(), window.start().value(), window.end().value(),
                                  min_alt.value(), max_alt.value()};
   tempoch_period_mjd_t *ptr = nullptr;
@@ -229,8 +231,7 @@ inline std::vector<Period> altitude_periods(const Subject &subj, const Geodetic 
 /**
  * @brief Azimuth at an instant (degrees, N-clockwise) for any subject.
  */
-inline qtty::Degree azimuth_at(const Subject &subj, const Geodetic &obs,
-                               const ModifiedJulianDate &mjd) {
+inline qtty::Degree azimuth_at(const Subject &subj, const Geodetic &obs, const Time<TT, MJD> &mjd) {
   double out;
   check_status(siderust_azimuth_at(subj.c_inner(), obs.to_c(), mjd.value(), &out),
                "azimuth_at(Subject)");
@@ -241,7 +242,7 @@ inline qtty::Degree azimuth_at(const Subject &subj, const Geodetic &obs,
  * @brief Azimuth bearing-crossing events for a subject.
  */
 inline std::vector<AzimuthCrossingEvent> azimuth_crossings(const Subject &subj, const Geodetic &obs,
-                                                           const Period &window,
+                                                           const Period<TT, MJD> &window,
                                                            qtty::Degree bearing,
                                                            const SearchOptions &opts = {}) {
   siderust_azimuth_crossing_event_t *ptr = nullptr;
@@ -256,7 +257,7 @@ inline std::vector<AzimuthCrossingEvent> azimuth_crossings(const Subject &subj, 
  * @brief Azimuth extrema (northernmost / southernmost) for a subject.
  */
 inline std::vector<AzimuthExtremum> azimuth_extrema(const Subject &subj, const Geodetic &obs,
-                                                    const Period &window,
+                                                    const Period<TT, MJD> &window,
                                                     const SearchOptions &opts = {}) {
   siderust_azimuth_extremum_t *ptr = nullptr;
   uintptr_t count = 0;
@@ -269,9 +270,10 @@ inline std::vector<AzimuthExtremum> azimuth_extrema(const Subject &subj, const G
 /**
  * @brief Periods when a subject's azimuth is within [min_deg, max_deg].
  */
-inline std::vector<Period> in_azimuth_range(const Subject &subj, const Geodetic &obs,
-                                            const Period &window, qtty::Degree min_deg,
-                                            qtty::Degree max_deg, const SearchOptions &opts = {}) {
+inline std::vector<Period<TT, MJD>> in_azimuth_range(const Subject &subj, const Geodetic &obs,
+                                                     const Period<TT, MJD> &window,
+                                                     qtty::Degree min_deg, qtty::Degree max_deg,
+                                                     const SearchOptions &opts = {}) {
   tempoch_period_mjd_t *ptr = nullptr;
   uintptr_t count = 0;
   check_status(siderust_in_azimuth_range(subj.c_inner(), obs.to_c(), window.c_inner(),

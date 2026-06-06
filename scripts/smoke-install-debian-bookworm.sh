@@ -6,7 +6,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SCRIPT_DIR}/lib.sh"
 
 APT_REPO_DIR="pages/apt"
-PACKAGE_VERSION="0.6.0"
+PACKAGE_VERSION="0.7.0"
 
 usage() {
   cat <<EOF

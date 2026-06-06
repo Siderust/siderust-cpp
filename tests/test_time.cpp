@@ -2,18 +2,23 @@
 #include <siderust/siderust.hpp>
 
 #include <type_traits>
+#include <utility>
 
 using namespace siderust;
 
 TEST(Time, ReexportsExposeExplicitScaleTypes) {
-  static_assert(std::is_same_v<JulianDate, tempoch::JulianDate<tempoch::scale::TT>>);
   static_assert(
-      std::is_same_v<ModifiedJulianDate, tempoch::ModifiedJulianDate<tempoch::scale::TT>>);
+      std::is_same_v<Time<TT, JD>, tempoch::EncodedTime<tempoch::scale::TT, tempoch::format::JD>>);
+  static_assert(std::is_same_v<Time<TT, MJD>,
+                               tempoch::EncodedTime<tempoch::scale::TT, tempoch::format::MJD>>);
 }
 
 TEST(Time, TtJulianDateRoundtripsThroughUtcConvenience) {
-  auto jd_tt = JulianDate::from_utc({2026, 7, 15, 22, 0, 0});
+  auto jd_tt = Time<TT, JD>::from_utc({2026, 7, 15, 22, 0, 0});
   auto roundtrip = jd_tt.to_utc();
+
+  static_assert(
+      std::is_same_v<decltype(std::declval<Time<TT, JD>>().to<TT, MJD>()), Time<TT, MJD>>);
 
   EXPECT_EQ(roundtrip.year, 2026);
   EXPECT_EQ(roundtrip.month, 7);
@@ -21,6 +26,6 @@ TEST(Time, TtJulianDateRoundtripsThroughUtcConvenience) {
 }
 
 TEST(Time, TtPeriodCompilesAndBehaves) {
-  Period period(ModifiedJulianDate(60200.0), ModifiedJulianDate(60201.0));
+  Period<TT, MJD> period(Time<TT, MJD>(60200.0), Time<TT, MJD>(60201.0));
   EXPECT_NEAR(period.duration<qtty::Hour>().value(), 24.0, 1e-9);
 }

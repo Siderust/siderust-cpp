@@ -13,6 +13,7 @@
 #include "coordinates.hpp"
 #include "ffi_core.hpp"
 #include "time.hpp"
+#include <optional>
 #include <vector>
 
 namespace siderust {
@@ -25,11 +26,11 @@ namespace siderust {
  * @brief A threshold-crossing event (rising or setting).
  */
 struct CrossingEvent {
-  ModifiedJulianDate time;
+  Time<TT, MJD> time;
   CrossingDirection direction;
 
   static CrossingEvent from_c(const siderust_crossing_event_t &c) {
-    return {ModifiedJulianDate(c.mjd), static_cast<CrossingDirection>(c.direction)};
+    return {Time<TT, MJD>(c.mjd), static_cast<CrossingDirection>(c.direction)};
   }
 };
 
@@ -37,12 +38,12 @@ struct CrossingEvent {
  * @brief A culmination (local altitude extremum) event.
  */
 struct CulminationEvent {
-  ModifiedJulianDate time;
+  Time<TT, MJD> time;
   qtty::Degree altitude;
   CulminationKind kind;
 
   static CulminationEvent from_c(const siderust_culmination_event_t &c) {
-    return {ModifiedJulianDate(c.mjd), qtty::Degree(c.altitude_deg),
+    return {Time<TT, MJD>(c.mjd), qtty::Degree(c.altitude_deg),
             static_cast<CulminationKind>(c.kind)};
   }
 };
@@ -55,27 +56,25 @@ struct CulminationEvent {
  * @brief Options for altitude search algorithms.
  */
 struct SearchOptions {
-  double time_tolerance_days = 1e-9;
-  double scan_step_days = 0.0;
-  bool has_scan_step = false;
+  qtty::Day time_tolerance = qtty::Day(1e-9);
+  std::optional<qtty::Day> scan_step;
 
   SearchOptions() = default;
 
   /// Set a custom scan step.
-  SearchOptions &with_scan_step(double step) {
-    scan_step_days = step;
-    has_scan_step = true;
+  SearchOptions &with_scan_step(qtty::Day step) {
+    scan_step = step;
     return *this;
   }
 
   /// Set time tolerance.
-  SearchOptions &with_tolerance(double tol) {
-    time_tolerance_days = tol;
+  SearchOptions &with_tolerance(qtty::Day tolerance) {
+    time_tolerance = tolerance;
     return *this;
   }
 
   siderust_search_opts_t to_c() const {
-    return {time_tolerance_days, scan_step_days, has_scan_step};
+    return {time_tolerance.value(), scan_step ? scan_step->value() : 0.0, scan_step.has_value()};
   }
 };
 
@@ -84,11 +83,11 @@ struct SearchOptions {
 // ============================================================================
 namespace detail {
 
-inline std::vector<Period> periods_from_c(tempoch_period_mjd_t *ptr, uintptr_t count) {
-  std::vector<Period> result;
+inline std::vector<Period<TT, MJD>> periods_from_c(tempoch_period_mjd_t *ptr, uintptr_t count) {
+  std::vector<Period<TT, MJD>> result;
   result.reserve(count);
   for (uintptr_t i = 0; i < count; ++i) {
-    result.push_back(Period::from_c(ptr[i]));
+    result.push_back(Period<TT, MJD>::from_c(ptr[i]));
   }
   siderust_periods_free(ptr, count);
   return result;
@@ -125,9 +124,9 @@ inline std::vector<CulminationEvent> culminations_from_c(siderust_culmination_ev
 namespace sun {
 
 /**
- * @brief Compute the Sun's altitude (radians) at a given ModifiedJulianDate instant.
+ * @brief Compute the Sun's altitude (radians) at a given Time<TT, MJD> instant.
  */
-inline qtty::Radian altitude_at(const Geodetic &obs, const ModifiedJulianDate &mjd) {
+inline qtty::Radian altitude_at(const Geodetic &obs, const Time<TT, MJD> &mjd) {
   double out;
   check_status(siderust_altitude_at(detail::make_body_subject(SIDERUST_BODY_SUN), obs.to_c(),
                                     mjd.value(), &out),
@@ -138,8 +137,10 @@ inline qtty::Radian altitude_at(const Geodetic &obs, const ModifiedJulianDate &m
 /**
  * @brief Find periods when the Sun is above a threshold altitude.
  */
-inline std::vector<Period> above_threshold(const Geodetic &obs, const Period &window,
-                                           qtty::Degree threshold, const SearchOptions &opts = {}) {
+inline std::vector<Period<TT, MJD>> above_threshold(const Geodetic &obs,
+                                                    const Period<TT, MJD> &window,
+                                                    qtty::Degree threshold,
+                                                    const SearchOptions &opts = {}) {
   tempoch_period_mjd_t *ptr = nullptr;
   uintptr_t count = 0;
   check_status(siderust_above_threshold(detail::make_body_subject(SIDERUST_BODY_SUN), obs.to_c(),
@@ -152,8 +153,10 @@ inline std::vector<Period> above_threshold(const Geodetic &obs, const Period &wi
 /**
  * @brief Find periods when the Sun is below a threshold altitude.
  */
-inline std::vector<Period> below_threshold(const Geodetic &obs, const Period &window,
-                                           qtty::Degree threshold, const SearchOptions &opts = {}) {
+inline std::vector<Period<TT, MJD>> below_threshold(const Geodetic &obs,
+                                                    const Period<TT, MJD> &window,
+                                                    qtty::Degree threshold,
+                                                    const SearchOptions &opts = {}) {
   tempoch_period_mjd_t *ptr = nullptr;
   uintptr_t count = 0;
   check_status(siderust_below_threshold(detail::make_body_subject(SIDERUST_BODY_SUN), obs.to_c(),
@@ -166,7 +169,7 @@ inline std::vector<Period> below_threshold(const Geodetic &obs, const Period &wi
 /**
  * @brief Find threshold-crossing events for the Sun.
  */
-inline std::vector<CrossingEvent> crossings(const Geodetic &obs, const Period &window,
+inline std::vector<CrossingEvent> crossings(const Geodetic &obs, const Period<TT, MJD> &window,
                                             qtty::Degree threshold,
                                             const SearchOptions &opts = {}) {
   siderust_crossing_event_t *ptr = nullptr;
@@ -180,8 +183,8 @@ inline std::vector<CrossingEvent> crossings(const Geodetic &obs, const Period &w
 /**
  * @brief Find culmination events for the Sun.
  */
-inline std::vector<CulminationEvent> culminations(const Geodetic &obs, const Period &window,
-                                                  const SearchOptions &opts = {}) {
+inline std::vector<CulminationEvent>
+culminations(const Geodetic &obs, const Period<TT, MJD> &window, const SearchOptions &opts = {}) {
   siderust_culmination_event_t *ptr = nullptr;
   uintptr_t count = 0;
   check_status(siderust_culminations(detail::make_body_subject(SIDERUST_BODY_SUN), obs.to_c(),
@@ -193,8 +196,9 @@ inline std::vector<CulminationEvent> culminations(const Geodetic &obs, const Per
 /**
  * @brief Find periods when the Sun's altitude is within [min, max].
  */
-inline std::vector<Period> altitude_periods(const Geodetic &obs, const Period &window,
-                                            qtty::Degree min_alt, qtty::Degree max_alt) {
+inline std::vector<Period<TT, MJD>> altitude_periods(const Geodetic &obs,
+                                                     const Period<TT, MJD> &window,
+                                                     qtty::Degree min_alt, qtty::Degree max_alt) {
   siderust_altitude_query_t q = {obs.to_c(), window.start().value(), window.end().value(),
                                  min_alt.value(), max_alt.value()};
   tempoch_period_mjd_t *ptr = nullptr;
@@ -214,9 +218,9 @@ inline std::vector<Period> altitude_periods(const Geodetic &obs, const Period &w
 namespace moon {
 
 /**
- * @brief Compute the Moon's altitude (radians) at a given ModifiedJulianDate instant.
+ * @brief Compute the Moon's altitude (radians) at a given Time<TT, MJD> instant.
  */
-inline qtty::Radian altitude_at(const Geodetic &obs, const ModifiedJulianDate &mjd) {
+inline qtty::Radian altitude_at(const Geodetic &obs, const Time<TT, MJD> &mjd) {
   double out;
   check_status(siderust_altitude_at(detail::make_body_subject(SIDERUST_BODY_MOON), obs.to_c(),
                                     mjd.value(), &out),
@@ -227,8 +231,10 @@ inline qtty::Radian altitude_at(const Geodetic &obs, const ModifiedJulianDate &m
 /**
  * @brief Find periods when the Moon is above a threshold altitude.
  */
-inline std::vector<Period> above_threshold(const Geodetic &obs, const Period &window,
-                                           qtty::Degree threshold, const SearchOptions &opts = {}) {
+inline std::vector<Period<TT, MJD>> above_threshold(const Geodetic &obs,
+                                                    const Period<TT, MJD> &window,
+                                                    qtty::Degree threshold,
+                                                    const SearchOptions &opts = {}) {
   tempoch_period_mjd_t *ptr = nullptr;
   uintptr_t count = 0;
   check_status(siderust_above_threshold(detail::make_body_subject(SIDERUST_BODY_MOON), obs.to_c(),
@@ -241,8 +247,10 @@ inline std::vector<Period> above_threshold(const Geodetic &obs, const Period &wi
 /**
  * @brief Find periods when the Moon is below a threshold altitude.
  */
-inline std::vector<Period> below_threshold(const Geodetic &obs, const Period &window,
-                                           qtty::Degree threshold, const SearchOptions &opts = {}) {
+inline std::vector<Period<TT, MJD>> below_threshold(const Geodetic &obs,
+                                                    const Period<TT, MJD> &window,
+                                                    qtty::Degree threshold,
+                                                    const SearchOptions &opts = {}) {
   tempoch_period_mjd_t *ptr = nullptr;
   uintptr_t count = 0;
   check_status(siderust_below_threshold(detail::make_body_subject(SIDERUST_BODY_MOON), obs.to_c(),
@@ -255,7 +263,7 @@ inline std::vector<Period> below_threshold(const Geodetic &obs, const Period &wi
 /**
  * @brief Find threshold-crossing events for the Moon.
  */
-inline std::vector<CrossingEvent> crossings(const Geodetic &obs, const Period &window,
+inline std::vector<CrossingEvent> crossings(const Geodetic &obs, const Period<TT, MJD> &window,
                                             qtty::Degree threshold,
                                             const SearchOptions &opts = {}) {
   siderust_crossing_event_t *ptr = nullptr;
@@ -269,8 +277,8 @@ inline std::vector<CrossingEvent> crossings(const Geodetic &obs, const Period &w
 /**
  * @brief Find culmination events for the Moon.
  */
-inline std::vector<CulminationEvent> culminations(const Geodetic &obs, const Period &window,
-                                                  const SearchOptions &opts = {}) {
+inline std::vector<CulminationEvent>
+culminations(const Geodetic &obs, const Period<TT, MJD> &window, const SearchOptions &opts = {}) {
   siderust_culmination_event_t *ptr = nullptr;
   uintptr_t count = 0;
   check_status(siderust_culminations(detail::make_body_subject(SIDERUST_BODY_MOON), obs.to_c(),
@@ -282,8 +290,9 @@ inline std::vector<CulminationEvent> culminations(const Geodetic &obs, const Per
 /**
  * @brief Find periods when the Moon's altitude is within [min, max].
  */
-inline std::vector<Period> altitude_periods(const Geodetic &obs, const Period &window,
-                                            qtty::Degree min_alt, qtty::Degree max_alt) {
+inline std::vector<Period<TT, MJD>> altitude_periods(const Geodetic &obs,
+                                                     const Period<TT, MJD> &window,
+                                                     qtty::Degree min_alt, qtty::Degree max_alt) {
   siderust_altitude_query_t q = {obs.to_c(), window.start().value(), window.end().value(),
                                  min_alt.value(), max_alt.value()};
   tempoch_period_mjd_t *ptr = nullptr;
@@ -303,9 +312,9 @@ inline std::vector<Period> altitude_periods(const Geodetic &obs, const Period &w
 namespace star_altitude {
 
 /**
- * @brief Compute a star's altitude (radians) at a given ModifiedJulianDate instant.
+ * @brief Compute a star's altitude (radians) at a given Time<TT, MJD> instant.
  */
-inline qtty::Radian altitude_at(const Star &s, const Geodetic &obs, const ModifiedJulianDate &mjd) {
+inline qtty::Radian altitude_at(const Star &s, const Geodetic &obs, const Time<TT, MJD> &mjd) {
   double out;
   check_status(
       siderust_altitude_at(detail::make_star_subject(s.c_handle()), obs.to_c(), mjd.value(), &out),
@@ -316,8 +325,10 @@ inline qtty::Radian altitude_at(const Star &s, const Geodetic &obs, const Modifi
 /**
  * @brief Find periods when a star is above a threshold altitude.
  */
-inline std::vector<Period> above_threshold(const Star &s, const Geodetic &obs, const Period &window,
-                                           qtty::Degree threshold, const SearchOptions &opts = {}) {
+inline std::vector<Period<TT, MJD>> above_threshold(const Star &s, const Geodetic &obs,
+                                                    const Period<TT, MJD> &window,
+                                                    qtty::Degree threshold,
+                                                    const SearchOptions &opts = {}) {
   tempoch_period_mjd_t *ptr = nullptr;
   uintptr_t count = 0;
   check_status(siderust_above_threshold(detail::make_star_subject(s.c_handle()), obs.to_c(),
@@ -330,8 +341,10 @@ inline std::vector<Period> above_threshold(const Star &s, const Geodetic &obs, c
 /**
  * @brief Find periods when a star is below a threshold altitude.
  */
-inline std::vector<Period> below_threshold(const Star &s, const Geodetic &obs, const Period &window,
-                                           qtty::Degree threshold, const SearchOptions &opts = {}) {
+inline std::vector<Period<TT, MJD>> below_threshold(const Star &s, const Geodetic &obs,
+                                                    const Period<TT, MJD> &window,
+                                                    qtty::Degree threshold,
+                                                    const SearchOptions &opts = {}) {
   tempoch_period_mjd_t *ptr = nullptr;
   uintptr_t count = 0;
   check_status(siderust_below_threshold(detail::make_star_subject(s.c_handle()), obs.to_c(),
@@ -345,7 +358,7 @@ inline std::vector<Period> below_threshold(const Star &s, const Geodetic &obs, c
  * @brief Find threshold-crossing events for a star.
  */
 inline std::vector<CrossingEvent> crossings(const Star &s, const Geodetic &obs,
-                                            const Period &window, qtty::Degree threshold,
+                                            const Period<TT, MJD> &window, qtty::Degree threshold,
                                             const SearchOptions &opts = {}) {
   siderust_crossing_event_t *ptr = nullptr;
   uintptr_t count = 0;
@@ -359,7 +372,7 @@ inline std::vector<CrossingEvent> crossings(const Star &s, const Geodetic &obs,
  * @brief Find culmination events for a star.
  */
 inline std::vector<CulminationEvent> culminations(const Star &s, const Geodetic &obs,
-                                                  const Period &window,
+                                                  const Period<TT, MJD> &window,
                                                   const SearchOptions &opts = {}) {
   siderust_culmination_event_t *ptr = nullptr;
   uintptr_t count = 0;
@@ -381,7 +394,7 @@ namespace icrs_altitude {
  * @brief Compute altitude (radians) for a fixed ICRS direction.
  */
 inline qtty::Radian altitude_at(const spherical::direction::ICRS &dir, const Geodetic &obs,
-                                const ModifiedJulianDate &mjd) {
+                                const Time<TT, MJD> &mjd) {
   double out;
   check_status(
       siderust_altitude_at(detail::make_icrs_subject(dir.to_c()), obs.to_c(), mjd.value(), &out),
@@ -393,16 +406,18 @@ inline qtty::Radian altitude_at(const spherical::direction::ICRS &dir, const Geo
  * @brief Backward-compatible RA/Dec overload.
  */
 inline qtty::Radian altitude_at(qtty::Degree ra, qtty::Degree dec, const Geodetic &obs,
-                                const ModifiedJulianDate &mjd) {
+                                const Time<TT, MJD> &mjd) {
   return altitude_at(spherical::direction::ICRS(ra, dec), obs, mjd);
 }
 
 /**
  * @brief Find periods when a fixed ICRS direction is above a threshold.
  */
-inline std::vector<Period> above_threshold(const spherical::direction::ICRS &dir,
-                                           const Geodetic &obs, const Period &window,
-                                           qtty::Degree threshold, const SearchOptions &opts = {}) {
+inline std::vector<Period<TT, MJD>> above_threshold(const spherical::direction::ICRS &dir,
+                                                    const Geodetic &obs,
+                                                    const Period<TT, MJD> &window,
+                                                    qtty::Degree threshold,
+                                                    const SearchOptions &opts = {}) {
   tempoch_period_mjd_t *ptr = nullptr;
   uintptr_t count = 0;
   check_status(siderust_above_threshold(detail::make_icrs_subject(dir.to_c()), obs.to_c(),
@@ -415,9 +430,11 @@ inline std::vector<Period> above_threshold(const spherical::direction::ICRS &dir
 /**
  * @brief Find periods when a fixed ICRS direction is below a threshold.
  */
-inline std::vector<Period> below_threshold(const spherical::direction::ICRS &dir,
-                                           const Geodetic &obs, const Period &window,
-                                           qtty::Degree threshold, const SearchOptions &opts = {}) {
+inline std::vector<Period<TT, MJD>> below_threshold(const spherical::direction::ICRS &dir,
+                                                    const Geodetic &obs,
+                                                    const Period<TT, MJD> &window,
+                                                    qtty::Degree threshold,
+                                                    const SearchOptions &opts = {}) {
   tempoch_period_mjd_t *ptr = nullptr;
   uintptr_t count = 0;
   check_status(siderust_below_threshold(detail::make_icrs_subject(dir.to_c()), obs.to_c(),
@@ -425,6 +442,18 @@ inline std::vector<Period> below_threshold(const spherical::direction::ICRS &dir
                                         &count),
                "icrs_altitude::below_threshold");
   return detail::periods_from_c(ptr, count);
+}
+
+/**
+ * @brief Find periods when a fixed ICRS direction's altitude is within [min, max].
+ */
+inline std::vector<Period<TT, MJD>> altitude_periods(const spherical::direction::ICRS &dir,
+                                                     const Geodetic &obs,
+                                                     const Period<TT, MJD> &window,
+                                                     qtty::Degree min_alt, qtty::Degree max_alt) {
+  auto above_min = above_threshold(dir, obs, window, min_alt);
+  auto below_max = below_threshold(dir, obs, window, max_alt);
+  return tempoch::intersect_periods(above_min, below_max);
 }
 
 } // namespace icrs_altitude
