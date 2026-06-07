@@ -55,6 +55,20 @@ int main() {
 }
 ```
 
+## Altitude Search Controls
+
+Sun and Moon altitude searches use Auto mode by default. Explicit algorithm control is additive:
+
+```cpp
+SearchOptions opts;
+opts.with_algorithm(CrossingAlgorithm::ChebyshevRoots);
+
+auto sunrise = sun::crossings(obs, win, qtty::Degree(0.0), opts);
+auto moon_up = moon::above_threshold(obs, win, qtty::Degree(0.0), opts);
+```
+
+Use `CrossingAlgorithm::ScanBrent` to force the legacy scan+Brent path.
+
 ---
 
 ## Architecture

@@ -45,6 +45,20 @@ int main() {
 }
 ```
 
+### Altitude Search Controls
+
+Default Sun and Moon altitude searches use Auto mode internally. To compare or force a crossing engine:
+
+```cpp
+SearchOptions opts;
+opts.with_algorithm(CrossingAlgorithm::ChebyshevRoots);
+
+auto events = sun::crossings(obs, win, qtty::Degree(0.0), opts);
+auto moon_up = moon::above_threshold(obs, win, qtty::Degree(0.0), opts);
+```
+
+Use `CrossingAlgorithm::ScanBrent` to force the legacy scan+Brent path.
+
 ### Streaming and printing
 
 Coordinate types, `Geodetic`, and `qtty` quantities support `operator<<` with

@@ -71,6 +71,25 @@ TEST_F(AltitudeTest, SunCrossings) {
   EXPECT_GE(events.size(), 1u);
 }
 
+TEST_F(AltitudeTest, SunCrossingsExplicitAlgorithmsAgree) {
+  SearchOptions scan_opts;
+  scan_opts.with_algorithm(CrossingAlgorithm::ScanBrent);
+
+  ChebyshevOptions cheb_opts;
+  cheb_opts.with_degree(18).with_tail_norm(1e-7);
+  SearchOptions cheb_search;
+  cheb_search.with_algorithm(CrossingAlgorithm::ChebyshevRoots).with_chebyshev(cheb_opts);
+
+  const auto scan = sun::crossings(obs, window, 0.0_deg, scan_opts);
+  const auto cheb = sun::crossings(obs, window, 0.0_deg, cheb_search);
+
+  ASSERT_EQ(cheb.size(), scan.size());
+  for (std::size_t i = 0; i < scan.size(); ++i) {
+    EXPECT_EQ(cheb[i].direction, scan[i].direction);
+    EXPECT_NEAR(cheb[i].time.value(), scan[i].time.value(), 1e-5);
+  }
+}
+
 TEST_F(AltitudeTest, SunCulminations) {
   auto events = sun::culminations(obs, window);
   // At least one culmination (meridian passage)
@@ -80,6 +99,15 @@ TEST_F(AltitudeTest, SunCulminations) {
 TEST_F(AltitudeTest, SunAltitudePeriods) {
   // Find periods when sun is between -6° and 0° (civil twilight)
   auto periods = sun::altitude_periods(obs, window, -6.0_deg, 0.0_deg);
+  for (auto &p : periods) {
+    EXPECT_GT(p.duration().value(), 0.0);
+  }
+}
+
+TEST_F(AltitudeTest, SunAltitudePeriodsAcceptSearchOptions) {
+  SearchOptions opts;
+  opts.with_algorithm(CrossingAlgorithm::ChebyshevRoots);
+  auto periods = sun::altitude_periods(obs, window, -6.0_deg, 0.0_deg, opts);
   for (auto &p : periods) {
     EXPECT_GT(p.duration().value(), 0.0);
   }
@@ -109,6 +137,15 @@ TEST_F(AltitudeTest, MoonAltitudeAt) {
 TEST_F(AltitudeTest, MoonAboveThreshold) {
   auto periods = moon::above_threshold(obs, window, 0.0_deg);
   // Moon may or may not be above horizon for this date; just no crash
+  for (auto &p : periods) {
+    EXPECT_GT(p.duration().value(), 0.0);
+  }
+}
+
+TEST_F(AltitudeTest, MoonAboveThresholdAcceptsChebyshevOptions) {
+  SearchOptions opts;
+  opts.with_algorithm(CrossingAlgorithm::ChebyshevRoots);
+  auto periods = moon::above_threshold(obs, window, 0.0_deg, opts);
   for (auto &p : periods) {
     EXPECT_GT(p.duration().value(), 0.0);
   }

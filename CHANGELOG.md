@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- `CrossingAlgorithm`, `ChebyshevOptions`, and fluent `SearchOptions` setters for explicit Auto, ScanBrent, and ChebyshevRoots altitude crossing selection.
+- C++ tests for explicit Sun/Moon algorithm selection and v2 search-option dispatch.
+- Benchmarks for Sun and Moon altitude-period searches across Auto, ScanBrent, and ChebyshevRoots over 30, 184, and 365 day windows.
+
+### Changed
+
+- `sun::*` and `moon::*` altitude threshold/crossing/range APIs remain source-compatible and dispatch to FFI v2 only when new search controls are requested.
+- CMake prefers the sibling `rust/siderust` workspace in this monorepo, while retaining the nested `siderust` submodule as the standalone fallback.
+
+### Fixed
+
+- Installed packages now stage the bundled `qtty_ffi` and `tempoch_ffi` shared libraries alongside `siderust_ffi`, so the installed-consumer fixture resolves runtime FFI dependencies from the package prefix.
+
 ## [0.7.0] - 2026/06/06
 
 ### Added
