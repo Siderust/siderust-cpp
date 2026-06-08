@@ -13,7 +13,7 @@
 #include "coordinates.hpp"
 #include "ffi_core.hpp"
 #include "time.hpp"
-#include <optional>
+#include <cstdint>
 #include <vector>
 
 namespace siderust {
@@ -57,15 +57,8 @@ struct CulminationEvent {
  */
 struct SearchOptions {
   qtty::Day time_tolerance = qtty::Day(1e-9);
-  std::optional<qtty::Day> scan_step;
 
   SearchOptions() = default;
-
-  /// Set a custom scan step.
-  SearchOptions &with_scan_step(qtty::Day step) {
-    scan_step = step;
-    return *this;
-  }
 
   /// Set time tolerance.
   SearchOptions &with_tolerance(qtty::Day tolerance) {
@@ -73,9 +66,7 @@ struct SearchOptions {
     return *this;
   }
 
-  siderust_search_opts_t to_c() const {
-    return {time_tolerance.value(), scan_step ? scan_step->value() : 0.0, scan_step.has_value()};
-  }
+  siderust_search_opts_t to_c() const { return {time_tolerance.value()}; }
 };
 
 // ============================================================================
@@ -196,16 +187,16 @@ culminations(const Geodetic &obs, const Period<TT, MJD> &window, const SearchOpt
 /**
  * @brief Find periods when the Sun's altitude is within [min, max].
  */
-inline std::vector<Period<TT, MJD>> altitude_periods(const Geodetic &obs,
-                                                     const Period<TT, MJD> &window,
-                                                     qtty::Degree min_alt, qtty::Degree max_alt) {
-  siderust_altitude_query_t q = {obs.to_c(), window.start().value(), window.end().value(),
-                                 min_alt.value(), max_alt.value()};
+inline std::vector<Period<TT, MJD>> altitude_ranges(const Geodetic &obs,
+                                                    const Period<TT, MJD> &window,
+                                                    qtty::Degree min_alt, qtty::Degree max_alt,
+                                                    const SearchOptions &opts = {}) {
   tempoch_period_mjd_t *ptr = nullptr;
   uintptr_t count = 0;
-  check_status(
-      siderust_altitude_periods(detail::make_body_subject(SIDERUST_BODY_SUN), q, &ptr, &count),
-      "sun::altitude_periods");
+  check_status(siderust_altitude_ranges(detail::make_body_subject(SIDERUST_BODY_SUN), obs.to_c(),
+                                        window.c_inner(), min_alt.value(), max_alt.value(),
+                                        opts.to_c(), &ptr, &count),
+               "sun::altitude_ranges");
   return detail::periods_from_c(ptr, count);
 }
 
@@ -290,16 +281,16 @@ culminations(const Geodetic &obs, const Period<TT, MJD> &window, const SearchOpt
 /**
  * @brief Find periods when the Moon's altitude is within [min, max].
  */
-inline std::vector<Period<TT, MJD>> altitude_periods(const Geodetic &obs,
-                                                     const Period<TT, MJD> &window,
-                                                     qtty::Degree min_alt, qtty::Degree max_alt) {
-  siderust_altitude_query_t q = {obs.to_c(), window.start().value(), window.end().value(),
-                                 min_alt.value(), max_alt.value()};
+inline std::vector<Period<TT, MJD>> altitude_ranges(const Geodetic &obs,
+                                                    const Period<TT, MJD> &window,
+                                                    qtty::Degree min_alt, qtty::Degree max_alt,
+                                                    const SearchOptions &opts = {}) {
   tempoch_period_mjd_t *ptr = nullptr;
   uintptr_t count = 0;
-  check_status(
-      siderust_altitude_periods(detail::make_body_subject(SIDERUST_BODY_MOON), q, &ptr, &count),
-      "moon::altitude_periods");
+  check_status(siderust_altitude_ranges(detail::make_body_subject(SIDERUST_BODY_MOON), obs.to_c(),
+                                        window.c_inner(), min_alt.value(), max_alt.value(),
+                                        opts.to_c(), &ptr, &count),
+               "moon::altitude_ranges");
   return detail::periods_from_c(ptr, count);
 }
 
@@ -447,13 +438,18 @@ inline std::vector<Period<TT, MJD>> below_threshold(const spherical::direction::
 /**
  * @brief Find periods when a fixed ICRS direction's altitude is within [min, max].
  */
-inline std::vector<Period<TT, MJD>> altitude_periods(const spherical::direction::ICRS &dir,
-                                                     const Geodetic &obs,
-                                                     const Period<TT, MJD> &window,
-                                                     qtty::Degree min_alt, qtty::Degree max_alt) {
-  auto above_min = above_threshold(dir, obs, window, min_alt);
-  auto below_max = below_threshold(dir, obs, window, max_alt);
-  return tempoch::intersect_periods(above_min, below_max);
+inline std::vector<Period<TT, MJD>> altitude_ranges(const spherical::direction::ICRS &dir,
+                                                    const Geodetic &obs,
+                                                    const Period<TT, MJD> &window,
+                                                    qtty::Degree min_alt, qtty::Degree max_alt,
+                                                    const SearchOptions &opts = {}) {
+  tempoch_period_mjd_t *ptr = nullptr;
+  uintptr_t count = 0;
+  check_status(siderust_altitude_ranges(detail::make_icrs_subject(dir.to_c()), obs.to_c(),
+                                        window.c_inner(), min_alt.value(), max_alt.value(),
+                                        opts.to_c(), &ptr, &count),
+               "icrs_altitude::altitude_ranges");
+  return detail::periods_from_c(ptr, count);
 }
 
 } // namespace icrs_altitude

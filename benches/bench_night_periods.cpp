@@ -4,7 +4,7 @@
 /// Night-period benchmarks for siderust-cpp.
 ///
 /// Typical usage:
-///   const auto nights = siderust::sun::altitude_periods(
+///   const auto nights = siderust::sun::altitude_ranges(
 ///       geo, window, qtty::Degree(-90.0), qtty::Degree(horizon));
 ///
 /// Target: a 6-month window completes in under 0.5 s on a typical desktop CPU
@@ -36,14 +36,14 @@ Period<TT, MJD> window_from_days(const Time<TT, MJD> &start, int days) {
   return Period<TT, MJD>(start, start + qtty::Day(static_cast<double>(days)));
 }
 
-void bench_altitude_periods(benchmark::State &state, qtty::Degree horizon) {
+void bench_sun_altitude_ranges(benchmark::State &state, qtty::Degree horizon) {
   const auto geo = ROQUE_DE_LOS_MUCHACHOS();
   const auto start = Time<TT, MJD>::from_utc({2026, 1, 1, 0, 0, 0});
   const auto window = window_from_days(start, static_cast<int>(state.range(0)));
 
   for (auto _ : state) {
     (void)_; // avoid "unused variable" warning
-    const auto nights = sun::altitude_periods(geo, window, qtty::Degree(-90.0), horizon);
+    const auto nights = sun::altitude_ranges(geo, window, qtty::Degree(-90.0), horizon);
     benchmark::DoNotOptimize(nights.data());
     benchmark::ClobberMemory();
   }
@@ -52,7 +52,7 @@ void bench_altitude_periods(benchmark::State &state, qtty::Degree horizon) {
   state.counters["days"] = static_cast<double>(state.range(0));
 }
 
-void bench_below_threshold(benchmark::State &state, qtty::Degree horizon) {
+void bench_sun_below_threshold(benchmark::State &state, qtty::Degree horizon) {
   const auto geo = ROQUE_DE_LOS_MUCHACHOS();
   const auto start = Time<TT, MJD>::from_utc({2026, 1, 1, 0, 0, 0});
   const auto window = window_from_days(start, static_cast<int>(state.range(0)));
@@ -61,6 +61,22 @@ void bench_below_threshold(benchmark::State &state, qtty::Degree horizon) {
     (void)_; // avoid "unused variable" warning
     const auto nights = sun::below_threshold(geo, window, horizon);
     benchmark::DoNotOptimize(nights.data());
+    benchmark::ClobberMemory();
+  }
+
+  state.SetItemsProcessed(state.iterations());
+  state.counters["days"] = static_cast<double>(state.range(0));
+}
+
+void bench_moon_above_threshold(benchmark::State &state, qtty::Degree horizon) {
+  const auto geo = ROQUE_DE_LOS_MUCHACHOS();
+  const auto start = Time<TT, MJD>::from_utc({2026, 1, 1, 0, 0, 0});
+  const auto window = window_from_days(start, static_cast<int>(state.range(0)));
+
+  for (auto _ : state) {
+    (void)_; // avoid "unused variable" warning
+    const auto periods = moon::above_threshold(geo, window, horizon);
+    benchmark::DoNotOptimize(periods.data());
     benchmark::ClobberMemory();
   }
 
@@ -82,8 +98,9 @@ void register_horizon_benchmarks(const char *api, void (*fn)(benchmark::State &,
 } // namespace
 
 int main(int argc, char **argv) {
-  register_horizon_benchmarks("altitude_periods", bench_altitude_periods);
-  register_horizon_benchmarks("below_threshold", bench_below_threshold);
+  register_horizon_benchmarks("sun_altitude_ranges", bench_sun_altitude_ranges);
+  register_horizon_benchmarks("sun_below_threshold", bench_sun_below_threshold);
+  register_horizon_benchmarks("moon_above_threshold", bench_moon_above_threshold);
 
   benchmark::Initialize(&argc, argv);
   if (benchmark::ReportUnrecognizedArguments(argc, argv)) {

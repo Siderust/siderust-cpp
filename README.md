@@ -45,6 +45,19 @@ int main() {
 }
 ```
 
+### Altitude Search Controls
+
+Altitude searches use Siderust's internal optimized engines automatically.
+The only user-facing control is time tolerance:
+
+```cpp
+SearchOptions opts;
+opts.with_tolerance(qtty::Day(1e-9));
+
+auto nights = sun::below_threshold(obs, win, qtty::Degree(-18.0), opts);
+auto twilight = sun::altitude_ranges(obs, win, qtty::Degree(-18.0), qtty::Degree(-12.0), opts);
+```
+
 ### Streaming and printing
 
 Coordinate types, `Geodetic`, and `qtty` quantities support `operator<<` with

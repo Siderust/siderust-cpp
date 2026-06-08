@@ -71,27 +71,43 @@ TEST_F(AltitudeTest, SunCrossings) {
   EXPECT_GE(events.size(), 1u);
 }
 
+TEST_F(AltitudeTest, SunCrossingsAcceptSearchOptions) {
+  SearchOptions opts;
+  opts.with_tolerance(qtty::Day(1e-9));
+  const auto events = sun::crossings(obs, window, 0.0_deg, opts);
+  EXPECT_GE(events.size(), 1u);
+}
+
 TEST_F(AltitudeTest, SunCulminations) {
   auto events = sun::culminations(obs, window);
   // At least one culmination (meridian passage)
   EXPECT_GE(events.size(), 1u);
 }
 
-TEST_F(AltitudeTest, SunAltitudePeriods) {
+TEST_F(AltitudeTest, SunAltitudeRanges) {
   // Find periods when sun is between -6° and 0° (civil twilight)
-  auto periods = sun::altitude_periods(obs, window, -6.0_deg, 0.0_deg);
+  auto periods = sun::altitude_ranges(obs, window, -6.0_deg, 0.0_deg);
   for (auto &p : periods) {
     EXPECT_GT(p.duration().value(), 0.0);
   }
 }
 
-TEST_F(AltitudeTest, SunBelowThresholdMatchesAltitudePeriods) {
+TEST_F(AltitudeTest, SunAltitudeRangesAcceptSearchOptions) {
+  SearchOptions opts;
+  opts.with_tolerance(qtty::Day(1e-9));
+  auto periods = sun::altitude_ranges(obs, window, -6.0_deg, 0.0_deg, opts);
+  for (auto &p : periods) {
+    EXPECT_GT(p.duration().value(), 0.0);
+  }
+}
+
+TEST_F(AltitudeTest, SunBelowThresholdMatchesAltitudeRanges) {
   const Period<TT, MJD> month_window(Time<TT, MJD>::from_utc({2026, 1, 1, 0, 0, 0}),
                                      Time<TT, MJD>::from_utc({2026, 2, 1, 0, 0, 0}));
 
   for (const auto horizon : {0.0_deg, -6.0_deg, -12.0_deg, -18.0_deg}) {
     const auto below = sun::below_threshold(obs, month_window, horizon);
-    const auto range = sun::altitude_periods(obs, month_window, -90.0_deg, horizon);
+    const auto range = sun::altitude_ranges(obs, month_window, -90.0_deg, horizon);
     ExpectEquivalentPeriods(below, range);
   }
 }
@@ -109,6 +125,15 @@ TEST_F(AltitudeTest, MoonAltitudeAt) {
 TEST_F(AltitudeTest, MoonAboveThreshold) {
   auto periods = moon::above_threshold(obs, window, 0.0_deg);
   // Moon may or may not be above horizon for this date; just no crash
+  for (auto &p : periods) {
+    EXPECT_GT(p.duration().value(), 0.0);
+  }
+}
+
+TEST_F(AltitudeTest, MoonAboveThresholdAcceptsSearchOptions) {
+  SearchOptions opts;
+  opts.with_tolerance(qtty::Day(1e-9));
+  auto periods = moon::above_threshold(obs, window, 0.0_deg, opts);
   for (auto &p : periods) {
     EXPECT_GT(p.duration().value(), 0.0);
   }
@@ -149,9 +174,9 @@ TEST_F(AltitudeTest, IcrsAboveThreshold) {
   EXPECT_GT(periods.size(), 0u);
 }
 
-TEST_F(AltitudeTest, IcrsAltitudePeriods) {
+TEST_F(AltitudeTest, IcrsAltitudeRanges) {
   const spherical::direction::ICRS vega_icrs(279.23_deg, 38.78_deg);
-  auto periods = icrs_altitude::altitude_periods(vega_icrs, obs, window, 30.0_deg, 80.0_deg);
+  auto periods = icrs_altitude::altitude_ranges(vega_icrs, obs, window, 30.0_deg, 80.0_deg);
   EXPECT_GT(periods.size(), 0u);
   for (const auto &period : periods) {
     EXPECT_LT(period.start().value(), period.end().value());

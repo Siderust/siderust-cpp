@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.21)
-project(siderust_cpp VERSION 0.7.0 LANGUAGES CXX)
+project(siderust_cpp VERSION 0.8.0 LANGUAGES CXX)
+set(SIDERUST_CPP_PACKAGE_VERSION "0.8.0-rc")
 
 # ---------------------------------------------------------------------------
 # CMake 3.21+ provides PROJECT_IS_TOP_LEVEL; emulate for older CMake if needed.
@@ -30,9 +31,17 @@ option(SIDERUST_CPP_ENABLE_PACKAGING "Enable CPack (.deb / .rpm) packaging."    
 find_program(CARGO_BIN cargo REQUIRED)
 
 # ---------------------------------------------------------------------------
-# Paths to siderust-ffi (inside the siderust submodule)
+# Paths to siderust-ffi. In the products monorepo, prefer the sibling Rust
+# checkout so siderust-cpp builds against local Rust changes. Standalone
+# checkouts keep using the nested siderust submodule by default.
 # ---------------------------------------------------------------------------
-set(SIDERUST_FFI_DIR       ${CMAKE_CURRENT_SOURCE_DIR}/siderust/siderust-ffi)
+set(_SIDERUST_DEFAULT_RUST_DIR ${CMAKE_CURRENT_SOURCE_DIR}/siderust)
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../../rust/siderust/siderust-ffi/Cargo.toml")
+    set(_SIDERUST_DEFAULT_RUST_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../rust/siderust)
+endif()
+set(SIDERUST_RUST_DIR ${_SIDERUST_DEFAULT_RUST_DIR}
+    CACHE PATH "Path to the siderust Rust workspace used to build siderust-ffi")
+set(SIDERUST_FFI_DIR ${SIDERUST_RUST_DIR}/siderust-ffi)
 set(SIDERUST_FFI_INCLUDE_DIR ${SIDERUST_FFI_DIR}/include)
 
 # Cargo features for siderust-ffi (e.g., "serde,de441")
@@ -55,7 +64,7 @@ endif()
 # ---------------------------------------------------------------------------
 # Platform-specific library paths
 # ---------------------------------------------------------------------------
-set(SIDERUST_ARTIFACT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/siderust/target/release)
+set(SIDERUST_ARTIFACT_DIR ${SIDERUST_RUST_DIR}/target/release)
 
 if(APPLE)
     set(SIDERUST_LIBRARY_NAME libsiderust_ffi.dylib)
@@ -158,9 +167,9 @@ endif()
 
 # RPATH for shared library lookup at runtime (build tree).
 if(APPLE)
-    set(_siderust_rpath "@loader_path/../siderust/siderust-ffi/target/release;@loader_path/../tempoch-cpp/tempoch/tempoch-ffi/target/release;@loader_path/../tempoch-cpp/qtty-cpp/qtty/target/release")
+    set(_siderust_rpath "${SIDERUST_ARTIFACT_DIR};@loader_path/../tempoch-cpp/tempoch/tempoch-ffi/target/release;@loader_path/../tempoch-cpp/qtty-cpp/qtty/target/release")
 elseif(UNIX)
-    set(_siderust_rpath "$ORIGIN/../siderust/siderust-ffi/target/release:$ORIGIN/../tempoch-cpp/tempoch/tempoch-ffi/target/release:$ORIGIN/../tempoch-cpp/qtty-cpp/qtty/target/release")
+    set(_siderust_rpath "${SIDERUST_ARTIFACT_DIR}:$ORIGIN/../tempoch-cpp/tempoch/tempoch-ffi/target/release:$ORIGIN/../tempoch-cpp/qtty-cpp/qtty/target/release")
 endif()
 
 # ---------------------------------------------------------------------------
@@ -239,7 +248,7 @@ if(SIDERUST_CPP_BUILD_EXAMPLES)
     siderust_add_example(19_sky_grid_sampling_example       examples/19_sky_grid_sampling.cpp)
     if(TARGET 18_lisa_pod_example)
         target_compile_definitions(18_lisa_pod_example PRIVATE
-            SIDERUST_TEST_DATA_DIR="${CMAKE_CURRENT_SOURCE_DIR}/siderust/tests/test-data/lisa"
+            SIDERUST_TEST_DATA_DIR="${SIDERUST_RUST_DIR}/tests/test-data/lisa"
         )
     endif()
 endif()
@@ -326,7 +335,13 @@ if(SIDERUST_CPP_INSTALL)
         FILES_MATCHING PATTERN "*.h"
     )
 
+    get_target_property(_siderust_qtty_ffi_library qtty_ffi IMPORTED_LOCATION)
+    get_target_property(_siderust_tempoch_ffi_library tempoch_ffi IMPORTED_LOCATION)
+
     if(WIN32)
+        get_target_property(_siderust_qtty_ffi_implib qtty_ffi IMPORTED_IMPLIB)
+        get_target_property(_siderust_tempoch_ffi_implib tempoch_ffi IMPORTED_IMPLIB)
+
         install(FILES ${SIDERUST_LIBRARY_PATH}
             DESTINATION ${CMAKE_INSTALL_BINDIR}
             COMPONENT siderust-cpp
@@ -335,9 +350,21 @@ if(SIDERUST_CPP_INSTALL)
             DESTINATION ${CMAKE_INSTALL_LIBDIR}
             COMPONENT siderust-cpp
         )
+        install(FILES ${_siderust_qtty_ffi_library} ${_siderust_tempoch_ffi_library}
+            DESTINATION ${CMAKE_INSTALL_BINDIR}
+            COMPONENT siderust-cpp
+        )
+        install(FILES ${_siderust_qtty_ffi_implib} ${_siderust_tempoch_ffi_implib}
+            DESTINATION ${CMAKE_INSTALL_LIBDIR}
+            COMPONENT siderust-cpp
+        )
         set(SIDERUST_FFI_INSTALLED_IMPLIB_NAME "siderust_ffi.dll.lib")
     else()
         install(FILES ${SIDERUST_LIBRARY_PATH}
+            DESTINATION ${CMAKE_INSTALL_LIBDIR}
+            COMPONENT siderust-cpp
+        )
+        install(FILES ${_siderust_qtty_ffi_library} ${_siderust_tempoch_ffi_library}
             DESTINATION ${CMAKE_INSTALL_LIBDIR}
             COMPONENT siderust-cpp
         )
@@ -386,7 +413,7 @@ endif()
 # ---------------------------------------------------------------------------
 if(SIDERUST_CPP_ENABLE_PACKAGING AND SIDERUST_CPP_INSTALL)
     set(CPACK_PACKAGE_NAME             "siderust-cpp")
-    set(CPACK_PACKAGE_VERSION          "${PROJECT_VERSION}")
+    set(CPACK_PACKAGE_VERSION          "${SIDERUST_CPP_PACKAGE_VERSION}")
     set(CPACK_PACKAGE_VENDOR           "Siderust")
     set(CPACK_PACKAGE_CONTACT          "VPRamon <vallespuigramon@gmail.com>")
     set(CPACK_PACKAGE_DESCRIPTION_SUMMARY

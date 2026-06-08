@@ -137,16 +137,16 @@ inline std::vector<CulminationEvent> culminations(Body b, const Geodetic &obs,
 /**
  * @brief Find periods when a body's altitude is within [min, max].
  */
-inline std::vector<Period<TT, MJD>> altitude_periods(Body b, const Geodetic &obs,
-                                                     const Period<TT, MJD> &window,
-                                                     qtty::Degree min_alt, qtty::Degree max_alt) {
-  siderust_altitude_query_t q = {obs.to_c(), window.start().value(), window.end().value(),
-                                 min_alt.value(), max_alt.value()};
+inline std::vector<Period<TT, MJD>> altitude_ranges(Body b, const Geodetic &obs,
+                                                    const Period<TT, MJD> &window,
+                                                    qtty::Degree min_alt, qtty::Degree max_alt,
+                                                    const SearchOptions &opts = {}) {
   tempoch_period_mjd_t *ptr = nullptr;
   uintptr_t count = 0;
-  check_status(siderust_altitude_periods(detail::make_body_subject(static_cast<SiderustBody>(b)), q,
-                                         &ptr, &count),
-               "body::altitude_periods");
+  check_status(siderust_altitude_ranges(detail::make_body_subject(static_cast<SiderustBody>(b)),
+                                        obs.to_c(), window.c_inner(), min_alt.value(),
+                                        max_alt.value(), opts.to_c(), &ptr, &count),
+               "body::altitude_ranges");
   return detail::periods_from_c(ptr, count);
 }
 

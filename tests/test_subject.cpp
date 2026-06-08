@@ -133,21 +133,20 @@ TEST(SubjectTest, CulminationsTarget) {
   EXPECT_GT(evts.size(), 0u);
 }
 
-// ── altitude_periods (body-only) ─────────────────────────────────────────────
+// ── altitude_ranges ──────────────────────────────────────────────────────────
 
-TEST(SubjectTest, AltitudePeriodsBody) {
+TEST(SubjectTest, AltitudeRangesBody) {
   auto subj = Subject::body(Body::Sun);
-  auto periods = altitude_periods(subj, paris(), one_day(), qtty::Degree(-90), qtty::Degree(90));
+  auto periods = altitude_ranges(subj, paris(), one_day(), qtty::Degree(-90), qtty::Degree(90));
   // Full altitude range — should cover the entire window
   EXPECT_GT(periods.size(), 0u);
 }
 
-TEST(SubjectTest, AltitudePeriodsStarThrows) {
+TEST(SubjectTest, AltitudeRangesStar) {
   Star vega = Star::catalog("VEGA");
   auto subj = Subject::star(vega);
-  EXPECT_THROW(
-      [&]() { altitude_periods(subj, paris(), one_day(), qtty::Degree(-90), qtty::Degree(90)); }(),
-      SiderustException);
+  auto periods = altitude_ranges(subj, paris(), one_day(), qtty::Degree(-90), qtty::Degree(90));
+  EXPECT_GT(periods.size(), 0u);
 }
 
 // ── azimuth_at ───────────────────────────────────────────────────────────────
