@@ -7,15 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.10.0] - 2026/06/08
+## [0.8.0-rc] - 2026/06/08
+
+Release candidate aligned with `siderust v0.10.0` (Option A altitude/event API).
 
 ### Changed
 
-- Aligned with `siderust v0.10.0` (Option A altitude/event API).
 - `SearchOptions` now exposes only `time_tolerance` via `with_tolerance(qtty::Day(...))`.
 - Renamed `altitude_periods(...)` to `altitude_ranges(...)` for Sun, Moon, ICRS, body, and subject wrappers.
 - Removed `CrossingAlgorithm`, `ChebyshevOptions`, scan-step tuning, and all FFI `_v2` dispatch paths.
 - Benchmarks simplified to the single optimized search engine (no algorithm dimension).
+- `siderust` submodule updated to the `v0.10.0` / PR #79 release line.
 
 ### Removed
 

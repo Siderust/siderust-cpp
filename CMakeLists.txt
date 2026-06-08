@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.21)
-project(siderust_cpp VERSION 0.10.0 LANGUAGES CXX)
+project(siderust_cpp VERSION 0.8.0 LANGUAGES CXX)
+set(SIDERUST_CPP_PACKAGE_VERSION "0.8.0-rc")
 
 # ---------------------------------------------------------------------------
 # CMake 3.21+ provides PROJECT_IS_TOP_LEVEL; emulate for older CMake if needed.
@@ -412,7 +413,7 @@ endif()
 # ---------------------------------------------------------------------------
 if(SIDERUST_CPP_ENABLE_PACKAGING AND SIDERUST_CPP_INSTALL)
     set(CPACK_PACKAGE_NAME             "siderust-cpp")
-    set(CPACK_PACKAGE_VERSION          "${PROJECT_VERSION}")
+    set(CPACK_PACKAGE_VERSION          "${SIDERUST_CPP_PACKAGE_VERSION}")
     set(CPACK_PACKAGE_VENDOR           "Siderust")
     set(CPACK_PACKAGE_CONTACT          "VPRamon <vallespuigramon@gmail.com>")
     set(CPACK_PACKAGE_DESCRIPTION_SUMMARY
