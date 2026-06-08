@@ -43,8 +43,7 @@ void bench_sun_altitude_ranges(benchmark::State &state, qtty::Degree horizon) {
 
   for (auto _ : state) {
     (void)_; // avoid "unused variable" warning
-    const auto nights =
-        sun::altitude_ranges(geo, window, qtty::Degree(-90.0), horizon);
+    const auto nights = sun::altitude_ranges(geo, window, qtty::Degree(-90.0), horizon);
     benchmark::DoNotOptimize(nights.data());
     benchmark::ClobberMemory();
   }
@@ -85,8 +84,7 @@ void bench_moon_above_threshold(benchmark::State &state, qtty::Degree horizon) {
   state.counters["days"] = static_cast<double>(state.range(0));
 }
 
-void register_horizon_benchmarks(const char *api,
-                                 void (*fn)(benchmark::State &, qtty::Degree)) {
+void register_horizon_benchmarks(const char *api, void (*fn)(benchmark::State &, qtty::Degree)) {
   for (const auto &horizon : kHorizons) {
     const std::string name = std::string(api) + "/" + horizon.label;
     benchmark::RegisterBenchmark(name.c_str(), fn, horizon.threshold)

@@ -143,9 +143,9 @@ inline std::vector<Period<TT, MJD>> altitude_ranges(Body b, const Geodetic &obs,
                                                     const SearchOptions &opts = {}) {
   tempoch_period_mjd_t *ptr = nullptr;
   uintptr_t count = 0;
-  check_status(siderust_altitude_ranges(
-                   detail::make_body_subject(static_cast<SiderustBody>(b)), obs.to_c(),
-                   window.c_inner(), min_alt.value(), max_alt.value(), opts.to_c(), &ptr, &count),
+  check_status(siderust_altitude_ranges(detail::make_body_subject(static_cast<SiderustBody>(b)),
+                                        obs.to_c(), window.c_inner(), min_alt.value(),
+                                        max_alt.value(), opts.to_c(), &ptr, &count),
                "body::altitude_ranges");
   return detail::periods_from_c(ptr, count);
 }

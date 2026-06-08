@@ -66,9 +66,7 @@ struct SearchOptions {
     return *this;
   }
 
-  siderust_search_opts_t to_c() const {
-    return {time_tolerance.value()};
-  }
+  siderust_search_opts_t to_c() const { return {time_tolerance.value()}; }
 };
 
 // ============================================================================
