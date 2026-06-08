@@ -57,17 +57,16 @@ int main() {
 
 ## Altitude Search Controls
 
-Sun and Moon altitude searches use Auto mode by default. Explicit algorithm control is additive:
+Altitude searches use Siderust's internal optimized engines automatically.
+The only user-facing control is time tolerance:
 
 ```cpp
 SearchOptions opts;
-opts.with_algorithm(CrossingAlgorithm::ChebyshevRoots);
+opts.with_tolerance(qtty::Day(1e-9));
 
-auto sunrise = sun::crossings(obs, win, qtty::Degree(0.0), opts);
-auto moon_up = moon::above_threshold(obs, win, qtty::Degree(0.0), opts);
+auto nights = sun::below_threshold(obs, win, qtty::Degree(-18.0), opts);
+auto twilight = sun::altitude_ranges(obs, win, qtty::Degree(-18.0), qtty::Degree(-12.0), opts);
 ```
-
-Use `CrossingAlgorithm::ScanBrent` to force the legacy scan+Brent path.
 
 ---
 

@@ -7,20 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added
-
-- `CrossingAlgorithm`, `ChebyshevOptions`, and fluent `SearchOptions` setters for explicit Auto, ScanBrent, and ChebyshevRoots altitude crossing selection.
-- C++ tests for explicit Sun/Moon algorithm selection and v2 search-option dispatch.
-- Benchmarks for Sun and Moon altitude-period searches across Auto, ScanBrent, and ChebyshevRoots over 30, 184, and 365 day windows.
+## [0.10.0] - 2026/06/08
 
 ### Changed
 
-- `sun::*` and `moon::*` altitude threshold/crossing/range APIs remain source-compatible and dispatch to FFI v2 only when new search controls are requested.
-- CMake prefers the sibling `rust/siderust` workspace in this monorepo, while retaining the nested `siderust` submodule as the standalone fallback.
+- Aligned with `siderust v0.10.0` (Option A altitude/event API).
+- `SearchOptions` now exposes only `time_tolerance` via `with_tolerance(qtty::Day(...))`.
+- Renamed `altitude_periods(...)` to `altitude_ranges(...)` for Sun, Moon, ICRS, body, and subject wrappers.
+- Removed `CrossingAlgorithm`, `ChebyshevOptions`, scan-step tuning, and all FFI `_v2` dispatch paths.
+- Benchmarks simplified to the single optimized search engine (no algorithm dimension).
 
-### Fixed
+### Removed
 
-- Installed packages now stage the bundled `qtty_ffi` and `tempoch_ffi` shared libraries alongside `siderust_ffi`, so the installed-consumer fixture resolves runtime FFI dependencies from the package prefix.
+- Legacy `siderust_altitude_periods` / `siderust_altitude_query_t` FFI usage.
+- Public algorithm selector and Chebyshev crossing-search controls.
 
 ## [0.7.0] - 2026/06/06
 

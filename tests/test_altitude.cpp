@@ -71,23 +71,11 @@ TEST_F(AltitudeTest, SunCrossings) {
   EXPECT_GE(events.size(), 1u);
 }
 
-TEST_F(AltitudeTest, SunCrossingsExplicitAlgorithmsAgree) {
-  SearchOptions scan_opts;
-  scan_opts.with_algorithm(CrossingAlgorithm::ScanBrent);
-
-  ChebyshevOptions cheb_opts;
-  cheb_opts.with_degree(18).with_tail_norm(1e-7);
-  SearchOptions cheb_search;
-  cheb_search.with_algorithm(CrossingAlgorithm::ChebyshevRoots).with_chebyshev(cheb_opts);
-
-  const auto scan = sun::crossings(obs, window, 0.0_deg, scan_opts);
-  const auto cheb = sun::crossings(obs, window, 0.0_deg, cheb_search);
-
-  ASSERT_EQ(cheb.size(), scan.size());
-  for (std::size_t i = 0; i < scan.size(); ++i) {
-    EXPECT_EQ(cheb[i].direction, scan[i].direction);
-    EXPECT_NEAR(cheb[i].time.value(), scan[i].time.value(), 1e-5);
-  }
+TEST_F(AltitudeTest, SunCrossingsAcceptSearchOptions) {
+  SearchOptions opts;
+  opts.with_tolerance(qtty::Day(1e-9));
+  const auto events = sun::crossings(obs, window, 0.0_deg, opts);
+  EXPECT_GE(events.size(), 1u);
 }
 
 TEST_F(AltitudeTest, SunCulminations) {
@@ -96,30 +84,30 @@ TEST_F(AltitudeTest, SunCulminations) {
   EXPECT_GE(events.size(), 1u);
 }
 
-TEST_F(AltitudeTest, SunAltitudePeriods) {
+TEST_F(AltitudeTest, SunAltitudeRanges) {
   // Find periods when sun is between -6° and 0° (civil twilight)
-  auto periods = sun::altitude_periods(obs, window, -6.0_deg, 0.0_deg);
+  auto periods = sun::altitude_ranges(obs, window, -6.0_deg, 0.0_deg);
   for (auto &p : periods) {
     EXPECT_GT(p.duration().value(), 0.0);
   }
 }
 
-TEST_F(AltitudeTest, SunAltitudePeriodsAcceptSearchOptions) {
+TEST_F(AltitudeTest, SunAltitudeRangesAcceptSearchOptions) {
   SearchOptions opts;
-  opts.with_algorithm(CrossingAlgorithm::ChebyshevRoots);
-  auto periods = sun::altitude_periods(obs, window, -6.0_deg, 0.0_deg, opts);
+  opts.with_tolerance(qtty::Day(1e-9));
+  auto periods = sun::altitude_ranges(obs, window, -6.0_deg, 0.0_deg, opts);
   for (auto &p : periods) {
     EXPECT_GT(p.duration().value(), 0.0);
   }
 }
 
-TEST_F(AltitudeTest, SunBelowThresholdMatchesAltitudePeriods) {
+TEST_F(AltitudeTest, SunBelowThresholdMatchesAltitudeRanges) {
   const Period<TT, MJD> month_window(Time<TT, MJD>::from_utc({2026, 1, 1, 0, 0, 0}),
                                      Time<TT, MJD>::from_utc({2026, 2, 1, 0, 0, 0}));
 
   for (const auto horizon : {0.0_deg, -6.0_deg, -12.0_deg, -18.0_deg}) {
     const auto below = sun::below_threshold(obs, month_window, horizon);
-    const auto range = sun::altitude_periods(obs, month_window, -90.0_deg, horizon);
+    const auto range = sun::altitude_ranges(obs, month_window, -90.0_deg, horizon);
     ExpectEquivalentPeriods(below, range);
   }
 }
@@ -142,9 +130,9 @@ TEST_F(AltitudeTest, MoonAboveThreshold) {
   }
 }
 
-TEST_F(AltitudeTest, MoonAboveThresholdAcceptsChebyshevOptions) {
+TEST_F(AltitudeTest, MoonAboveThresholdAcceptsSearchOptions) {
   SearchOptions opts;
-  opts.with_algorithm(CrossingAlgorithm::ChebyshevRoots);
+  opts.with_tolerance(qtty::Day(1e-9));
   auto periods = moon::above_threshold(obs, window, 0.0_deg, opts);
   for (auto &p : periods) {
     EXPECT_GT(p.duration().value(), 0.0);
@@ -186,9 +174,9 @@ TEST_F(AltitudeTest, IcrsAboveThreshold) {
   EXPECT_GT(periods.size(), 0u);
 }
 
-TEST_F(AltitudeTest, IcrsAltitudePeriods) {
+TEST_F(AltitudeTest, IcrsAltitudeRanges) {
   const spherical::direction::ICRS vega_icrs(279.23_deg, 38.78_deg);
-  auto periods = icrs_altitude::altitude_periods(vega_icrs, obs, window, 30.0_deg, 80.0_deg);
+  auto periods = icrs_altitude::altitude_ranges(vega_icrs, obs, window, 30.0_deg, 80.0_deg);
   EXPECT_GT(periods.size(), 0u);
   for (const auto &period : periods) {
     EXPECT_LT(period.start().value(), period.end().value());

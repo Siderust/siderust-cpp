@@ -14,7 +14,6 @@
 #include "ffi_core.hpp"
 #include "time.hpp"
 #include <cstdint>
-#include <optional>
 #include <vector>
 
 namespace siderust {
@@ -49,81 +48,6 @@ struct CulminationEvent {
   }
 };
 
-/**
- * @brief Crossing search algorithm selector.
- */
-enum class CrossingAlgorithm : int32_t {
-  Auto = SIDERUST_CROSSING_ALGORITHM_T_AUTO,
-  ScanBrent = SIDERUST_CROSSING_ALGORITHM_T_SCAN_BRENT,
-  ChebyshevRoots = SIDERUST_CROSSING_ALGORITHM_T_CHEBYSHEV_ROOTS,
-};
-
-/**
- * @brief Chebyshev crossing-search controls.
- */
-struct ChebyshevOptions {
-  qtty::Day segment_length = qtty::Day(0.5);
-  uint32_t degree = 10;
-  double max_tail_norm = 1e-6;
-  double max_residual = 1e-10;
-  bool refine = true;
-  qtty::Day refine_margin = qtty::Day(20.0 / 1440.0);
-  double min_slope = 1e-8;
-  bool adaptive_split = true;
-  uint32_t max_split_depth = 2;
-
-  ChebyshevOptions &with_segment_length(qtty::Day value) {
-    segment_length = value;
-    return *this;
-  }
-
-  ChebyshevOptions &with_degree(uint32_t value) {
-    degree = value;
-    return *this;
-  }
-
-  ChebyshevOptions &with_tail_norm(double value) {
-    max_tail_norm = value;
-    return *this;
-  }
-
-  ChebyshevOptions &with_residual(double value) {
-    max_residual = value;
-    return *this;
-  }
-
-  ChebyshevOptions &with_refinement(bool value) {
-    refine = value;
-    return *this;
-  }
-
-  ChebyshevOptions &with_refine_margin(qtty::Day value) {
-    refine_margin = value;
-    return *this;
-  }
-
-  ChebyshevOptions &with_min_slope(double value) {
-    min_slope = value;
-    return *this;
-  }
-
-  ChebyshevOptions &with_adaptive_split(bool value) {
-    adaptive_split = value;
-    return *this;
-  }
-
-  ChebyshevOptions &with_max_split_depth(uint32_t value) {
-    max_split_depth = value;
-    return *this;
-  }
-
-  siderust_cheb_search_opts_t to_c() const {
-    return {segment_length.value(), degree,          max_tail_norm,
-            max_residual,          refine,          refine_margin.value(),
-            min_slope,             adaptive_split,  max_split_depth};
-  }
-};
-
 // ============================================================================
 // SearchOptions
 // ============================================================================
@@ -133,17 +57,8 @@ struct ChebyshevOptions {
  */
 struct SearchOptions {
   qtty::Day time_tolerance = qtty::Day(1e-9);
-  std::optional<qtty::Day> scan_step;
-  CrossingAlgorithm algorithm = CrossingAlgorithm::Auto;
-  std::optional<ChebyshevOptions> chebyshev;
 
   SearchOptions() = default;
-
-  /// Set a custom scan step.
-  SearchOptions &with_scan_step(qtty::Day step) {
-    scan_step = step;
-    return *this;
-  }
 
   /// Set time tolerance.
   SearchOptions &with_tolerance(qtty::Day tolerance) {
@@ -151,34 +66,8 @@ struct SearchOptions {
     return *this;
   }
 
-  /// Select a crossing discovery algorithm.
-  SearchOptions &with_algorithm(CrossingAlgorithm value) {
-    algorithm = value;
-    return *this;
-  }
-
-  /// Set Chebyshev crossing-search controls.
-  SearchOptions &with_chebyshev(const ChebyshevOptions &value) {
-    chebyshev = value;
-    return *this;
-  }
-
   siderust_search_opts_t to_c() const {
-    return {time_tolerance.value(), scan_step ? scan_step->value() : 0.0, scan_step.has_value()};
-  }
-
-  bool requires_v2() const {
-    return algorithm != CrossingAlgorithm::Auto || chebyshev.has_value();
-  }
-
-  siderust_search_opts_v2_t to_c_v2() const {
-    const ChebyshevOptions cheb = chebyshev.value_or(ChebyshevOptions{});
-    return {time_tolerance.value(),
-            scan_step ? scan_step->value() : 0.0,
-            scan_step.has_value(),
-            static_cast<siderust_crossing_algorithm_t>(algorithm),
-            cheb.to_c(),
-            chebyshev.has_value()};
+    return {time_tolerance.value()};
   }
 };
 
@@ -247,17 +136,10 @@ inline std::vector<Period<TT, MJD>> above_threshold(const Geodetic &obs,
                                                     const SearchOptions &opts = {}) {
   tempoch_period_mjd_t *ptr = nullptr;
   uintptr_t count = 0;
-  if (opts.requires_v2()) {
-    check_status(siderust_above_threshold_v2(detail::make_body_subject(SIDERUST_BODY_SUN),
-                                             obs.to_c(), window.c_inner(), threshold.value(),
-                                             opts.to_c_v2(), &ptr, &count),
-                 "sun::above_threshold");
-  } else {
-    check_status(siderust_above_threshold(detail::make_body_subject(SIDERUST_BODY_SUN), obs.to_c(),
-                                          window.c_inner(), threshold.value(), opts.to_c(), &ptr,
-                                          &count),
-                 "sun::above_threshold");
-  }
+  check_status(siderust_above_threshold(detail::make_body_subject(SIDERUST_BODY_SUN), obs.to_c(),
+                                        window.c_inner(), threshold.value(), opts.to_c(), &ptr,
+                                        &count),
+               "sun::above_threshold");
   return detail::periods_from_c(ptr, count);
 }
 
@@ -270,17 +152,10 @@ inline std::vector<Period<TT, MJD>> below_threshold(const Geodetic &obs,
                                                     const SearchOptions &opts = {}) {
   tempoch_period_mjd_t *ptr = nullptr;
   uintptr_t count = 0;
-  if (opts.requires_v2()) {
-    check_status(siderust_below_threshold_v2(detail::make_body_subject(SIDERUST_BODY_SUN),
-                                             obs.to_c(), window.c_inner(), threshold.value(),
-                                             opts.to_c_v2(), &ptr, &count),
-                 "sun::below_threshold");
-  } else {
-    check_status(siderust_below_threshold(detail::make_body_subject(SIDERUST_BODY_SUN), obs.to_c(),
-                                          window.c_inner(), threshold.value(), opts.to_c(), &ptr,
-                                          &count),
-                 "sun::below_threshold");
-  }
+  check_status(siderust_below_threshold(detail::make_body_subject(SIDERUST_BODY_SUN), obs.to_c(),
+                                        window.c_inner(), threshold.value(), opts.to_c(), &ptr,
+                                        &count),
+               "sun::below_threshold");
   return detail::periods_from_c(ptr, count);
 }
 
@@ -292,16 +167,9 @@ inline std::vector<CrossingEvent> crossings(const Geodetic &obs, const Period<TT
                                             const SearchOptions &opts = {}) {
   siderust_crossing_event_t *ptr = nullptr;
   uintptr_t count = 0;
-  if (opts.requires_v2()) {
-    check_status(siderust_crossings_v2(detail::make_body_subject(SIDERUST_BODY_SUN), obs.to_c(),
-                                       window.c_inner(), threshold.value(), opts.to_c_v2(), &ptr,
-                                       &count),
-                 "sun::crossings");
-  } else {
-    check_status(siderust_crossings(detail::make_body_subject(SIDERUST_BODY_SUN), obs.to_c(),
-                                    window.c_inner(), threshold.value(), opts.to_c(), &ptr, &count),
-                 "sun::crossings");
-  }
+  check_status(siderust_crossings(detail::make_body_subject(SIDERUST_BODY_SUN), obs.to_c(),
+                                  window.c_inner(), threshold.value(), opts.to_c(), &ptr, &count),
+               "sun::crossings");
   return detail::crossings_from_c(ptr, count);
 }
 
@@ -321,23 +189,16 @@ culminations(const Geodetic &obs, const Period<TT, MJD> &window, const SearchOpt
 /**
  * @brief Find periods when the Sun's altitude is within [min, max].
  */
-inline std::vector<Period<TT, MJD>> altitude_periods(const Geodetic &obs,
-                                                     const Period<TT, MJD> &window,
-                                                     qtty::Degree min_alt, qtty::Degree max_alt,
-                                                     const SearchOptions &opts = {}) {
-  siderust_altitude_query_t q = {obs.to_c(), window.start().value(), window.end().value(),
-                                 min_alt.value(), max_alt.value()};
+inline std::vector<Period<TT, MJD>> altitude_ranges(const Geodetic &obs,
+                                                    const Period<TT, MJD> &window,
+                                                    qtty::Degree min_alt, qtty::Degree max_alt,
+                                                    const SearchOptions &opts = {}) {
   tempoch_period_mjd_t *ptr = nullptr;
   uintptr_t count = 0;
-  if (opts.requires_v2()) {
-    check_status(siderust_altitude_periods_v2(detail::make_body_subject(SIDERUST_BODY_SUN), q,
-                                              opts.to_c_v2(), &ptr, &count),
-                 "sun::altitude_periods");
-  } else {
-    check_status(
-        siderust_altitude_periods(detail::make_body_subject(SIDERUST_BODY_SUN), q, &ptr, &count),
-        "sun::altitude_periods");
-  }
+  check_status(siderust_altitude_ranges(detail::make_body_subject(SIDERUST_BODY_SUN), obs.to_c(),
+                                        window.c_inner(), min_alt.value(), max_alt.value(),
+                                        opts.to_c(), &ptr, &count),
+               "sun::altitude_ranges");
   return detail::periods_from_c(ptr, count);
 }
 
@@ -369,17 +230,10 @@ inline std::vector<Period<TT, MJD>> above_threshold(const Geodetic &obs,
                                                     const SearchOptions &opts = {}) {
   tempoch_period_mjd_t *ptr = nullptr;
   uintptr_t count = 0;
-  if (opts.requires_v2()) {
-    check_status(siderust_above_threshold_v2(detail::make_body_subject(SIDERUST_BODY_MOON),
-                                             obs.to_c(), window.c_inner(), threshold.value(),
-                                             opts.to_c_v2(), &ptr, &count),
-                 "moon::above_threshold");
-  } else {
-    check_status(siderust_above_threshold(detail::make_body_subject(SIDERUST_BODY_MOON),
-                                          obs.to_c(), window.c_inner(), threshold.value(),
-                                          opts.to_c(), &ptr, &count),
-                 "moon::above_threshold");
-  }
+  check_status(siderust_above_threshold(detail::make_body_subject(SIDERUST_BODY_MOON), obs.to_c(),
+                                        window.c_inner(), threshold.value(), opts.to_c(), &ptr,
+                                        &count),
+               "moon::above_threshold");
   return detail::periods_from_c(ptr, count);
 }
 
@@ -392,17 +246,10 @@ inline std::vector<Period<TT, MJD>> below_threshold(const Geodetic &obs,
                                                     const SearchOptions &opts = {}) {
   tempoch_period_mjd_t *ptr = nullptr;
   uintptr_t count = 0;
-  if (opts.requires_v2()) {
-    check_status(siderust_below_threshold_v2(detail::make_body_subject(SIDERUST_BODY_MOON),
-                                             obs.to_c(), window.c_inner(), threshold.value(),
-                                             opts.to_c_v2(), &ptr, &count),
-                 "moon::below_threshold");
-  } else {
-    check_status(siderust_below_threshold(detail::make_body_subject(SIDERUST_BODY_MOON),
-                                          obs.to_c(), window.c_inner(), threshold.value(),
-                                          opts.to_c(), &ptr, &count),
-                 "moon::below_threshold");
-  }
+  check_status(siderust_below_threshold(detail::make_body_subject(SIDERUST_BODY_MOON), obs.to_c(),
+                                        window.c_inner(), threshold.value(), opts.to_c(), &ptr,
+                                        &count),
+               "moon::below_threshold");
   return detail::periods_from_c(ptr, count);
 }
 
@@ -414,16 +261,9 @@ inline std::vector<CrossingEvent> crossings(const Geodetic &obs, const Period<TT
                                             const SearchOptions &opts = {}) {
   siderust_crossing_event_t *ptr = nullptr;
   uintptr_t count = 0;
-  if (opts.requires_v2()) {
-    check_status(siderust_crossings_v2(detail::make_body_subject(SIDERUST_BODY_MOON), obs.to_c(),
-                                       window.c_inner(), threshold.value(), opts.to_c_v2(), &ptr,
-                                       &count),
-                 "moon::crossings");
-  } else {
-    check_status(siderust_crossings(detail::make_body_subject(SIDERUST_BODY_MOON), obs.to_c(),
-                                    window.c_inner(), threshold.value(), opts.to_c(), &ptr, &count),
-                 "moon::crossings");
-  }
+  check_status(siderust_crossings(detail::make_body_subject(SIDERUST_BODY_MOON), obs.to_c(),
+                                  window.c_inner(), threshold.value(), opts.to_c(), &ptr, &count),
+               "moon::crossings");
   return detail::crossings_from_c(ptr, count);
 }
 
@@ -443,23 +283,16 @@ culminations(const Geodetic &obs, const Period<TT, MJD> &window, const SearchOpt
 /**
  * @brief Find periods when the Moon's altitude is within [min, max].
  */
-inline std::vector<Period<TT, MJD>> altitude_periods(const Geodetic &obs,
-                                                     const Period<TT, MJD> &window,
-                                                     qtty::Degree min_alt, qtty::Degree max_alt,
-                                                     const SearchOptions &opts = {}) {
-  siderust_altitude_query_t q = {obs.to_c(), window.start().value(), window.end().value(),
-                                 min_alt.value(), max_alt.value()};
+inline std::vector<Period<TT, MJD>> altitude_ranges(const Geodetic &obs,
+                                                    const Period<TT, MJD> &window,
+                                                    qtty::Degree min_alt, qtty::Degree max_alt,
+                                                    const SearchOptions &opts = {}) {
   tempoch_period_mjd_t *ptr = nullptr;
   uintptr_t count = 0;
-  if (opts.requires_v2()) {
-    check_status(siderust_altitude_periods_v2(detail::make_body_subject(SIDERUST_BODY_MOON), q,
-                                              opts.to_c_v2(), &ptr, &count),
-                 "moon::altitude_periods");
-  } else {
-    check_status(
-        siderust_altitude_periods(detail::make_body_subject(SIDERUST_BODY_MOON), q, &ptr, &count),
-        "moon::altitude_periods");
-  }
+  check_status(siderust_altitude_ranges(detail::make_body_subject(SIDERUST_BODY_MOON), obs.to_c(),
+                                        window.c_inner(), min_alt.value(), max_alt.value(),
+                                        opts.to_c(), &ptr, &count),
+               "moon::altitude_ranges");
   return detail::periods_from_c(ptr, count);
 }
 
@@ -607,13 +440,18 @@ inline std::vector<Period<TT, MJD>> below_threshold(const spherical::direction::
 /**
  * @brief Find periods when a fixed ICRS direction's altitude is within [min, max].
  */
-inline std::vector<Period<TT, MJD>> altitude_periods(const spherical::direction::ICRS &dir,
-                                                     const Geodetic &obs,
-                                                     const Period<TT, MJD> &window,
-                                                     qtty::Degree min_alt, qtty::Degree max_alt) {
-  auto above_min = above_threshold(dir, obs, window, min_alt);
-  auto below_max = below_threshold(dir, obs, window, max_alt);
-  return tempoch::intersect_periods(above_min, below_max);
+inline std::vector<Period<TT, MJD>> altitude_ranges(const spherical::direction::ICRS &dir,
+                                                    const Geodetic &obs,
+                                                    const Period<TT, MJD> &window,
+                                                    qtty::Degree min_alt, qtty::Degree max_alt,
+                                                    const SearchOptions &opts = {}) {
+  tempoch_period_mjd_t *ptr = nullptr;
+  uintptr_t count = 0;
+  check_status(siderust_altitude_ranges(detail::make_icrs_subject(dir.to_c()), obs.to_c(),
+                                        window.c_inner(), min_alt.value(), max_alt.value(),
+                                        opts.to_c(), &ptr, &count),
+               "icrs_altitude::altitude_ranges");
+  return detail::periods_from_c(ptr, count);
 }
 
 } // namespace icrs_altitude
