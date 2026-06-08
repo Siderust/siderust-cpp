@@ -63,6 +63,19 @@ for required in "qtty-cpp (>= 0.4.5)" "tempoch-cpp (>= 0.5.2)"; do
   fi
 done
 
+deb_contents="$(dpkg-deb -c "${deb_packages[0]}")"
+for forbidden in "libqtty_ffi.so" "libtempoch_ffi.so"; do
+  if grep -Fq "${forbidden}" <<<"${deb_contents}"; then
+    fail "DEB package must not bundle ${forbidden}; declare qtty-cpp/tempoch-cpp instead"
+    exit 1
+  fi
+done
+
+if ! grep -Fq "libsiderust_ffi.so" <<<"${deb_contents}"; then
+  fail "DEB package is missing libsiderust_ffi.so"
+  exit 1
+fi
+
 if [[ ${#rpm_packages[@]} -gt 0 ]]; then
   require_cmd rpm
   rpm_requires="$(rpm -qp --requires "${rpm_packages[0]}")"

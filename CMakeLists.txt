@@ -335,10 +335,9 @@ if(SIDERUST_CPP_INSTALL)
         FILES_MATCHING PATTERN "*.h"
     )
 
-    get_target_property(_siderust_qtty_ffi_library qtty_ffi IMPORTED_LOCATION)
-    get_target_property(_siderust_tempoch_ffi_library tempoch_ffi IMPORTED_LOCATION)
-
     if(WIN32)
+        get_target_property(_siderust_qtty_ffi_library qtty_ffi IMPORTED_LOCATION)
+        get_target_property(_siderust_tempoch_ffi_library tempoch_ffi IMPORTED_LOCATION)
         get_target_property(_siderust_qtty_ffi_implib qtty_ffi IMPORTED_IMPLIB)
         get_target_property(_siderust_tempoch_ffi_implib tempoch_ffi IMPORTED_IMPLIB)
 
@@ -360,11 +359,9 @@ if(SIDERUST_CPP_INSTALL)
         )
         set(SIDERUST_FFI_INSTALLED_IMPLIB_NAME "siderust_ffi.dll.lib")
     else()
+        # Linux packages declare qtty-cpp and tempoch-cpp dependencies; only
+        # ship libsiderust_ffi.so here to avoid dpkg/rpm file conflicts.
         install(FILES ${SIDERUST_LIBRARY_PATH}
-            DESTINATION ${CMAKE_INSTALL_LIBDIR}
-            COMPONENT siderust-cpp
-        )
-        install(FILES ${_siderust_qtty_ffi_library} ${_siderust_tempoch_ffi_library}
             DESTINATION ${CMAKE_INSTALL_LIBDIR}
             COMPONENT siderust-cpp
         )
